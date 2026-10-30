@@ -107,15 +107,24 @@ svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
 .g-head{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px;margin:4px 0 0}
 h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.01em}   /* the compact view's title: the section-head step */
 .meta{font:var(--fs-ui)/1.35 var(--sans);margin:0;color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 0}
-.week{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:0 0 0 auto;white-space:nowrap}
+/* "data as of" line, high on every page (same on index-v2, precinct-v2, glance); filled from city.json */
+.asof{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:0 0 var(--sp-3);max-width:60em;min-height:calc(2 * var(--lh-cap) * 1em)}
+.asof b{color:var(--ink);font-weight:700;white-space:nowrap}
+@media (min-width:700px){ .asof{min-height:calc(var(--lh-cap) * 1em)} }
+.g-t{display:flex;align-items:baseline;gap:0 14px;min-width:0}
+.g-head .asof{margin:0;min-height:0;grid-column:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:700px){
+  .g-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;align-items:center}
+  .g-head .cta{grid-column:2;grid-row:1 / span 2}
+}
 .msg{font:var(--fs-meta)/var(--lh-cap) var(--sans);margin:8px 0 0;padding:6px 10px;background:var(--panel-2);border-left:3px solid var(--accent)}
 
 /* ---------- tiles ---------- */
 /* rows inside the tiles line up across each row of four (subgrid), so a two-line name doesn't shift the charts */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:16px;row-gap:0;margin-top:2px}
-.g-lab{grid-column:1 / -1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 16px;font:700 var(--fs-micro)/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:3px 0 1px}
+.g-lab{grid-column:1 / -1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 16px;font:700 var(--fs-micro)/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:2px 0 0}
 .g-key{font:var(--fs-micro)/1.2 var(--sans);letter-spacing:0;text-transform:none;color:var(--muted)}
-.tile{position:relative;background:var(--panel);padding:6px 12px;min-width:0;display:grid;grid-template-rows:subgrid;grid-row:span 5;row-gap:0}
+.tile{position:relative;background:var(--panel);padding:5px 12px;min-width:0;display:grid;grid-template-rows:subgrid;grid-row:span 5;row-gap:0}
 .t-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-height:20px}
 .t-top h3{font:700 var(--fs-ui)/1.25 var(--sans);margin:0;min-width:0}
 .t-go{flex:none;display:inline-flex;align-items:center;min-height:44px;margin:-11px -8px -11px 0;padding:0 8px;font:700 var(--fs-small) var(--sans);text-decoration:none;white-space:nowrap}
@@ -213,7 +222,8 @@ h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.0
   .pick select{flex:1;max-width:none}
   .g-head{margin-top:10px}
   .logo a{padding:10px 0 14px}   /* BRAND.md clear space; the one-screen squeeze is for desktop only */
-  .week{margin-left:0;flex-basis:100%}
+  .g-t{flex:1 0 100%;flex-wrap:wrap}
+  .g-head .asof{flex:1 0 100%;white-space:normal;margin-top:2px}
 }
 @media (max-width:599.98px){
   .tiles{grid-template-columns:1fr;column-gap:12px}
@@ -259,7 +269,7 @@ h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.0
 
   <p class="loading" id="loading">Loading the precinct data…</p>
   <div id="page" hidden>
-    <div class="g-head"><h1 id="hed">Citywide</h1><p class="meta" id="meta"></p><p class="week" id="week"></p><a class="cta" id="ctaTop" href="index.html">See maps, trends and every precinct →</a></div>
+    <div class="g-head"><div class="g-t"><h1 id="hed">Citywide</h1><p class="meta" id="meta"></p></div><p class="asof" id="asof"></p><a class="cta" id="ctaTop" href="index.html">See maps, trends and every precinct →</a></div>
     <p class="msg" id="msg" role="status" hidden></p>
 
     <div class="tiles" id="tiles"></div>
@@ -347,11 +357,15 @@ function parsePcts(raw){
 }
 
 function start(C){
-var YEARS = C.years, I19 = YEARS.indexOf(2019), I25 = YEARS.indexOf(2025), LASTY = YEARS[YEARS.length - 1];
+// every data year on this page comes from city.json; the comparison base year is the one design constant
+var BASE_YEAR = 2019;
+var YEARS = C.years, LASTY = YEARS[YEARS.length - 1], I19 = YEARS.indexOf(BASE_YEAR), I25 = YEARS.indexOf(LASTY);
 var PBY = {}; C.precincts.forEach(function(p){ PBY[p.pct] = p; });
 var CATS = C.categories.filter(function(c){ return CFG.groups.some(function(g){ return g[0] === c.group; }); });
 var CO = C.countsOnly || [];
 var WEEK = C.weekEnding || "";
+var CSY = +((/(\d{4})\s*$/.exec(WEEK) || [])[1]) || LASTY + 1, CPY = CSY - 1;   // CompStat's year and the year it compares with
+var B = BASE_YEAR, L = LASTY;
 var BORO_ORDER = ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"];
 function named(p){ return p.name && p.name !== p.ord; }
 
@@ -452,7 +466,7 @@ function model(PCTS){
     if (iss && CMP){
       // NYPD's official figure for that year is wrong: never show it, or a % built on it
       o.mode = "issue"; o.issue = iss; o.b = null; o.p = null;
-      o.sp = a.map(function(v, i){ return YEARS[i] >= (iss.year || 2025) ? null : v; });
+      o.sp = a.map(function(v, i){ return YEARS[i] >= (iss.year || LASTY) ? null : v; });
       if (M.issues.indexOf(iss.note) < 0) M.issues.push(iss.note);
     } else if (CMP){
       o.mode = isNum(o.a) && isNum(o.b) && Math.min(o.a, o.b) >= CFG.smallN ? "cmp" : "small";
@@ -472,8 +486,8 @@ function model(PCTS){
   var seen = {}; M.issues.forEach(function(n){ seen[n] = 1; });
   UNITS.forEach(function(u){ (u.notes || []).forEach(function(n){ if (!seen[n]){ seen[n] = 1; M.notes.push(n); } }); });
   // the data note was written for the full view ("this page shows report counts"); here no 2025 total is shown at all
-  M.noteList = M.issues.map(function(n){ return n.replace(/,? so this page shows report counts for 2025 instead\.?$/, ", so no official 2025 total or change is shown for those crimes here; Maps & details uses report counts instead. Citywide 2025 totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime)."); }).concat(M.notes);
-  if (GROUP) M.noteList.push("Because of the December 2024 boundary change, the change since 2019 and the trend lines are for the " + listJoin(GROUP.split("+").map(ordN)) + " Precincts combined; the 2025 and 2026 figures are this precinct’s own.");
+  M.noteList = M.issues.map(function(n){ return n.replace(/,? so this page shows report counts for (\d{4}) instead\.?$/, ", so no official $1 total or change is shown for those crimes here; Maps & details uses report counts instead. Citywide $1 totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime)."); }).concat(M.notes);
+  if (GROUP) M.noteList.push("Because of the December 2024 boundary change, the change since " + B + " and the trend lines are for the " + listJoin(GROUP.split("+").map(ordN)) + " Precincts combined; the " + L + " and " + CSY + " figures are this precinct’s own.");
   M.issueN = M.issues.length ? 1 : 0;
   var q = PCTS.join(",");
   M.detail = function(key){ return "precinct.html?pct=" + q + "&cat=" + encodeURIComponent(key); };
@@ -495,7 +509,7 @@ function coItem(it, pcts, cmp){
     if (A){ yrs = A.years; ser = pcts ? sumSeries(pcts.map(function(n){ return (A.byPct || {})[n]; }), A.years.length) : A.citywide; }
   }
   if (!ser || !yrs){ r.none = true; return r; }
-  r.a = ser[yrs.indexOf(2019)]; r.b = ser[yrs.indexOf(2025)];
+  r.a = ser[yrs.indexOf(B)]; r.b = ser[yrs.indexOf(L)];
   return r;
 }
 
@@ -518,7 +532,7 @@ function render(PCTS, msg){
   $("#hed").textContent = M.title;
   $("#meta").textContent = M.meta;
   $("#meta").setAttribute("title", M.metaFull || M.meta);   // one line on screen (ellipsis if long); the full list on hover
-  $("#week").textContent = "2026 figures through " + WEEK;
+  asOfLine($("#asof"), C.generated, C.weekEnding, C.years, BASE_YEAR);
   var m = $("#msg"); m.hidden = !msg; m.textContent = msg || "";
 
   var box = $("#tiles"); box.innerHTML = ""; SPARKS = [];
@@ -526,7 +540,7 @@ function render(PCTS, msg){
     var cs = M.cats.filter(function(o){ return o.c.group === g[0]; });
     if (!cs.length) return;
     var gl = HT("h2", { "class":"g-lab" }, box, g[1]);
-    if (g === CFG.groups[0]) HT("span", { "class":"g-key" }, gl, "Big numbers: NYPD’s official 2025 totals" + (M.city ? ", citywide" : "") + " · change since 2019 · trend · 2026 so far vs. the same weeks of 2025");
+    if (g === CFG.groups[0]) HT("span", { "class":"g-key" }, gl, "Big numbers: NYPD’s official " + L + " totals" + (M.city ? ", citywide" : "") + " · change since " + B + " · trend · " + CSY + " so far vs. the same weeks of " + CPY);
     cs.forEach(function(o){ tile(box, o, M); });
   });
   renderCO(M);
@@ -537,41 +551,41 @@ function render(PCTS, msg){
 function changeHTML(o, M){
   // [visible html, plain text for screen readers]
   function sw(p){ return '<i class="sw b' + binOf(p) + '" aria-hidden="true"></i>'; }
-  if (o.mode === "cmp") return ['<span class="c1">' + sw(o.p) + pctStr(o.p) + "</span>since 2019",
-    pctStr(o.p) + " since 2019, from " + fmt(o.a) + " in 2019"];
-  if (o.mode === "small") return ['<span class="c1">' + fmt(o.a) + " → " + fmt(o.b) + "</span>2019 → 2025",
-    fmt(o.a) + " in 2019 and " + fmt(o.b) + " in 2025, too few for a percent change"];
-  if (o.mode === "issue") return ['<span class="c1">' + fmt(o.a) + " in 2019</span>",
-    fmt(o.a) + " in 2019. NYPD’s official 2025 figure appears misaligned in its spreadsheet; see note " + M.issueN + " at the bottom"];
+  if (o.mode === "cmp") return ['<span class="c1">' + sw(o.p) + pctStr(o.p) + "</span>since " + B,
+    pctStr(o.p) + " since " + B + ", from " + fmt(o.a) + " in " + B];
+  if (o.mode === "small") return ['<span class="c1">' + fmt(o.a) + " → " + fmt(o.b) + "</span>" + B + " → " + L,
+    fmt(o.a) + " in " + B + " and " + fmt(o.b) + " in " + L + ", too few for a percent change"];
+  if (o.mode === "issue") return ['<span class="c1">' + fmt(o.a) + " in " + B + "</span>",
+    fmt(o.a) + " in " + B + ". NYPD’s official " + ((o.issue && o.issue.year) || L) + " figure appears misaligned in its spreadsheet; see note " + M.issueN + " at the bottom"];
   if (o.mode === "group"){
-    var h = o.gsmall ? '<span class="c1">' + fmt(o.ga) + " → " + fmt(o.gb) + "</span>2019 → 2025" : '<span class="c1">' + sw(o.gp) + pctStr(o.gp) + "</span>since 2019";
+    var h = o.gsmall ? '<span class="c1">' + fmt(o.ga) + " → " + fmt(o.gb) + "</span>" + B + " → " + L : '<span class="c1">' + sw(o.gp) + pctStr(o.gp) + "</span>since " + B;
     return [h + ", " + esc(M.groupShort),
-      (o.gsmall ? fmt(o.ga) + " in 2019 and " + fmt(o.gb) + " in 2025" : pctStr(o.gp) + " since 2019, from " + fmt(o.ga) + " to " + fmt(o.gb)) + ", " + M.groupLabel];
+      (o.gsmall ? fmt(o.ga) + " in " + B + " and " + fmt(o.gb) + " in " + L : pctStr(o.gp) + " since " + B + ", from " + fmt(o.ga) + " to " + fmt(o.gb)) + ", " + M.groupLabel];
   }
-  return ['<span class="c1">—</span>2019 not comparable', "2019 not comparable because of the 2024 boundary change"];
+  return ['<span class="c1">—</span>' + B + " not comparable", B + " not comparable because of the 2024 boundary change"];
 }
 // the 2026 band: label + as-of date, then the year-to-date count, a change pill in the map's bin colours, and the 2025 count
 var THRU = WEEK.replace(/, \d{4}$/, "");
 function y26Band(box, o, tag){
-  var lab = HT(tag, { "class":"y-lab" }, box, "2026 so far");
+  var lab = HT(tag, { "class":"y-lab" }, box, CSY + " so far");
   HT("span", { "class":"y-d" }, lab, "through " + THRU);
   var row = HT(tag, { "class":"y-row" }, box), y = o.ytd, vs = HT(tag, { "class":"y-vs" }, box);
   if (!o.c.compstat){ HT("span", { "class":"y-none" }, row, "Not in CompStat"); return; }
-  if (!y){ HT("span", { "class":"y-none" }, row, "No 2026 figure"); return; }
+  if (!y){ HT("span", { "class":"y-none" }, row, "No " + CSY + " figure"); return; }
   HT("span", { "class":"y-n" }, row, fmt(y.b));
   if (ySmall(y)){
     HT("span", { "class":"y-pill nt" }, row, "vs. " + fmt(y.a));
-    vs.textContent = "in the same weeks of 2025";
+    vs.textContent = "in the same weeks of " + CPY;
   } else {
     HT("span", { "class":"y-pill b" + binOf(y.p) }, row, pctGiven(y.p));
-    vs.textContent = "vs. " + fmt(y.a) + " in the same weeks of 2025";
+    vs.textContent = "vs. " + fmt(y.a) + " in the same weeks of " + CPY;
   }
 }
 function ytdHTML(o){
-  if (!o.c.compstat) return ["2026 so far: not in CompStat", "NYPD’s weekly CompStat report doesn’t track this separately"];
-  var y = o.ytd; if (!y) return ["2026 so far: —", "no 2026 figure"];
-  if (ySmall(y)) return ["2026 so far <b>" + fmt(y.b) + "</b> vs. " + fmt(y.a), "2026 so far: " + fmt(y.b) + ", vs. " + fmt(y.a) + " in the same weeks of 2025"];
-  return ["2026 so far <b>" + pctGiven(y.p) + "</b> vs. 2025", "2026 so far: " + pctGiven(y.p) + " vs. the same weeks of 2025, " + fmt(y.b) + " vs. " + fmt(y.a)];
+  if (!o.c.compstat) return [CSY + " so far: not in CompStat", "NYPD’s weekly CompStat report doesn’t track this separately"];
+  var y = o.ytd; if (!y) return [CSY + " so far: —", "no " + CSY + " figure"];
+  if (ySmall(y)) return [CSY + " so far <b>" + fmt(y.b) + "</b> vs. " + fmt(y.a), CSY + " so far: " + fmt(y.b) + ", vs. " + fmt(y.a) + " in the same weeks of " + CPY];
+  return [CSY + " so far <b>" + pctGiven(y.p) + "</b> vs. " + CPY, CSY + " so far: " + pctGiven(y.p) + " vs. the same weeks of " + CPY + ", " + fmt(y.b) + " vs. " + fmt(y.a)];
 }
 
 function tile(box, o, M){
@@ -588,7 +602,7 @@ function tile(box, o, M){
   else big.textContent = fmt(o.b);
   var chg = HT("p", { "class":"t-chg" }, nums); chg.innerHTML = ch[0];
   var sp = HT("div", { "class":"t-spark" }, t);
-  var al = o.label + (M.city ? ", citywide" : ", " + M.title) + ": " + (o.mode === "issue" ? "no official 2025 figure. " : fmt(o.b) + " in 2025, ") + ch[1] + ". " + yt[1] + ".";
+  var al = o.label + (M.city ? ", citywide" : ", " + M.title) + ": " + (o.mode === "issue" ? "no official " + L + " figure. " : fmt(o.b) + " in " + L + ", ") + ch[1] + ". " + yt[1] + ".";
   var foot = HT("div", { "class":"t-foot" }, t);
   y26Band(foot, o, "span");
   if (!M.city){
@@ -598,7 +612,7 @@ function tile(box, o, M){
     if (o.mode !== "issue") HT("span", { "class":"dot" }, cs, " · ");
     cs.appendChild(document.createTextNode("Citywide "));
     HT("b", null, cs, cTxt);
-    al += " Citywide since 2019: " + cTxt + ".";
+    al += " Citywide since " + B + ": " + cTxt + ".";
   }
   // hidden summary for screen readers; the visible bits are aria-hidden duplicates
   var sr = HT("p", { "class":"sr" }, t, al); t.insertBefore(sr, nums);
@@ -613,7 +627,7 @@ function spark(host, o, M){
   var ro = HT("p", { "class":"ro", "aria-live":"polite" }, host);
   if (pts.length < 2){
     ro.textContent = "";
-    HT("p", { "class":"sp-none" }, host, "No comparable trend before 2025.");
+    HT("p", { "class":"sp-none" }, host, "No comparable trend before " + L + ".");
     return { draw:function(){} };
   }
   var nameFor = o.spName;
@@ -636,12 +650,12 @@ function spark(host, o, M){
     svg = S("svg", { viewBox:"0 0 " + W + " " + H, width:W, height:H, "aria-hidden":"true", focusable:"false" }, plot);
     S("line", { "class":"sp-base", x1:L, x2:W - R, y1:PH + .5, y2:PH + .5 }, svg);
     S("path", { "class":"sp-line", d:pts.map(function(p, i){ return (i ? "L" : "M") + X(p.y).toFixed(1) + " " + Y(p.v).toFixed(1); }).join("") }, svg);
-    var p19 = null; pts.forEach(function(p){ if (p.y === 2019) p19 = p; });
-    if (p19) S("circle", { "class":"sp-d19", cx:X(2019), cy:Y(p19.v), r:2.5 }, svg);
+    var p19 = null; pts.forEach(function(p){ if (p.y === B) p19 = p; });
+    if (p19) S("circle", { "class":"sp-d19", cx:X(B), cy:Y(p19.v), r:2.5 }, svg);
     var pl = pts[pts.length-1]; S("circle", { "class":"sp-d25", cx:X(pl.y), cy:Y(pl.v), r:2.5 }, svg);
     S("text", { "class":"sp-yr", x:L - 2, y:H - 2 }, svg, String(y0));
     S("text", { "class":"sp-yr", x:W - R + 2, y:H - 2, "text-anchor":"end" }, svg, String(y1));
-    if (p19 && X(2019) - X(y0) > 40 && X(y1) - X(2019) > 40) S("text", { "class":"sp-yr k", x:X(2019), y:H - 2, "text-anchor":"middle" }, svg, "2019");
+    if (p19 && X(B) - X(y0) > 40 && X(y1) - X(B) > 40) S("text", { "class":"sp-yr k", x:X(B), y:H - 2, "text-anchor":"middle" }, svg, String(B));
     svg._rule = S("line", { "class":"sp-rule", y1:0, y2:PH }, svg);
     svg._dot = S("circle", { "class":"sp-dot", r:4 }, svg);
     mark();
@@ -705,15 +719,15 @@ function renderCO(M){
   var anyNC = M.cmp && M.co.some(function(r){ return r.nc; });
   var h = $("#coH");
   h.textContent = "Not shown";
-  HT("span", { "class":"g-key" }, h, "Not in the tiles above: counts only, " + (M.cmp ? "2019 → 2025" : "2025") + (anyNC ? " · * Not comparable: rape law broadened Sept. 1, 2024" : ""));
+  HT("span", { "class":"g-key" }, h, "Not in the tiles above: counts only, " + (M.cmp ? B + " → " + L : String(L)) + (anyNC ? " · * Not comparable: rape law broadened Sept. 1, 2024" : ""));
   M.co.forEach(function(r){
     var it = r.it, li = HT("li", null, ul), al = r.label + ": ";
     HT("span", { "class":"l" }, li, CO_SHORT[it.key] || r.label);
     var n = HT("span", { "class":"n" }, li), b = HT("b", null, n);
     if (r.none){ b.textContent = "—"; al += "no figures"; }
-    else if (r.issue){ b.textContent = fmt(r.a) + " → see note " + M.issueN; al += fmt(r.a) + " in 2019; the official 2025 figure appears misaligned in NYPD’s spreadsheet"; }
-    else if (r.cmp){ b.textContent = fmt(r.a) + " → " + fmt(r.b); al += fmt(r.a) + " in 2019, " + fmt(r.b) + " in 2025"; }
-    else { b.textContent = fmt(r.b); al += fmt(r.b) + " in 2025"; }
+    else if (r.issue){ b.textContent = fmt(r.a) + " → see note " + M.issueN; al += fmt(r.a) + " in " + B + "; the official " + ((r.issue && r.issue.year) || L) + " figure appears misaligned in NYPD’s spreadsheet"; }
+    else if (r.cmp){ b.textContent = fmt(r.a) + " → " + fmt(r.b); al += fmt(r.a) + " in " + B + ", " + fmt(r.b) + " in " + L; }
+    else { b.textContent = fmt(r.b); al += fmt(r.b) + " in " + L; }
     if (r.nc && r.cmp){ HT("i", { "class":"tag" }, n, "*"); al += ", not comparable: " + it.notComparable.replace(/\.$/, ""); }
     if (r.rep){ HT("i", { "class":"tag" }, n, "reports"); al += " (individual NYPD reports)"; }
     al += ". ";
@@ -726,6 +740,21 @@ function renderCO(M){
 }
 
 /* ---------- footer, notes ---------- */
+// "Updated Oct. 30, 2026 · 2026 figures through Oct. 25 (NYPD CompStat, weekly) · yearly figures 2019–2025",
+// from city.json (generated, weekEnding, years), so it changes by itself with every rebuild. AP month style.
+function asOfLine(el, gen, week, years, base){
+  if (!el) return;
+  var MO = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+  var g = /^(\d{4})-(\d{2})-(\d{2})/.exec(gen || ""), up = g ? MO[+g[2] - 1] + " " + (+g[3]) + ", " + g[1] : "";
+  var wy = (/(\d{4})\s*$/.exec(week || "") || [])[1], thru = g && wy === g[1] ? String(week).replace(/,\s*\d{4}\s*$/, "") : week;
+  var last = years && years.length ? years[years.length - 1] : null;
+  el.innerHTML = "";
+  function t(s){ el.appendChild(document.createTextNode(s)); }
+  function b(s){ var x = document.createElement("b"); x.textContent = s; el.appendChild(x); }
+  if (up){ t("Updated "); b(up); }
+  if (week){ t((up ? " · " : "") + (wy || "") + " figures through "); b(thru); t(" (NYPD CompStat, weekly)"); }
+  if (last && base){ t(" · yearly figures "); b(base + "–" + last); }
+}
 function renderFoot(M){
   var f = $("#footTxt"); f.innerHTML = "";
   function line(t){ if (f.firstChild) f.appendChild(document.createTextNode(" ")); HT("span", null, f, t); }
@@ -747,9 +776,9 @@ function renderFoot(M){
     });
   }
   var ul = HT("ul", null, nb);
-  HT("li", null, ul, "Big numbers are NYPD’s official " + LASTY + " totals" + (M.city ? ", citywide." : ".") + " With fewer than " + CFG.smallN + " in either year, a few cases swing a percentage a lot, so tiles show the two counts instead. Colors step with the change since 2019: greys for falls, blues for rises.");
+  HT("li", null, ul, "Big numbers are NYPD’s official " + LASTY + " totals" + (M.city ? ", citywide." : ".") + " With fewer than " + CFG.smallN + " in either year, a few cases swing a percentage a lot, so tiles show the two counts instead. Colors step with the change since " + B + ": greys for falls, blues for rises.");
   var noCS = CATS.filter(function(c){ return !c.compstat; }).map(function(c){ return lc(c.label); });
-  HT("li", null, ul, "2026 so far: NYPD CompStat, year to date through " + WEEK + ", vs. the same weeks of 2025" + (M.PCTS.length > 1 ? " (percentages computed for the summed precincts)" : " (percentages as NYPD prints them)") + "." + (noCS.length ? " CompStat doesn’t report " + listJoin(noCS) + " separately." : ""));
+  HT("li", null, ul, CSY + " so far: NYPD CompStat, year to date through " + WEEK + ", vs. the same weeks of " + CPY + (M.PCTS.length > 1 ? " (percentages computed for the summed precincts)" : " (percentages as NYPD prints them)") + "." + (noCS.length ? " CompStat doesn’t report " + listJoin(noCS) + " separately." : ""));
   var nc = CO.filter(function(it){ return it.notComparable; })[0];
   if (nc) HT("li", null, ul, nc.notComparable);
   var li = HT("li", null, ul, "Not shown: ");

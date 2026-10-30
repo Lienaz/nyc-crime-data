@@ -120,6 +120,10 @@ h1{font-family:var(--serif);font-weight:700;font-size:var(--fs-h1);line-height:v
 .nextdoor{font:var(--fs-ui)/var(--lh-cap) var(--sans);color:var(--muted);margin:10px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:0 4px}
 .nextdoor a{display:inline-flex;align-items:center;min-height:44px;padding:0 6px;font-weight:700;text-decoration:none}
 .nextdoor a:hover{text-decoration:underline}
+/* "data as of" line, high on every page (same on index-v2, precinct-v2, glance); filled from city.json */
+.asof{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:0 0 var(--sp-3);max-width:60em;min-height:calc(2 * var(--lh-cap) * 1em)}
+.asof b{color:var(--ink);font-weight:700;white-space:nowrap}
+@media (min-width:700px){ .asof{min-height:calc(var(--lh-cap) * 1em)} }
 .intro{padding-bottom:6px}
 .meta{display:flex;align-items:center;gap:10px}
 .loc{display:inline-block;flex:none;line-height:0}
@@ -545,13 +549,14 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
     <p class="hoods" id="hoods"></p>
   </div>
   <p class="dek" id="dek"></p>
+  <p class="asof" id="asof"></p>
   <div class="i-rest">
     <p class="nextdoor" id="nextdoor"></p>
   </div>
 </section>
 
 <section class="wrap sec" id="overview" aria-labelledby="ovH">
-  <h2 id="ovH">What changed, 2019 to 2025</h2>
+  <h2 id="ovH">What changed, <span data-yr="base">2019</span> to <span data-yr="last">2025</span></h2>
   <p class="lede">Percent change in NYPD’s official totals. Tap a crime to see where and when.</p>
   <p class="ov-note" id="ovGroupNote" hidden></p>
   <p class="ov-key" id="ovKey"></p>
@@ -574,7 +579,7 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
   <div class="graphic" id="graphic">
     <div class="g-head">
       <p class="fig" id="gFig">Map</p><p class="s-title" id="mapTitle"></p>
-      <div class="g-ctl" id="yearCtl"><div class="seg" role="group" aria-label="Year on the map" id="segYear"><button type="button" data-v="2025" aria-pressed="true">2025</button><button type="button" data-v="2019" aria-pressed="false">2019</button></div></div>
+      <div class="g-ctl" id="yearCtl"><div class="seg" role="group" aria-label="Year on the map" id="segYear"><button type="button" data-v="2025" data-yr="plast" aria-pressed="true">2025</button><button type="button" data-v="2019" data-yr="pbase" aria-pressed="false">2019</button></div></div>
     </div>
     <div class="mapbox" id="catMap" role="group"><p class="loading">Loading the map…</p></div>
     <div class="g-foot"><p class="legend" id="mapLegend"></p><p class="g-cap" id="mapNote"></p></div>
@@ -591,7 +596,7 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
         <p class="rank" id="rankTxt" hidden></p>
       </div>
     <div class="blk" id="b-ytd">
-      <p class="bh">2026 so far</p>
+      <p class="bh"><span data-yr="cs">2026</span> so far</p>
       <p class="txt" id="ytdTxt"></p>
       <div class="ifig" id="if-ytd">
         <p class="fig"></p><p class="s-title" id="ytdTitle"></p>
@@ -628,7 +633,7 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
         <div class="ifig" id="if-type">
           <p class="fig"></p><p class="s-title" id="typeTitle"></p>
           <div class="ifig-body" id="typeBody"></div>
-          <div class="s-foot"><p class="legend"><span><i class="sq" style="background:var(--y2019)"></i>2019</span><span><i class="sq" style="background:var(--blue)"></i>2025</span></p><p>Individual NYPD reports, which differ slightly from official totals.</p></div>
+          <div class="s-foot"><p class="legend"><span><i class="sq" style="background:var(--y2019)"></i><span data-yr="pbase">2019</span></span><span><i class="sq" style="background:var(--blue)"></i><span data-yr="plast">2025</span></span></p><p>Individual NYPD reports, which differ slightly from official totals.</p></div>
         </div></div></details>
     </div>
 
@@ -640,7 +645,7 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
       <div class="ifig" id="if-when">
         <p class="fig"></p><p class="s-title" id="whenTitle"></p>
         <div class="ifig-body" id="whenBody"></div>
-        <div class="s-foot"><p class="legend"><span><i class="sq" style="background:var(--y2019)"></i>2019</span><span><i class="sq" style="background:var(--blue)"></i>2025</span></p><p>Individual NYPD reports, by reported start time. Tap a time window to show it on the map.</p></div>
+        <div class="s-foot"><p class="legend"><span><i class="sq" style="background:var(--y2019)"></i><span data-yr="pbase">2019</span></span><span><i class="sq" style="background:var(--blue)"></i><span data-yr="plast">2025</span></span></p><p>Individual NYPD reports, by reported start time. Tap a time window to show it on the map.</p></div>
       </div>
     </div>
 
@@ -886,8 +891,34 @@ var AREA_L = MULTI ? AREA_S : UNITS[0].name;   // labels under big numbers: "44t
 var BOROS = []; UNITS.forEach(function(u){ if (BOROS.indexOf(u.boro) < 0) BOROS.push(u.boro); });
 document.title = AREA + " · New York, Precinct by Precinct";
 
-var YEARS = CITY.years, I19 = YEARS.indexOf(2019), I25 = YEARS.indexOf(2025);
+// Years on this page all come from the data; BASE_YEAR (the comparison year) is the one design constant.
+// Y_B/Y_L: comparison and latest annual year (city.json years); Y_C/Y_P: CompStat's year and the year it compares
+// with (city.json weekEnding); Y_PB/Y_PL: the report-level (map) years in the precinct files; Y_RB/Y_RL: response.json
+// years; Y_M: the Midtown crowd/response year (midtown_crowd.json window).
+var BASE_YEAR = 2019;
+var YEARS = CITY.years, Y_B = BASE_YEAR, Y_L = YEARS[YEARS.length - 1], I19 = YEARS.indexOf(Y_B), I25 = YEARS.indexOf(Y_L);
+var Y_C = +((/(\d{4})\s*$/.exec(CITY.weekEnding || "") || [])[1]) || Y_L + 1, Y_P = Y_C - 1;
+var Y_PB = Y_B, Y_PL = Y_L, Y_RB = Y_B, Y_RL = Y_L, Y_M = Y_L;
+// static text in the page marked data-yr (headings, buttons, legends)
+function fillYears(){ $$("[data-yr]").forEach(function(el){ var v = { base:Y_B, last:Y_L, cs:Y_C, pbase:Y_PB, plast:Y_PL }[el.getAttribute("data-yr")]; if (v != null){ if (el.hasAttribute("data-v")) el.setAttribute("data-v", String(v)); el.textContent = v; } }); }
+fillYears();
 var WEEK = CITY.weekEnding || "", THRU = WEEK.replace(/, \d{4}$/, "");
+// "Updated Oct. 30, 2026 · 2026 figures through Oct. 25 (NYPD CompStat, weekly) · yearly figures 2019–2025",
+// from city.json (generated, weekEnding, years), so it changes by itself with every rebuild. AP month style.
+function asOfLine(el, gen, week, years, base){
+  if (!el) return;
+  var MO = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+  var g = /^(\d{4})-(\d{2})-(\d{2})/.exec(gen || ""), up = g ? MO[+g[2] - 1] + " " + (+g[3]) + ", " + g[1] : "";
+  var wy = (/(\d{4})\s*$/.exec(week || "") || [])[1], thru = g && wy === g[1] ? String(week).replace(/,\s*\d{4}\s*$/, "") : week;
+  var last = years && years.length ? years[years.length - 1] : null;
+  el.innerHTML = "";
+  function t(s){ el.appendChild(document.createTextNode(s)); }
+  function b(s){ var x = document.createElement("b"); x.textContent = s; el.appendChild(x); }
+  if (up){ t("Updated "); b(up); }
+  if (week){ t((up ? " · " : "") + (wy || "") + " figures through "); b(thru); t(" (NYPD CompStat, weekly)"); }
+  if (last && base){ t(" · yearly figures "); b(base + "–" + last); }
+}
+asOfLine($("#asof"), CITY.generated, CITY.weekEnding, CITY.years, BASE_YEAR);
 var SRC = CITY.sources || {};
 function srcName(k){ return SRC[k] ? SRC[k].name : k; }
 
@@ -899,7 +930,7 @@ var GROUP_PCTS = GROUP ? GROUP.split("+").map(Number) : [];
 var GROUP_T = GROUP ? "the " + listJoin(GROUP_PCTS.map(ordN)) + " precincts combined" : "";
 var GROUP_S = GROUP ? GROUP_PCTS.map(ordN).join(" + ") : "";
 // the 116th: no figures of its own before 2025 (zeros or blanks in NYPD's files)
-var NEWPCT = !MULTI && UNITS[0].compare2019 === false && (function(){ var b = CITY.official.byPct[UNITS[0].pct] || {}; return Object.keys(b).every(function(k){ var v = b[k] && b[k][YEARS.indexOf(2019)]; return !v; }); })();
+var NEWPCT = !MULTI && UNITS[0].compare2019 === false && (function(){ var b = CITY.official.byPct[UNITS[0].pct] || {}; return Object.keys(b).every(function(k){ var v = b[k] && b[k][YEARS.indexOf(Y_B)]; return !v; }); })();
 var TS = (function(){
   var us = CMP && NONCMP.length ? UNITS.filter(function(u){ return u.compare2019 !== false; }) : UNITS;
   if (!us.length) return YEARS[0];
@@ -934,14 +965,14 @@ function ySmall(y){ return !y || Math.min(y.a, y.b) < CFG.smallN || !isNum(y.p);
 // the 2026 band on the overview tiles: label + as-of date, the year-to-date count, a change pill in the map's bin colours, the 2025 count
 function binOf(p){ if (p <= -50) return 0; if (p <= -20) return 1; if (p <= -5) return 2; if (p < 5) return 3; if (p < 20) return 4; if (p < 50) return 5; if (p < 100) return 6; return 7; }
 function y26Band(box, o){
-  var lab = HT("span", { "class":"y-lab" }, box, "2026 so far");
+  var lab = HT("span", { "class":"y-lab" }, box, (Y_C + " so far"));
   HT("span", { "class":"y-d" }, lab, "through " + THRU);
   var row = HT("span", { "class":"y-row" }, box), y = o.ytd, vs = HT("span", { "class":"y-vs" }, box);
   if (!o.c.compstat){ HT("span", { "class":"y-none" }, row, "Not in CompStat"); return; }
-  if (!y){ HT("span", { "class":"y-none" }, row, "No 2026 figure"); return; }
+  if (!y){ HT("span", { "class":"y-none" }, row, ("No " + Y_C + " figure")); return; }
   HT("span", { "class":"y-n" }, row, fmt(y.b));
-  if (ySmall(y)){ HT("span", { "class":"y-pill nt" }, row, "vs. " + fmt(y.a)); vs.textContent = "in the same weeks of 2025"; }
-  else { HT("span", { "class":"y-pill b" + binOf(y.p) }, row, pctGiven(y.p)); vs.textContent = "vs. " + fmt(y.a) + " in the same weeks of 2025"; }
+  if (ySmall(y)){ HT("span", { "class":"y-pill nt" }, row, "vs. " + fmt(y.a)); vs.textContent = ("in the same weeks of " + Y_P); }
+  else { HT("span", { "class":"y-pill b" + binOf(y.p) }, row, pctGiven(y.p)); vs.textContent = "vs. " + fmt(y.a) + (" in the same weeks of " + Y_P); }
 }
 function ytdShort(y){ return !y ? "—" : (ySmall(y) ? fmt(y.a) + " → " + fmt(y.b) : pctGiven(y.p)); }
 
@@ -960,7 +991,7 @@ CATS.forEach(function(c){
   if (o.issue && CMP){
     // the official figure for the issue year is wrong in NYPD's file: never show it or a % built on it
     o.mode = "issue"; o.mp = null; o.b = null;
-    o.series = a.map(function(v, i){ return YEARS[i] >= (o.issue.year || 2025) ? null : v; });
+    o.series = a.map(function(v, i){ return YEARS[i] >= (o.issue.year || Y_L) ? null : v; });
   } else if (CMP){
     o.mode = (isNum(o.a) && isNum(o.b) && Math.min(o.a, o.b) >= CFG.smallN) ? "cmp" : "small";
     o.mp = o.mode === "cmp" ? pctOf(o.a, o.b) : null;
@@ -1006,7 +1037,7 @@ $("#meta").textContent = MULTI ? listJoin(UNITS.map(function(u){ return u.ord; }
 var HOODS = []; UNITS.forEach(function(u){ (u.hoods || []).forEach(function(h){ if (HOODS.indexOf(h) < 0) HOODS.push(h); }); });
 $("#hoods").textContent = HOODS.join(" · ");
 $("#hoods").hidden = !HOODS.length;
-$("#dek").textContent = "How " + numWord(CATS.length) + " kinds of crime changed in " + AREA_T + " from 2019 to 2025, and in 2026 so far, compared with the city.";
+$("#dek").textContent = "How " + numWord(CATS.length) + " kinds of crime changed in " + AREA_T + (" from " + Y_B + " to " + Y_L + ", and in " + Y_C + " so far, compared with the city.");
 /* ---------- numbered notes (#notes at the bottom); figures they affect get a "See note 1" link ---------- */
 var NOTES = [];   // { text, kind }
 function noteKind(t){ return /trend lines start/.test(t) ? "trend" : /116th/.test(t) ? "boundary" : /city jail|Detention|courthouse/.test(t) ? "jail" : "other"; }
@@ -1037,7 +1068,7 @@ document.addEventListener("click", function(e){
   if (t.focus) t.focus({ preventScroll:true });
 });
 // the precinct's own notes, in data order (the data-issue note first when there is one)
-UNITS.forEach(function(u){ if (u.dataIssue && u.dataIssue.note) addNote(u.dataIssue.note + (/as published/.test(u.dataIssue.note) ? "" : " Citywide 2025 totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime)."), "issue"); });
+UNITS.forEach(function(u){ if (u.dataIssue && u.dataIssue.note) addNote(u.dataIssue.note + (/as published/.test(u.dataIssue.note) ? "" : (" Citywide " + Y_L + " totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime).")), "issue"); });
 UNITS.forEach(function(u){ (u.notes || []).forEach(function(n){ addNote(n); }); });
 (function(){
   var nb = []; UNITS.forEach(function(u){ (u.neighbors || []).forEach(function(n){ if (PCTS.indexOf(n) < 0 && nb.indexOf(n) < 0 && PBY[n]) nb.push(n); }); });
@@ -1072,7 +1103,7 @@ function rowVal(o){ return o.mode === "cmp" ? o.mp : (o.mode === "group" ? o.gp 
   var aLab = GROUP ? GROUP_S : AREA_S;
   $("#ovKey").innerHTML = '<span><i style="background:var(--blue)"></i>' + esc(GROUP ? GROUP_S + ", combined" : AREA) + '</span><span><i style="background:var(--y2019)"></i>Citywide</span>';
   var head = $("#ovHead");
-  [ "Crime", GROUP ? "2025" : "2019 → 2025", "Change, 2019 to 2025", "2026 so far" ].forEach(function(t){ HT("span", null, head, t); });
+  [ "Crime", GROUP ? [Y_L] : (Y_B + " → " + Y_L), ("Change, " + Y_B + " to " + Y_L), (Y_C + " so far") ].forEach(function(t){ HT("span", null, head, t); });
   if (GROUP){
     var gn = $("#ovGroupNote"); gn.hidden = false;
     gn.textContent = "Because of a December 2024 boundary change, the blue bars show " + GROUP_T + ".";
@@ -1091,7 +1122,7 @@ function rowVal(o){ return o.mode === "cmp" ? o.mp : (o.mode === "group" ? o.gp 
       cnt.id = "ovc-" + c.key;
       if (o.mode === "issue") cnt.innerHTML = fmt(o.a) + ' → <small>see note ' + noteOf("issue") + '</small>';
       else if (o.mode === "cmp" || o.mode === "small") cnt.innerHTML = fmt(o.a) + " → " + fmt(o.b);
-      else cnt.innerHTML = fmt(o.b) + " <small>in 2025</small>";
+      else cnt.innerHTML = fmt(o.b) + (" <small>in " + Y_L + "</small>");
       var bars = HT("span", { "class":"ov-bars" }, b);
       function bar(v, cls, tagTxt){
         var t = HT("span", { "class":"bt" }, bars), z = pos(0);
@@ -1105,17 +1136,17 @@ function rowVal(o){ return o.mode === "cmp" ? o.mp : (o.mode === "group" ? o.gp 
         if (v >= 0) lab.style.left = "calc(56px + (100% - 112px)*" + p1.toFixed(4) + " + 5px)";
         else lab.style.right = "calc(56px + (100% - 112px)*" + (1 - p0).toFixed(4) + " + 5px)";
       }
-      var smallTag = o.mode === "small" ? null : o.mode === "issue" ? "See note " + noteOf("issue") : (o.mode === "group" && o.gsmall ? "Combined: " + fmt(o.ga) + " → " + fmt(o.gb) : (o.mode === "none" ? "2019 not comparable" : null));
+      var smallTag = o.mode === "small" ? null : o.mode === "issue" ? "See note " + noteOf("issue") : (o.mode === "group" && o.gsmall ? "Combined: " + fmt(o.ga) + " → " + fmt(o.gb) : (o.mode === "none" ? (Y_B + " not comparable") : null));
       bar(rowVal(o), "a", smallTag);
       bar(o.cp, "c");
       y26Band(HT("span", { "class":"ov-ytd" }, b), o);
       var al = c.label + ". ";
-      if (o.mode === "issue") al += AREA + ": " + fmt(o.a) + " in 2019. NYPD’s official 2025 figure appears misaligned in its spreadsheet; see note " + noteOf("issue") + " at the bottom. ";
-      else if (o.mode === "cmp") al += AREA + ": " + fmt(o.a) + " in 2019, " + fmt(o.b) + " in 2025, " + pctStr(o.mp) + ". ";
-      else if (o.mode === "small") al += AREA + ": " + fmt(o.a) + " in 2019, " + fmt(o.b) + " in 2025; too few for a percent change. ";
-      else if (o.mode === "group") al += AREA + ": " + fmt(o.b) + " in 2025. " + uc(GROUP_T) + ": " + fmt(o.ga) + " in 2019, " + fmt(o.gb) + " in 2025" + (o.gsmall ? ". " : ", " + pctStr(o.gp) + ". ");
-      else al += AREA + ": " + fmt(o.b) + " in 2025. ";
-      al += "Citywide " + pctStr(o.cp) + ". 2026 so far: " + (o.ytd ? (ySmall(o.ytd) ? fmt(o.ytd.b) + " vs. " + fmt(o.ytd.a) : pctGiven(o.ytd.p)) : "no figure") + ".";
+      if (o.mode === "issue") al += AREA + ": " + fmt(o.a) + (" in " + Y_B + ". NYPD’s official " + Y_L + " figure appears misaligned in its spreadsheet; see note ") + noteOf("issue") + " at the bottom. ";
+      else if (o.mode === "cmp") al += AREA + ": " + fmt(o.a) + (" in " + Y_B + ", ") + fmt(o.b) + (" in " + Y_L + ", ") + pctStr(o.mp) + ". ";
+      else if (o.mode === "small") al += AREA + ": " + fmt(o.a) + (" in " + Y_B + ", ") + fmt(o.b) + (" in " + Y_L + "; too few for a percent change. ");
+      else if (o.mode === "group") al += AREA + ": " + fmt(o.b) + (" in " + Y_L + ". ") + uc(GROUP_T) + ": " + fmt(o.ga) + (" in " + Y_B + ", ") + fmt(o.gb) + (" in " + Y_L) + (o.gsmall ? ". " : ", " + pctStr(o.gp) + ". ");
+      else al += AREA + ": " + fmt(o.b) + (" in " + Y_L + ". ");
+      al += "Citywide " + pctStr(o.cp) + (". " + Y_C + " so far: ") + (o.ytd ? (ySmall(o.ytd) ? fmt(o.ytd.b) + " vs. " + fmt(o.ytd.a) : pctGiven(o.ytd.p)) : "no figure") + ".";
       b.setAttribute("aria-label", al);
       b.addEventListener("click", function(){ setCat(c.key, "cat"); });
       b.addEventListener("pointerenter", function(){ ovRead(c.key); });
@@ -1124,9 +1155,9 @@ function rowVal(o){ return o.mode === "cmp" ? o.mp : (o.mode === "group" ? o.gp 
       b.addEventListener("blur", function(){ ovRead(CAT); });
     });
   });
-  $("#ovNote").textContent = "NYPD official annual totals" + (MULTI ? " for " + listJoin(UNITS.map(function(u){ return u.ord; })) + ", summed" : "") + ". With fewer than " + CFG.smallN + " in either year, a few cases swing a percentage a lot, so the page shows counts instead. 2026 so far: NYPD CompStat, year to date through " + WEEK + ", vs. the same weeks of 2025 (counts shown as 2025 → 2026 when small).";
+  $("#ovNote").textContent = "NYPD official annual totals" + (MULTI ? " for " + listJoin(UNITS.map(function(u){ return u.ord; })) + ", summed" : "") + ". With fewer than " + CFG.smallN + (" in either year, a few cases swing a percentage a lot, so the page shows counts instead. " + Y_C + " so far: NYPD CompStat, year to date through ") + WEEK + (", vs. the same weeks of " + Y_P + " (counts shown as " + Y_L + " → " + Y_C + " when small).");
   var iss = CATS.map(function(c){ return ST[c.key]; }).filter(function(o){ return o.mode === "issue"; });
-  if (iss.length){ $("#ovNote").textContent += " " + uc(listJoin(iss.map(function(o){ return lc(o.label); }))) + ": NYPD’s official 2025 figures appear misaligned in its spreadsheet."; seeNote(noteOf("issue"), $("#ovNote")); }
+  if (iss.length){ $("#ovNote").textContent += " " + uc(listJoin(iss.map(function(o){ return lc(o.label); }))) + (": NYPD’s official " + Y_L + " figures appear misaligned in its spreadsheet."); seeNote(noteOf("issue"), $("#ovNote")); }
 })();
 
 function ovRead(key){
@@ -1134,9 +1165,9 @@ function ovRead(key){
   var sw = function(col){ return '<i style="background:' + col + '"></i>'; }, a;
   if (o.mode === "cmp") a = fmt(o.a) + " → " + fmt(o.b) + " (" + pctStr(o.mp) + ")";
   else if (o.mode === "small") a = fmt(o.a) + " → " + fmt(o.b);
-  else if (o.mode === "issue") a = fmt(o.a) + " in 2019;</b></span> <span>official 2025 figure appears misaligned<b>";   // this part may wrap
-  else if (o.mode === "group") a = fmt(o.b) + " in 2025</b></span> · <span class=\"rs\">" + sw("var(--blue)") + "Combined <b>" + fmt(o.ga) + " → " + fmt(o.gb) + (o.gsmall ? "" : " (" + pctStr(o.gp) + ")");
-  else a = fmt(o.b) + " in 2025";
+  else if (o.mode === "issue") a = fmt(o.a) + (" in " + Y_B + ";</b></span> <span>official " + Y_L + " figure appears misaligned<b>");   // this part may wrap
+  else if (o.mode === "group") a = fmt(o.b) + (" in " + Y_L + "</b></span> · <span class=\"rs\">") + sw("var(--blue)") + "Combined <b>" + fmt(o.ga) + " → " + fmt(o.gb) + (o.gsmall ? "" : " (" + pctStr(o.gp) + ")");
+  else a = fmt(o.b) + (" in " + Y_L);
   el.innerHTML = "<b>" + esc(o.label) + "</b> · <span class=\"rs\">" + (o.mode === "group" ? "" : sw("var(--blue)")) + esc(AREA_L) + " <b>" + a + "</b></span> · <span class=\"rs\">" + sw("var(--y2019)") + "Citywide <b>" + fmt(o.ca) + " → " + fmt(o.cb) + "</b> (" + pctStr(o.cp) + ")</span>";
 }
 
@@ -1179,18 +1210,18 @@ function renderCounts(){
     if (it.plain){ HT("p", { "class":"co-plain" }, li, it.plain); al += it.plain + " "; }
     var coIss = ser && ser.off ? areaIssue(it.key) : null;
     if (coIss){
-      var a0 = ser.area[ser.years.indexOf(2019)], n0 = HT("p", { "class":"co-nums" }, li);
-      n0.innerHTML = fmt(a0) + ' <small>in 2019; the official 2025 figure appears misaligned</small>';
-      var cw = HT("p", { "class":"co-why" }, li, "NYPD’s official 2025 figure appears misaligned in its spreadsheet."); seeNote(noteOf("issue"), cw); al += fmt(a0) + " in 2019. NYPD’s official 2025 figure appears misaligned in its spreadsheet; see note " + noteOf("issue") + " at the bottom. ";
+      var a0 = ser.area[ser.years.indexOf(Y_B)], n0 = HT("p", { "class":"co-nums" }, li);
+      n0.innerHTML = fmt(a0) + (' <small>in ' + Y_B + '; the official ' + Y_L + ' figure appears misaligned</small>');
+      var cw = HT("p", { "class":"co-why" }, li, ("NYPD’s official " + Y_L + " figure appears misaligned in its spreadsheet.")); seeNote(noteOf("issue"), cw); al += fmt(a0) + (" in " + Y_B + ". NYPD’s official " + Y_L + " figure appears misaligned in its spreadsheet; see note ") + noteOf("issue") + " at the bottom. ";
     } else if (ser){
-      var i19 = ser.years.indexOf(2019), i25 = ser.years.indexOf(2025), a = ser.area[i19], b = ser.area[i25];
+      var i19 = ser.years.indexOf(Y_B), i25 = ser.years.indexOf(Y_L), a = ser.area[i19], b = ser.area[i25];
       var nums = HT("p", { "class":"co-nums" }, li);
       if (CMP){
-        nums.innerHTML = fmt(a) + ' <small>in 2019</small> → <span class="c25">' + fmt(b) + '</span> <small>in 2025' + (ser.rep ? ", reports" : "") + '</small>';
-        al += fmt(a) + " in 2019, " + fmt(b) + " in 2025" + (ser.rep ? " (NYPD reports)" : "") + ". ";
+        nums.innerHTML = fmt(a) + (' <small>in ' + Y_B + '</small> → <span class="c25">') + fmt(b) + ('</span> <small>in ' + Y_L) + (ser.rep ? ", reports" : "") + '</small>';
+        al += fmt(a) + (" in " + Y_B + ", ") + fmt(b) + (" in " + Y_L) + (ser.rep ? " (NYPD reports)" : "") + ". ";
       } else {
-        nums.innerHTML = '<span class="c25">' + fmt(b) + '</span> <small>in 2025' + (ser.rep ? ", reports" : "") + '</small>';
-        al += fmt(b) + " in 2025. ";
+        nums.innerHTML = '<span class="c25">' + fmt(b) + ('</span> <small>in ' + Y_L) + (ser.rep ? ", reports" : "") + '</small>';
+        al += fmt(b) + (" in " + Y_L + ". ");
       }
       var bits = [];
       if (ser.off && !it.notComparable){
@@ -1199,7 +1230,7 @@ function renderCounts(){
       }
       if (it.compstat){
         var y = ytdOf("area", it.key);
-        if (y){ var ys = it.notComparable || ySmall(y); bits.push('<span><span class="lab">2026 so far</span> <b>' + (ys ? fmt(y.b) + '</b> <span class="lab">vs. ' + fmt(y.a) + ' in the same weeks of 2025</span>' : pctGiven(y.p) + '</b>') + '</span>'); al += "2026 so far: " + fmt(y.b) + " vs. " + fmt(y.a) + " in the same weeks of 2025. "; }
+        if (y){ var ys = it.notComparable || ySmall(y); bits.push(('<span><span class="lab">' + Y_C + ' so far</span> <b>') + (ys ? fmt(y.b) + '</b> <span class="lab">vs. ' + fmt(y.a) + (' in the same weeks of ' + Y_P + '</span>') : pctGiven(y.p) + '</b>') + '</span>'); al += (Y_C + " so far: ") + fmt(y.b) + " vs. " + fmt(y.a) + (" in the same weeks of " + Y_P + ". "); }
       }
       if (bits.length){ var ch = HT("p", { "class":"co-chg" }, li); ch.innerHTML = bits.join(""); }
       if (CMP){
@@ -1212,12 +1243,12 @@ function renderCounts(){
     HT("p", { "class":"co-why" }, li, it.why); al += it.why;
     if (it.key === "hate_crimes" && hateBD && hateBD.length){
       var bd = HT("p", { "class":"co-bd" }, li);
-      bd.innerHTML = "<b>2025 by bias motive:</b> " + hateBD.map(function(r){ return esc(titleCase(r[0])) + " " + fmt(r[1]); }).join(" · ");
+      bd.innerHTML = ("<b>" + (hateBD.year || Y_L) + " by bias motive:</b> ") + hateBD.map(function(r){ return esc(titleCase(r[0])) + " " + fmt(r[1]); }).join(" · ");
     }
     li.setAttribute("aria-label", al.trim());
   });
   var srcs = []; CO.forEach(function(it){ if (it.src && srcs.indexOf(it.src) < 0) srcs.push(it.src); });
-  $("#coNote").textContent = "Sources: " + listJoin(srcs.map(srcName)) + ". Percent changes only from official totals, and only with " + CFG.smallN + " or more in both years. Hate crimes overlap with the other categories." + (CMP ? "" : " 2019 isn’t shown because this precinct’s boundaries changed in December 2024.");
+  $("#coNote").textContent = "Sources: " + listJoin(srcs.map(srcName)) + ". Percent changes only from official totals, and only with " + CFG.smallN + " or more in both years. Hate crimes overlap with the other categories." + (CMP ? "" : (" " + Y_B + " isn’t shown because this precinct’s boundaries changed in December 2024."));
   renderCoCharts();
 }
 function titleCase(s){ return String(s).toLowerCase().replace(/(^|[\s(\-\/])([a-z])/g, function(m, p1, p2){ return p1 + p2.toUpperCase(); }); }
@@ -1294,7 +1325,7 @@ function lines(svg, w, h, years, series, o){
     S("line", { x1:X(o.refYear), x2:X(o.refYear), y1:m.t, y2:h - m.b, stroke:"var(--line)", "stroke-width":1 }, svg);
     if (o.refLabel) S("text", { "class":"c-lbl m halo", x:X(o.refYear) - 4, y:m.t + 10, "text-anchor":"end", "font-size":12 }, svg, o.refLabel);
   }
-  var cand = narrow ? [2010, 2019] : [2005, 2010, 2015, 2019], ticks = [x0];
+  var cand = (narrow ? [2010] : [2005, 2010, 2015]).filter(function(t){ return t < Y_B; }).concat([Y_B]), ticks = [x0];
   cand.forEach(function(t){ if (t - ticks[ticks.length-1] >= (narrow ? 5 : 4) && x1 - t >= 4) ticks.push(t); });
   ticks.push(x1);
   ticks.forEach(function(yr){ S("text", { "class":"c-lbl m", x:X(yr), y:h - 6, "text-anchor":"middle", "font-size":12 }, svg, yr); });
@@ -1325,7 +1356,7 @@ function yearScrub(svg, G, years, series, readEl, label){
   function text(y){
     var i = years.indexOf(y), first = true;
     return "<b>" + y + "</b> · " + series.filter(function(s){ return isNum(s.raw[i]); }).map(function(s){
-      var t = '<span class="rs"><i style="background:' + s.color + '"></i>' + esc(s.name) + " <b>" + fmt(s.raw[i]) + "</b>" + (s.base > 0 ? " (" + rat(s.raw[i], s.base) + (first ? " 2019" : "") + ")" : "") + "</span>";
+      var t = '<span class="rs"><i style="background:' + s.color + '"></i>' + esc(s.name) + " <b>" + fmt(s.raw[i]) + "</b>" + (s.base > 0 ? " (" + rat(s.raw[i], s.base) + (first ? (" " + Y_B) : "") + ")" : "") + "</span>";
       first = false; return t;
     }).join(" · ");
   }
@@ -1408,27 +1439,27 @@ function binBars(body, b19, b25, selBin, h, label){
 var CAT = (QCAT && ST[QCAT]) ? QCAT : CFG.defaultCat;
 if (!ST[CAT]) CAT = CATS[0].key;
 var CHK = ST[CAT].mappable ? CAT : (ST[CFG.defaultCat] && ST[CFG.defaultCat].mappable ? CFG.defaultCat : MAPPABLE[0].key);
-var MAPYEAR = "2025", MAPSTATE = "nums", WHENBIN = null, JAIL = [];
+var MAPYEAR = String(Y_PL), MAPSTATE = "nums", WHENBIN = null, JAIL = [];
 var CPX = null;     // complaint stats for the area, per category, once the precinct files load
 
 /* ---------- category view ---------- */
 function heroHTML(o){
-  var h = "", ytdLab = "2026 so far" + (THRU ? ", through " + THRU : "");
+  var h = "", ytdLab = (Y_C + " so far") + (THRU ? ", through " + THRU : "");
   function hn(big, lab, cls){ h += '<div class="hn"><b' + (cls ? ' class="' + cls + '"' : "") + '>' + big + '</b><span class="lab">' + esc(lab) + '</span></div>'; }
   if (o.mode === "issue"){
-    hn(fmt(o.a), "2019, NYPD official total");
+    hn(fmt(o.a), (Y_B + ", NYPD official total"));
     var R0 = CPX && CPX[o.key];
-    hn('<span class="c25">' + (R0 ? fmt(R0.y2025) : "…") + '</span>', "2025, individual reports");
+    hn('<span class="c25">' + (R0 ? fmt(R0["y" + Y_PL]) : "…") + '</span>', (Y_L + ", individual reports"));
     hn(pctStr(o.cp), "Citywide, " + fmt(o.ca) + " → " + fmt(o.cb));
   } else if (o.mode === "cmp" || o.mode === "small"){
-    hn(fmt(o.a) + ' <span class="arrow" aria-hidden="true">→</span> <span class="c25">' + fmt(o.b) + '</span>', "2019 → 2025");
+    hn(fmt(o.a) + ' <span class="arrow" aria-hidden="true">→</span> <span class="c25">' + fmt(o.b) + '</span>', (Y_B + " → " + Y_L));
     if (o.mode === "cmp") hn(pctStr(o.mp), AREA_L, "c25");
     hn(pctStr(o.cp), "Citywide, " + fmt(o.ca) + " → " + fmt(o.cb));
   } else {
-    hn('<span class="c25">' + fmt(o.b) + '</span>', "2025");
-    if (o.mode === "group"){ if (o.gsmall) hn(fmt(o.ga) + " → " + fmt(o.gb), GROUP_S + ", 2019 → 2025", "sm"); else hn(pctStr(o.gp), GROUP_S + " combined"); hn(pctStr(o.cp), "Citywide, " + fmt(o.ca) + " → " + fmt(o.cb)); }
+    hn('<span class="c25">' + fmt(o.b) + '</span>', Y_L);
+    if (o.mode === "group"){ if (o.gsmall) hn(fmt(o.ga) + " → " + fmt(o.gb), GROUP_S + (", " + Y_B + " → " + Y_L), "sm"); else hn(pctStr(o.gp), GROUP_S + " combined"); hn(pctStr(o.cp), "Citywide, " + fmt(o.ca) + " → " + fmt(o.cb)); }
   }
-  if (o.ytd) hn(ySmall(o.ytd) ? fmt(o.ytd.a) + ' <span class="arrow" aria-hidden="true">→</span> ' + fmt(o.ytd.b) : pctGiven(o.ytd.p), ytdLab + (ySmall(o.ytd) ? " (2025 → 2026)" : ""), ySmall(o.ytd) ? null : null);
+  if (o.ytd) hn(ySmall(o.ytd) ? fmt(o.ytd.a) + ' <span class="arrow" aria-hidden="true">→</span> ' + fmt(o.ytd.b) : pctGiven(o.ytd.p), ytdLab + (ySmall(o.ytd) ? (" (" + Y_L + " → " + Y_C + ")") : ""), ySmall(o.ytd) ? null : null);
   return h;
 }
 function upDown(v){ return Math.abs(v) < 0.5 ? "about the same" : (v > 0 ? "up " : "down ") + pctStr(Math.abs(v)).replace("+", ""); }
@@ -1459,12 +1490,12 @@ function renderTop(o){
   $("#heroNums").innerHTML = heroHTML(o);
   $("#heroNums").setAttribute("aria-label", c.label + " in " + AREA + ", key numbers");
   var t;
-  if (o.mode === "issue"){ var R1 = CPX && CPX[o.key]; t = "NYPD’s official 2025 figure for " + o.plural + " in " + AREA_T + " appears misaligned in its spreadsheet, so this page doesn’t use it. The official 2019 total was " + fmt(o.a) + (R1 ? "; individual NYPD reports for 2025 number " + fmt(R1.y2025) + " (reports are counted differently, so the two aren’t directly comparable)" : "") + ". Citywide: " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + "."; }
-  else if (o.mode === "cmp") t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + " in 2025, " + upDown(o.mp) + " from " + fmt(o.a) + " in 2019. Citywide: " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
-  else if (o.mode === "small") t = "NYPD recorded " + nOf(o.a, o) + " in " + AREA_T + " in 2019 and " + fmt(o.b) + " in 2025. With numbers this small, a few cases swing a percentage a lot. Citywide: " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
-  else if (o.mode === "group") t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + " in 2025. " + (NEWPCT ? "The precinct is new, so there is no 2019 figure." : "Its boundaries changed in December 2024, so 2019 isn’t comparable.") +
-    (o.gsmall ? "" : " In " + GROUP_T + ", " + o.plural + " were " + upDown(o.gp) + " from 2019 to 2025; citywide, " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".");
-  else t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + " in 2025. Boundaries changed in December 2024, so 2019 isn’t comparable. Citywide: " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
+  if (o.mode === "issue"){ var R1 = CPX && CPX[o.key]; t = ("NYPD’s official " + Y_L + " figure for ") + o.plural + " in " + AREA_T + (" appears misaligned in its spreadsheet, so this page doesn’t use it. The official " + Y_B + " total was ") + fmt(o.a) + (R1 ? ("; individual NYPD reports for " + Y_L + " number ") + fmt(R1.y2025) + " (reports are counted differently, so the two aren’t directly comparable)" : "") + ". Citywide: " + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + "."; }
+  else if (o.mode === "cmp") t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + (" in " + Y_L + ", ") + upDown(o.mp) + " from " + fmt(o.a) + (" in " + Y_B + ". Citywide: ") + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
+  else if (o.mode === "small") t = "NYPD recorded " + nOf(o.a, o) + " in " + AREA_T + (" in " + Y_B + " and ") + fmt(o.b) + (" in " + Y_L + ". With numbers this small, a few cases swing a percentage a lot. Citywide: ") + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
+  else if (o.mode === "group") t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + (" in " + Y_L + ". ") + (NEWPCT ? ("The precinct is new, so there is no " + Y_B + " figure.") : ("Its boundaries changed in December 2024, so " + Y_B + " isn’t comparable.")) +
+    (o.gsmall ? "" : " In " + GROUP_T + ", " + o.plural + " were " + upDown(o.gp) + (" from " + Y_B + " to " + Y_L + "; citywide, ") + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".");
+  else t = "NYPD recorded " + nOf(o.b, o) + " in " + AREA_T + (" in " + Y_L + ". Boundaries changed in December 2024, so " + Y_B + " isn’t comparable. Citywide: ") + upDown(o.cp) + ", from " + fmt(o.ca) + " to " + fmt(o.cb) + ".";
   $("#cvLede").textContent = t;
   var rk = (!MULTI && o.mode === "cmp") ? rankOf(c.key, UNITS[0].pct) : null, re = $("#rankTxt");
   re.hidden = !rk;
@@ -1479,12 +1510,12 @@ function renderRest(o, rk){
   var c = o.c;
   // more detail under the trend
   var md = $("#trendMoreBody"); md.innerHTML = "";
-  if (rk) HT("p", { "class":"q" }, md, "Comparable precincts: those with the same boundaries in 2019 and 2025 and at least " + CFG.smallN + " " + o.plural + " in both years" + (function(){ var out = CITY.precincts.filter(function(p){ return issueOf(p.pct, c.key); }).map(function(p){ return "the " + p.ord; }); return out.length ? " (" + listJoin(out) + " left out: NYPD’s official 2025 figure appears misaligned in its spreadsheet)" : ""; })() + ". Ranked by percent change in official totals.");
-  if (o.mode === "issue"){ var mq = HT("p", { "class":"q" }, md, "NYPD’s official 2025 figure appears misaligned in its spreadsheet, so this page shows report counts for 2025."); seeNote(noteOf("issue"), mq); }
-  if (o.peak) HT("p", null, md, "The 2025 total is the highest in NYPD’s precinct-by-precinct annual data, which starts in " + YEARS[0] + ".");
-  if (MULTI) o.units.forEach(function(u){ if (issueOf(u.u.pct, c.key)){ HT("p", null, md, u.u.name + ": " + fmt(u.a) + " in 2019; official 2025 figure appears misaligned."); return; } HT("p", null, md, u.u.name + ": " + fmt(u.a) + " in 2019, " + fmt(u.b) + " in 2025" + (u.u.compare2019 !== false && isNum(u.a) && isNum(u.b) && Math.min(u.a, u.b) >= CFG.smallN ? " (" + pctStr(pctOf(u.a, u.b)) + ")" : "") + "."); });
-  if (o.mode === "group" && !o.gsmall) HT("p", null, md, uc(GROUP_T) + ": " + fmt(o.ga) + " in 2019, " + fmt(o.gb) + " in 2025 (" + pctStr(o.gp) + ").");
-  if (o.mode !== "group" && o.mode !== "none" && isNum(o.ca)) HT("p", null, md, "Citywide: " + fmt(o.ca) + " in 2019, " + fmt(o.cb) + " in 2025 (" + pctStr(o.cp) + "). Citywide totals include crimes in city jails, which belong to no precinct.");
+  if (rk) HT("p", { "class":"q" }, md, ("Comparable precincts: those with the same boundaries in " + Y_B + " and " + Y_L + " and at least ") + CFG.smallN + " " + o.plural + " in both years" + (function(){ var out = CITY.precincts.filter(function(p){ return issueOf(p.pct, c.key); }).map(function(p){ return "the " + p.ord; }); return out.length ? " (" + listJoin(out) + (" left out: NYPD’s official " + Y_L + " figure appears misaligned in its spreadsheet)") : ""; })() + ". Ranked by percent change in official totals.");
+  if (o.mode === "issue"){ var mq = HT("p", { "class":"q" }, md, ("NYPD’s official " + Y_L + " figure appears misaligned in its spreadsheet, so this page shows report counts for " + Y_L + ".")); seeNote(noteOf("issue"), mq); }
+  if (o.peak) HT("p", null, md, ("The " + Y_L + " total is the highest in NYPD’s precinct-by-precinct annual data, which starts in ") + YEARS[0] + ".");
+  if (MULTI) o.units.forEach(function(u){ if (issueOf(u.u.pct, c.key)){ HT("p", null, md, u.u.name + ": " + fmt(u.a) + (" in " + Y_B + "; official " + Y_L + " figure appears misaligned.")); return; } HT("p", null, md, u.u.name + ": " + fmt(u.a) + (" in " + Y_B + ", ") + fmt(u.b) + (" in " + Y_L) + (u.u.compare2019 !== false && isNum(u.a) && isNum(u.b) && Math.min(u.a, u.b) >= CFG.smallN ? " (" + pctStr(pctOf(u.a, u.b)) + ")" : "") + "."); });
+  if (o.mode === "group" && !o.gsmall) HT("p", null, md, uc(GROUP_T) + ": " + fmt(o.ga) + (" in " + Y_B + ", ") + fmt(o.gb) + (" in " + Y_L + " (") + pctStr(o.gp) + ").");
+  if (o.mode !== "group" && o.mode !== "none" && isNum(o.ca)) HT("p", null, md, "Citywide: " + fmt(o.ca) + (" in " + Y_B + ", ") + fmt(o.cb) + (" in " + Y_L + " (") + pctStr(o.cp) + "). Citywide totals include crimes in city jails, which belong to no precinct.");
   if (TS > YEARS[0] && o.mode !== "group"){ var tq = HT("p", { "class":"q" }, md, "The chart starts in " + TS + " because of a boundary or counting change; earlier years aren’t comparable."); seeNote(noteOf("trend") || noteOf("boundary"), tq); }
   $("#trendMore").hidden = !md.children.length;
   renderTrend(); renderYtdTxt();
@@ -1506,14 +1537,14 @@ function renderTrend(){
     var P = prep(body, h);
     var aV = sliceFrom(idx(aSer, base), ts), cV = sliceFrom(idx(o.city, cbase), ts);
     var ap = useGroup ? o.gp : o.mp;
-    title.textContent = c.label + ", " + (useGroup ? GROUP_S + " combined" : AREA) + " vs. citywide, " + ts + "–2025";
+    title.textContent = c.label + ", " + (useGroup ? GROUP_S + " combined" : AREA) + " vs. citywide, " + ts + ("–" + Y_L);
     var G1 = lines(P.svg, P.w, h, yrs, [
       { vals:cV, color:"var(--muted)", width:2, end:"City\n" + pctStr(o.cp) },
       { vals:aV, color:"var(--blue)", width:3, end:(useGroup ? "Combined" : AREA_S) + "\n" + pctStr(ap) }
-    ], { ref:100, refYear:2019, refLabel:"2019 = 100" });
-    var trendLabel1 = c.label + ", indexed to 2019. " + nameT + ": " + fmt(base) + " in 2019, " + fmt(aSer[I25]) + " in 2025 (" + pctStr(ap) + "). Citywide: " + fmt(cbase) + " and " + fmt(o.city[I25]) + " (" + pctStr(o.cp) + ").";
+    ], { ref:100, refYear:Y_B, refLabel:(Y_B + " = 100") });
+    var trendLabel1 = c.label + (", indexed to " + Y_B + ". ") + nameT + ": " + fmt(base) + (" in " + Y_B + ", ") + fmt(aSer[I25]) + (" in " + Y_L + " (") + pctStr(ap) + "). Citywide: " + fmt(cbase) + " and " + fmt(o.city[I25]) + " (" + pctStr(o.cp) + ").";
     lg.innerHTML = '<span><i class="ln" style="background:var(--blue)"></i>' + esc(nameT) + '</span><span><i class="ln" style="background:var(--muted)"></i>Citywide</span>';
-    srcT.textContent = "Each line is that year’s official NYPD total as a share of its 2019 total (2019 = 100), so the two can share one scale." + (useGroup ? " This chart combines the " + listJoin(GROUP_PCTS.map(ordN)) + " precincts." : "");
+    srcT.textContent = ("Each line is that year’s official NYPD total as a share of its " + Y_B + " total (" + Y_B + " = 100), so the two can share one scale.") + (useGroup ? " This chart combines the " + listJoin(GROUP_PCTS.map(ordN)) + " precincts." : "");
     seeNote(useGroup ? noteOf("boundary") : o.mode === "issue" ? noteOf("issue") : ts > YEARS[0] ? (noteOf("trend") || noteOf("boundary")) : 0, srcT);
     yearScrub(P.svg, G1, yrs, [
       { name:useGroup ? "Combined" : AREA_L, color:"var(--blue)", plot:aV, raw:sliceFrom(aSer, ts), base:base },
@@ -1521,10 +1552,10 @@ function renderTrend(){
     ], $("#trendRead"), trendLabel1);
   } else {
     var vals = sliceFrom(aSer, ts), P2 = prep(body, h), last = aSer[I25];
-    title.textContent = c.label + " in " + (useGroup ? GROUP_S + " combined" : AREA) + ", " + ts + "–2025";
-    var G2 = lines(P2.svg, P2.w, h, yrs, [{ vals:vals, color:"var(--blue)", width:3, end:isNum(last) ? fmt(last) + " in 2025" : "" }], { zero:true, refYear:2019 });
+    title.textContent = c.label + " in " + (useGroup ? GROUP_S + " combined" : AREA) + ", " + ts + ("–" + Y_L);
+    var G2 = lines(P2.svg, P2.w, h, yrs, [{ vals:vals, color:"var(--blue)", width:3, end:isNum(last) ? fmt(last) + (" in " + Y_L) : "" }], { zero:true, refYear:Y_B });
     lg.innerHTML = '<span><i class="ln" style="background:var(--blue)"></i>' + esc(nameT) + ', count</span>';
-    srcT.textContent = (o.mode === "issue" ? "Official NYPD totals through " + ((o.issue.year || 2025) - 1) + "; the official " + (o.issue.year || 2025) + " figure appears misaligned in NYPD’s spreadsheet and is left out." : "Official NYPD totals. Small numbers, so the chart shows counts rather than change from 2019, and no citywide line.") + (useGroup ? " This chart combines the " + listJoin(GROUP_PCTS.map(ordN)) + " precincts." : "");
+    srcT.textContent = (o.mode === "issue" ? "Official NYPD totals through " + ((o.issue.year || Y_L) - 1) + "; the official " + (o.issue.year || Y_L) + " figure appears misaligned in NYPD’s spreadsheet and is left out." : ("Official NYPD totals. Small numbers, so the chart shows counts rather than change from " + Y_B + ", and no citywide line.")) + (useGroup ? " This chart combines the " + listJoin(GROUP_PCTS.map(ordN)) + " precincts." : "");
     seeNote(useGroup ? noteOf("boundary") : o.mode === "issue" ? noteOf("issue") : ts > YEARS[0] ? (noteOf("trend") || noteOf("boundary")) : 0, srcT);
     yearScrub(P2.svg, G2, yrs, [{ name:useGroup ? "Combined" : AREA_L, color:"var(--blue)", plot:vals, raw:vals, base:0 }], $("#trendRead"),
       c.label + " in " + nameT + " by year, official NYPD totals: " + yrs.map(function(y, k){ return y + " " + fmt(vals[k]); }).filter(function(t, k){ return isNum(vals[k]); }).join(", ") + ".");
@@ -1533,12 +1564,12 @@ function renderTrend(){
 function renderYtdTxt(){
   var o = ST[CAT], c = o.c, y = o.ytd, cy = o.cytd;
   $("#b-ytd").hidden = !c.compstat && !y;
-  if (!y){ $("#ytdTxt").textContent = !c.compstat ? "NYPD’s weekly CompStat report doesn’t track " + c.label.toLowerCase() + " separately." : "No 2026 figure yet."; $("#if-ytd").hidden = true; return; }
+  if (!y){ $("#ytdTxt").textContent = !c.compstat ? "NYPD’s weekly CompStat report doesn’t track " + c.label.toLowerCase() + " separately." : ("No " + Y_C + " figure yet."); $("#if-ytd").hidden = true; return; }
   $("#if-ytd").hidden = false;
-  $("#ytdTxt").textContent = "Through " + WEEK + ", CompStat counts " + nOf(y.b, o) + " in " + AREA_T + ", vs. " + fmt(y.a) + " in the same weeks of 2025" + (ySmall(y) ? "." : " (" + pctGiven(y.p) + ").") + (cy ? " Citywide: " + (ySmall(cy) ? fmt(cy.b) + " vs. " + fmt(cy.a) : pctGiven(cy.p)) + "." : "");
-  $("#ytdTitle").textContent = c.label + ", 2026 so far vs. the same weeks of 2025";
+  $("#ytdTxt").textContent = "Through " + WEEK + ", CompStat counts " + nOf(y.b, o) + " in " + AREA_T + ", vs. " + fmt(y.a) + (" in the same weeks of " + Y_P) + (ySmall(y) ? "." : " (" + pctGiven(y.p) + ").") + (cy ? " Citywide: " + (ySmall(cy) ? fmt(cy.b) + " vs. " + fmt(cy.a) : pctGiven(cy.p)) + "." : "");
+  $("#ytdTitle").textContent = c.label + (", " + Y_C + " so far vs. the same weeks of " + Y_P);
   var anySmall = [o.ytd, o.cytd, o.gytd].concat(o.units.map(function(u){ return u.y; })).some(function(y){ return y && ySmall(y); });
-  $("#ytdFoot").textContent = "NYPD CompStat, year to date through " + WEEK + "." + (MULTI ? " Combined change computed from the precinct counts." : "") + (anySmall ? " Where numbers are small (under " + CFG.smallN + "), the chart shows the counts, 2025 → 2026, instead of a percentage." : "");
+  $("#ytdFoot").textContent = "NYPD CompStat, year to date through " + WEEK + "." + (MULTI ? " Combined change computed from the precinct counts." : "") + (anySmall ? " Where numbers are small (under " + CFG.smallN + ("), the chart shows the counts, " + Y_L + " → " + Y_C + ", instead of a percentage.") : "");
   renderYtd();
 }
 function renderYtd(){
@@ -1555,8 +1586,8 @@ function renderYtd(){
   rows.forEach(function(r, i){
     var yy = 3 + i*rowH, bh = 14, y = r[1];
     var rg = S("g", null, P.svg); S("rect", { "class":"hit", x:0, y:yy, width:P.w, height:rowH }, rg);
-    var html = "<b>" + esc(r[0]) + "</b> · 2026 so far <b>" + fmt(y.b) + "</b> · same weeks of 2025 <b>" + fmt(y.a) + "</b>" + (ySmall(y) ? "" : " · " + pctGiven(y.p));
-    var on = barReadout(rg, rd, html); rg.setAttribute("aria-label", r[0] + ": " + fmt(y.b) + " in 2026 so far, vs. " + fmt(y.a) + " in the same weeks of 2025" + (ySmall(y) ? "." : " (" + pctGiven(y.p) + ")."));
+    var html = "<b>" + esc(r[0]) + ("</b> · " + Y_C + " so far <b>") + fmt(y.b) + ("</b> · same weeks of " + Y_P + " <b>") + fmt(y.a) + "</b>" + (ySmall(y) ? "" : " · " + pctGiven(y.p));
+    var on = barReadout(rg, rd, html); rg.setAttribute("aria-label", r[0] + ": " + fmt(y.b) + (" in " + Y_C + " so far, vs. ") + fmt(y.a) + (" in the same weeks of " + Y_P) + (ySmall(y) ? "." : " (" + pctGiven(y.p) + ")."));
     rg.setAttribute("role", "img");
     if (!i) defOn = on;
     svg = rg;
@@ -1572,26 +1603,36 @@ function renderYtd(){
   svg.addEventListener("pointerleave", function(){ defOn && defOn(); });
   if (defOn) defOn();
   if (rows.some(function(r){ return !ySmall(r[1]); })) svg.insertBefore(S("line", { "class":"c-axis", x1:zx, x2:zx, y1:0, y2:h, "stroke-width":1.5 }), svg.firstChild);
-  svg.setAttribute("aria-label", c.label + ", 2026 through " + WEEK + " vs. the same weeks of 2025: " + rows.map(function(r){ return r[0] + " " + fmt(r[1].b) + " vs. " + fmt(r[1].a) + (ySmall(r[1]) ? "" : " (" + pctGiven(r[1].p) + ")"); }).join("; ") + ".");
+  svg.setAttribute("aria-label", c.label + (", " + Y_C + " through ") + WEEK + (" vs. the same weeks of " + Y_P + ": ") + rows.map(function(r){ return r[0] + " " + fmt(r[1].b) + " vs. " + fmt(r[1].a) + (ySmall(r[1]) ? "" : " (" + pctGiven(r[1].p) + ")"); }).join("; ") + ".");
 }
 
 /* ---------- complaint-report parts: where, when (need the precinct files) ---------- */
 var PLACES = [["street","Street, sidewalk, park"],["transit","Transit: subway, stations, buses, taxis"],["store","Stores, restaurants, bars, offices"],["public_bldg","Hospitals, schools, public buildings"],["home","Homes and apartments"],["hotel","Hotels"],["shelter","Homeless shelters"],["unknown","Not recorded"]];
 var PUBLIC = { street:1, transit:1, store:1, public_bldg:1 };
+// the two report-level years in the precinct files (keys of byType, e.g. "2019" and "2025")
+function setPointYears(files){
+  var ys = [];
+  files.forEach(function(f){ (f.categories || []).forEach(function(k){ var bt = k.complaints && k.complaints.byType; if (bt) Object.keys(bt).forEach(function(y){ y = +y; if (y && ys.indexOf(y) < 0) ys.push(y); }); }); });
+  if (ys.length < 2) return;
+  ys.sort(); var was = String(Y_PL);
+  Y_PB = ys[0]; Y_PL = ys[ys.length - 1];
+  if (MAPYEAR === was) MAPYEAR = String(Y_PL); else if (MAPYEAR !== String(Y_PB)) MAPYEAR = String(Y_PL);
+  fillYears();
+}
 function buildCPX(files){
   var out = {};
   CATS.forEach(function(c){
     var parts = files.map(function(f){ var k = (f.categories || []).filter(function(x){ return x.key === c.key; })[0]; return k && k.complaints; }).filter(Boolean);
     if (!parts.length){ out[c.key] = null; return; }
-    var r = { y2019:sum(parts.map(function(p){ return p.y2019; })), y2025:sum(parts.map(function(p){ return p.y2025; })), tod:{ y2019:[0,0,0,0,0,0,0,0], y2025:[0,0,0,0,0,0,0,0] }, byType:{ "2019":{}, "2025":{} }, miss:{ "2019":0, "2025":0 }, pub:{} };
+    var r = { ["y" + Y_PB]:sum(parts.map(function(p){ return p["y" + Y_PB]; })), ["y" + Y_PL]:sum(parts.map(function(p){ return p["y" + Y_PL]; })), tod:{ ["y" + Y_PB]:[0,0,0,0,0,0,0,0], ["y" + Y_PL]:[0,0,0,0,0,0,0,0] }, byType:{ [Y_PB]:{}, [Y_PL]:{} }, miss:{ [Y_PB]:0, [Y_PL]:0 }, pub:{} };
     parts.forEach(function(p){
       ["y2019","y2025"].forEach(function(k){ ((p.timeOfDay || {})[k] || []).forEach(function(v, i){ if (isNum(v)) r.tod[k][i] += v; }); });
-      ["2019","2025"].forEach(function(y){
+      [Y_PB,Y_PL].forEach(function(y){
         var bt = (p.byType || {})[y] || {}; Object.keys(bt).forEach(function(t){ r.byType[y][t] = (r.byType[y][t] || 0) + (bt[t] || 0); });
         r.miss[y] += ((p.missingCoords || {})[y] || 0);
       });
     });
-    ["2019","2025"].forEach(function(y){
+    [Y_PB,Y_PL].forEach(function(y){
       if (parts.length === 1){ var v = ((parts[0].publicShare || {})[y]); r.pub[y] = isNum(v) ? v : null; return; }
       var bt = r.byType[y], tot = 0, pub = 0; Object.keys(bt).forEach(function(t){ tot += bt[t]; if (PUBLIC[t]) pub += bt[t]; });
       r.pub[y] = tot > 0 && (bt.unknown || 0) < tot/2 ? Math.round(pub/tot*1000)/10 : null;
@@ -1607,29 +1648,29 @@ function renderComplaintParts(){
   $("#b-where").hidden = !show; $("#b-when").hidden = !show; $("#st-where").hidden = !show; $("#st-when").hidden = !show;
   if (!show) return;
   if (!R){ $("#transitTxt").textContent = ""; $("#whereTxt").textContent = CPX ? "No report-level data for this category." : (PTS_FAIL ? "Report-level data isn’t available." : "Loading…"); $("#if-pub").hidden = true; $("#if-when").hidden = true; $("#typeMore").hidden = true; $("#whenTxt").textContent = CPX || PTS_FAIL ? "" : "Loading…"; return; }
-  var ps = R.pub, hasPub = isNum(ps["2019"]) && isNum(ps["2025"]);
+  var ps = R.pub, hasPub = isNum(ps[Y_PB]) && isNum(ps[Y_PL]);
   $("#if-pub").hidden = !hasPub; $("#typeMore").hidden = false;
   $("#whereTxt").classList.toggle("m", !hasPub);
   $("#whereTxt").textContent = hasPub ? "Share of reports in public places: streets, transit, stores and restaurants, and public buildings." : "Too many reports have no recorded place type to give a public share.";
   // transit (NYPD's "transit" place types: subway, other transit facilities, bus terminals, buses and taxis): report counts; NYPD's official precinct totals don't split them out
-  var tr19 = R.byType["2019"].transit || 0, tr25 = R.byType["2025"].transit || 0, trSmall = tr19 < CFG.smallN || tr25 < CFG.smallN;
-  $("#transitTxt").textContent = "In transit (subway, stations and terminals, buses, taxis): " + fmt(tr19) + " report" + (tr19 === 1 ? "" : "s") + " in 2019, " + fmt(tr25) + " in 2025" +
-    (!trSmall && R.y2025 > 0 ? " (" + Math.round(tr25/R.y2025*100) + "% of " + (MULTI ? "these precincts’" : "this precinct’s") + " 2025 reports)" : "") + ". Not split out in NYPD’s official totals.";
+  var tr19 = R.byType[Y_PB].transit || 0, tr25 = R.byType[Y_PL].transit || 0, trSmall = tr19 < CFG.smallN || tr25 < CFG.smallN;
+  $("#transitTxt").textContent = "In transit (subway, stations and terminals, buses, taxis): " + fmt(tr19) + " report" + (tr19 === 1 ? "" : "s") + (" in " + Y_PB + ", ") + fmt(tr25) + (" in " + Y_PL) +
+    (!trSmall && R["y" + Y_PL] > 0 ? " (" + Math.round(tr25/R["y" + Y_PL]*100) + "% of " + (MULTI ? "these precincts’" : "this precinct’s") + (" " + Y_PL + " reports)") : "") + ". Not split out in NYPD’s official totals.";
   $("#pubTitle").textContent = "Share of " + c.label.toLowerCase() + " reports in public places";
-  $("#pubFoot").textContent = "From " + fmt(R.y2019) + " reports in 2019 and " + fmt(R.y2025) + " in 2025 (individual NYPD reports, which differ slightly from official totals). " + AREA + " only; no citywide comparison.";
+  $("#pubFoot").textContent = "From " + fmt(R["y" + Y_PB]) + (" reports in " + Y_PB + " and ") + fmt(R["y" + Y_PL]) + (" in " + Y_PL + " (individual NYPD reports, which differ slightly from official totals). ") + AREA + " only; no citywide comparison.";
   $("#typeTitle").textContent = c.label + " reports by type of place";
-  var T = R.tod, n25 = sum(T.y2025), mx = -1, mi = 0;
-  T.y2025.forEach(function(v, i){ if (v > mx){ mx = v; mi = i; } });
+  var T = R.tod, n25 = sum(T["y" + Y_PL]), mx = -1, mi = 0;
+  T["y" + Y_PL].forEach(function(v, i){ if (v > mx){ mx = v; mi = i; } });
   $("#if-when").hidden = false;
   $("#whenTitle").textContent = c.label + " reports by time of day";
   $("#whenTxt").classList.toggle("m", n25 < CFG.smallN);
-  if (n25 < CFG.smallN) $("#whenTxt").textContent = "With " + fmt(n25) + " reports with a time in 2025, there are too few for a clear pattern.";
-  else $("#whenTxt").textContent = "Busiest in 2025: " + BINS[mi].replace("Midnight", "midnight").replace("Noon", "noon") + ", with " + fmt(mx) + " reports (" + fmt(T.y2019[mi]) + " in 2019).";
+  if (n25 < CFG.smallN) $("#whenTxt").textContent = "With " + fmt(n25) + (" reports with a time in " + Y_PL + ", there are too few for a clear pattern.");
+  else $("#whenTxt").textContent = ("Busiest in " + Y_PL + ": ") + BINS[mi].replace("Midnight", "midnight").replace("Noon", "noon") + ", with " + fmt(mx) + " reports (" + fmt(T["y" + Y_PB][mi]) + (" in " + Y_PB + ").");
   renderPub(); renderByType(); renderWhen();
 }
 function pairBars(svg, w, v19, v25){
   var rowH = 28;
-  [[v19, "bar19", "2019", ""], [v25, "bar25", "2025", " c-blue"]].forEach(function(b, i){
+  [[v19, "bar19", Y_PB, ""], [v25, "bar25", Y_PL, " c-blue"]].forEach(function(b, i){
     var yy = 4 + i*(rowH + 8), bw = Math.max(2, (w - 110)*(b[0] || 0)/100);
     S("text", { "class":"c-lbl m", x:0, y:yy + rowH/2 + 5 }, svg, b[2]);
     S("rect", { "class":b[1], x:42, y:yy, width:bw, height:rowH }, svg);
@@ -1639,13 +1680,13 @@ function pairBars(svg, w, v19, v25){
 function renderPub(){
   var o = ST[CAT], R = CPX && CPX[o.key], body = $("#pubBody");
   if (!R || !visible(body.parentNode)) return;
-  var P = prep(body, 76, "Share of " + o.c.label.toLowerCase() + " reports in public places in " + AREA + ": " + fmtPct(R.pub["2019"]) + " in 2019 and " + fmtPct(R.pub["2025"]) + " in 2025.");
-  pairBars(P.svg, P.w, R.pub["2019"], R.pub["2025"]);
+  var P = prep(body, 76, "Share of " + o.c.label.toLowerCase() + " reports in public places in " + AREA + ": " + fmtPct(R.pub[Y_PB]) + (" in " + Y_PB + " and ") + fmtPct(R.pub[Y_PL]) + (" in " + Y_PL + "."));
+  pairBars(P.svg, P.w, R.pub[Y_PB], R.pub[Y_PL]);
 }
 function renderByType(){
   var o = ST[CAT], R = CPX && CPX[o.key], body = $("#typeBody");
   if (!R || !visible(body.parentNode)) return;
-  var cnt = PLACES.map(function(p){ return [p[1], R.byType["2019"][p[0]] || 0, R.byType["2025"][p[0]] || 0]; }).filter(function(t){ return t[1] || t[2]; });
+  var cnt = PLACES.map(function(p){ return [p[1], R.byType[Y_PB][p[0]] || 0, R.byType[Y_PL][p[0]] || 0]; }).filter(function(t){ return t[1] || t[2]; });
   var rowH = 40, P = prep(body, Math.max(40, cnt.length*rowH + 4)), svg = P.svg;
   var maxV = 1; cnt.forEach(function(t){ maxV = Math.max(maxV, t[1], t[2]); });
   var barW = P.w - 52, thick = 9;
@@ -1657,18 +1698,18 @@ function renderByType(){
     S("text", { "class":"c-lbl b", x:barW*t[1]/maxV + 5, y:b1y + thick, "font-size":12 }, svg, fmt(t[1]));
     S("text", { "class":"c-lbl b c-blue", x:barW*t[2]/maxV + 5, y:b2y + thick + 1, "font-size":12 }, svg, fmt(t[2]));
   });
-  svg.setAttribute("aria-label", o.c.label + " reports by type of place, 2019 vs. 2025: " + cnt.map(function(t){ return t[0] + " " + t[1] + " to " + t[2]; }).join("; ") + ".");
+  svg.setAttribute("aria-label", o.c.label + (" reports by type of place, " + Y_PB + " vs. " + Y_PL + ": ") + cnt.map(function(t){ return t[0] + " " + t[1] + " to " + t[2]; }).join("; ") + ".");
 }
 function renderWhen(){
   var o = ST[CAT], R = CPX && CPX[o.key], body = $("#whenBody");
   if (!R || !visible(body.parentNode)) return;
   var T = R.tod, w = body.clientWidth;
-  if (WHENBIN == null){ var mx = -1; T.y2025.forEach(function(v, i){ if (v > mx){ mx = v; WHENBIN = i; } }); }
-  var svgW = binBars(body, T.y2019, T.y2025, WHENBIN, w >= 600 ? 210 : 190, o.c.label + " reports by three-hour window, 2019 vs. 2025: " + BINS.map(function(b, i){ return b + " " + T.y2019[i] + " and " + T.y2025[i]; }).join("; ") + ".");
+  if (WHENBIN == null){ var mx = -1; T["y" + Y_PL].forEach(function(v, i){ if (v > mx){ mx = v; WHENBIN = i; } }); }
+  var svgW = binBars(body, T["y" + Y_PB], T["y" + Y_PL], WHENBIN, w >= 600 ? 210 : 190, o.c.label + (" reports by three-hour window, " + Y_PB + " vs. " + Y_PL + ": ") + BINS.map(function(b, i){ return b + " " + T["y" + Y_PB][i] + " and " + T["y" + Y_PL][i]; }).join("; ") + ".");
   svgW.setAttribute("role", "group");
   var gw = (svgW.viewBox.baseVal.width - 4)/8, hh = svgW.viewBox.baseVal.height;
   for (var i=0;i<8;i++) (function(i){
-    var g = S("g", { "class":"bar-hit", tabindex:"0", role:"button", "aria-pressed":i === WHENBIN ? "true" : "false", "aria-label":"Show " + BINS[i] + " on the map: " + T.y2019[i] + " reports in 2019, " + T.y2025[i] + " in 2025" }, svgW);
+    var g = S("g", { "class":"bar-hit", tabindex:"0", role:"button", "aria-pressed":i === WHENBIN ? "true" : "false", "aria-label":"Show " + BINS[i] + " on the map: " + T["y" + Y_PB][i] + (" reports in " + Y_PB + ", ") + T["y" + Y_PL][i] + (" in " + Y_PL) }, svgW);
     S("rect", { "class":"hit", x:2 + i*gw, y:0, width:gw, height:hh }, g);
     function pick(){ WHENBIN = i; renderWhen(); MAPSTATE = "when"; $$(".step").forEach(function(x){ x.classList.toggle("active", x.getAttribute("data-step") === "when"); }); renderCatMap(false); var f = $$("#whenBody .bar-hit")[i]; if (f && document.activeElement && document.activeElement.closest && document.activeElement.closest("#whenBody")) f.focus(); }
     g.addEventListener("click", pick);
@@ -2036,7 +2077,7 @@ MapView.prototype.draw = function(){
   var r = Math.max(2.5, Math.min(3, (this.k0 || this.k)*11));
   var pal = { pub:c25, priv:cssVar("--aqua") || "#0BA39A", unk:c19 };
   this.layers.forEach(function(Lr){
-    var col = Lr.year === 2019 ? c19 : c25;
+    var col = Lr.year === Y_PB ? c19 : c25;
     var last = -1, lastC = null;
     for (var i=0;i<Lr.pts.length;i++){
       var p = Lr.pts[i];
@@ -2056,7 +2097,7 @@ MapView.prototype.draw = function(){
   });
   ctx.restore();
 };
-function dotAlpha(n, year){ var a = Math.max(0.2, Math.min(0.8, 0.8*Math.sqrt(250/Math.max(1, n)))); return year === 2019 ? Math.min(0.85, a + 0.08) : a; }
+function dotAlpha(n, year){ var a = Math.max(0.2, Math.min(0.8, 0.8*Math.sqrt(250/Math.max(1, n)))); return year === Y_PB ? Math.min(0.85, a + 0.08) : a; }
 
 var catMap = null, check = null;
 // the sticky map follows the active card: nums / note → one year's dots; trend → 2019 and 2025 together;
@@ -2074,17 +2115,17 @@ function renderCatMap(full){
     $("#catMap").setAttribute("aria-label", "Street map of " + AREA + " without dots. " + cap.textContent);
     return done();
   }
-  var B = BYCAT[o.i] || { 2019:[], 2025:[] }, st = MAPSTATE, lc0 = o.c.label;
+  var B = BYCAT[o.i] || { [Y_PB]:[], [Y_PL]:[] }, st = MAPSTATE, lc0 = o.c.label;
   ctl.style.visibility = (st === "trend" || st === "when") ? "hidden" : "";
   $$("#segYear button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-v") === MAPYEAR ? "true" : "false"); });
   if (!PTS_READY){ $("#mapTitle").textContent = lc0 + " reports"; leg.innerHTML = '<span class="q">' + (PTS_FAIL || "Loading reports…") + '</span>'; cap.textContent = ""; catMap.layers = []; return done(); }
   var y = +MAPYEAR, sw = function(v){ return '<i style="background:var(' + v + ')"></i>'; }, al;
   if (st === "trend"){
-    catMap.layers = [2019, 2025].map(function(yy){ return { pts:B[yy], year:yy, a:dotAlpha(B[yy].length, yy) }; });
-    $("#mapTitle").textContent = lc0 + ", 2019 and 2025 reports";
-    leg.innerHTML = '<span>' + sw("--dot19") + '2019 · ' + fmt(B[2019].length) + '</span><span>' + sw("--blue") + '2025 · ' + fmt(B[2025].length) + '</span>';
-    cap.textContent = "Both years together: gray dots are 2019, blue dots 2025.";
-    al = fmt(B[2019].length) + " reports in 2019 and " + fmt(B[2025].length) + " in 2025";
+    catMap.layers = [Y_PB, Y_PL].map(function(yy){ return { pts:B[yy], year:yy, a:dotAlpha(B[yy].length, yy) }; });
+    $("#mapTitle").textContent = lc0 + (", " + Y_PB + " and " + Y_PL + " reports");
+    leg.innerHTML = '<span>' + sw("--dot19") + (Y_PB + ' · ') + fmt(B[Y_PB].length) + '</span><span>' + sw("--blue") + (Y_PL + ' · ') + fmt(B[Y_PL].length) + '</span>';
+    cap.textContent = ("Both years together: gray dots are " + Y_PB + ", blue dots " + Y_PL + ".");
+    al = fmt(B[Y_PB].length) + (" reports in " + Y_PB + " and ") + fmt(B[Y_PL].length) + (" in " + Y_PL);
   } else if (st === "where"){
     var n = { pub:0, priv:0, unk:0 }; B[y].forEach(function(p){ n[placeKind(p)]++; });
     catMap.layers = [{ pts:B[y], year:y, a:Math.min(0.9, dotAlpha(B[y].length, y) + 0.1), colorOf:placeKind }];
@@ -2094,17 +2135,17 @@ function renderCatMap(full){
     al = y + " reports by type of place: " + n.pub + " public, " + n.priv + " private, " + n.unk + " not recorded";
   } else if (st === "when"){
     var bi = WHENBIN == null ? 0 : WHENBIN;
-    catMap.layers = [2019, 2025].map(function(yy){ return { pts:B[yy], year:yy, a:Math.min(0.9, dotAlpha(B[yy].length/4, yy)) }; });
+    catMap.layers = [Y_PB, Y_PL].map(function(yy){ return { pts:B[yy], year:yy, a:Math.min(0.9, dotAlpha(B[yy].length/4, yy)) }; });
     catMap.filter = function(p){ return p.bin === bi; };
-    var c19 = B[2019].filter(catMap.filter).length, c25 = B[2025].filter(catMap.filter).length;
+    var c19 = B[Y_PB].filter(catMap.filter).length, c25 = B[Y_PL].filter(catMap.filter).length;
     $("#mapTitle").textContent = lc0 + ", " + BINS[bi].replace("Midnight", "midnight").replace("Noon", "noon");
-    leg.innerHTML = '<span>' + sw("--dot19") + '2019 · ' + fmt(c19) + '</span><span>' + sw("--blue") + '2025 · ' + fmt(c25) + '</span>';
+    leg.innerHTML = '<span>' + sw("--dot19") + (Y_PB + ' · ') + fmt(c19) + '</span><span>' + sw("--blue") + (Y_PL + ' · ') + fmt(c25) + '</span>';
     cap.textContent = "Reports that began between " + BINS[bi].replace("Midnight", "midnight").replace("Noon", "noon") + ". Tap another window in the chart.";
-    al = BINS[bi] + ": " + c19 + " reports in 2019 and " + c25 + " in 2025";
+    al = BINS[bi] + ": " + c19 + (" reports in " + Y_PB + " and ") + c25 + (" in " + Y_PL);
   } else {
     catMap.layers = [{ pts:B[y], year:y, a:dotAlpha(B[y].length, y) }];
     $("#mapTitle").textContent = lc0 + ", " + y + " reports";
-    leg.innerHTML = '<span>' + sw(y === 2019 ? "--dot19" : "--blue") + y + ' · ' + fmt(B[y].length) + (B[y].length === 1 ? ' report' : ' reports') + '</span>';
+    leg.innerHTML = '<span>' + sw(y === Y_PB ? "--dot19" : "--blue") + y + ' · ' + fmt(B[y].length) + (B[y].length === 1 ? ' report' : ' reports') + '</span>';
     var notes = [];
     if (st === "note" && JAIL.length) notes.push("Circled: " + listJoin(JAIL_NAMES) + ".");
     if (o.c.mapNote) notes.push(o.c.mapNote);
@@ -2113,8 +2154,8 @@ function renderCatMap(full){
   }
   var R0 = CPX && CPX[o.key], miss = R0 ? R0.miss : null;
   var mf2 = $("#mapFoot2"), nRe = REASSIGN ? noteOf("reassign") : 0;
-  mf2.textContent = (miss && (miss["2019"] || miss["2025"]) ? fmt(miss["2019"]) + " reports in 2019 and " + fmt(miss["2025"]) + " in 2025 had no usable location and aren’t on the map." : "");
-  if (nRe){ mf2.appendChild(document.createTextNode((mf2.textContent ? " " : "") + "2019 reports are placed by today’s precinct boundaries.")); seeNote(nRe, mf2); }
+  mf2.textContent = (miss && (miss[Y_PB] || miss[Y_PL]) ? fmt(miss[Y_PB]) + (" reports in " + Y_PB + " and ") + fmt(miss[Y_PL]) + (" in " + Y_PL + " had no usable location and aren’t on the map.") : "");
+  if (nRe){ mf2.appendChild(document.createTextNode((mf2.textContent ? " " : "") + (Y_PB + " reports are placed by today’s precinct boundaries."))); seeNote(nRe, mf2); }
   $("#catMap").setAttribute("aria-label", "Street map of " + AREA + " with " + lc0.toLowerCase() + " reports as dots: " + al + "." + (GEO.rot ? " The map is turned so the avenues run up and down." : " North is up."));
   done();
 }
@@ -2123,8 +2164,8 @@ function renderNoteCard(){
   var o = ST[CAT], body = $("#noteBody"), st = $("#st-note"); body.innerHTML = "";
   JAIL = []; JAIL_NAMES = [];
   if (o.mappable) (JAILP || []).forEach(function(j){ var cnt = (j.counts || {})[o.key]; if (cnt && (cnt[0] || cnt[1])){ JAIL = JAIL.concat(j.spots || []); JAIL_NAMES.push(j.name); HT("p", { "class":"txt" }, body, j.alsoNear
-      ? "Reports at or next to " + j.name + ", a city jail, and " + j.alsoNear + " share a single spot on the map, so they appear as a stack of dots (circled): " + nOf(cnt[0], o) + " in 2019 and " + fmt(cnt[1]) + " in 2025."
-      : uc(j.name) + " is a city jail. NYPD’s report data places crimes inside it at the jail’s location, so they appear as a stack of dots (circled): " + nOf(cnt[0], o) + " in 2019 and " + fmt(cnt[1]) + " in 2025."); } });
+      ? "Reports at or next to " + j.name + ", a city jail, and " + j.alsoNear + " share a single spot on the map, so they appear as a stack of dots (circled): " + nOf(cnt[0], o) + (" in " + Y_PB + " and ") + fmt(cnt[1]) + (" in " + Y_PL + ".")
+      : uc(j.name) + " is a city jail. NYPD’s report data places crimes inside it at the jail’s location, so they appear as a stack of dots (circled): " + nOf(cnt[0], o) + (" in " + Y_PB + " and ") + fmt(cnt[1]) + (" in " + Y_PL + ".")); } });
   if (JAIL.length && noteOf("jail")) seeNote(noteOf("jail"), body.lastChild);
   if (o.mappable && o.c.mapNote) HT("p", { "class":"txt" }, body, o.c.mapNote);
   $("#noteH").textContent = JAIL.length ? "The jail on the map" : "On the map";
@@ -2257,16 +2298,16 @@ function loadPct(n){
 }
 function E0(){ return { n:0, pub:0, bins:[0,0,0,0,0,0,0,0] }; }
 function spotStats(ci, lat, lon, radiusM, bin, nbList){
-  var out = { spot:{ 2019:E0(), 2025:E0() }, area:{ 2019:E0(), 2025:E0() }, byPct:{} };
+  var out = { spot:{ [Y_PB]:E0(), [Y_PL]:E0() }, area:{ [Y_PB]:E0(), [Y_PL]:E0() }, byPct:{} };
   function scan(pts, isArea){
     pts.forEach(function(p){
-      if (p.c !== ci || (p.y !== 2019 && p.y !== 2025)) return;
+      if (p.c !== ci || (p.y !== Y_PB && p.y !== Y_PL)) return;
       var near = haversine(lat, lon, p.lat, p.lon) <= radiusM;
       p.near = near;
       if (near && p.bin != null) out.spot[p.y].bins[p.bin]++;
       if (bin !== "all" && p.bin !== bin) return;
       if (isArea){ out.area[p.y].n++; }
-      if (near){ out.spot[p.y].n++; if (p.pub) out.spot[p.y].pub++; if (!isArea){ out.byPct[p.pct] = out.byPct[p.pct] || { 2019:0, 2025:0 }; out.byPct[p.pct][p.y]++; } }
+      if (near){ out.spot[p.y].n++; if (p.pub) out.spot[p.y].pub++; if (!isArea){ out.byPct[p.pct] = out.byPct[p.pct] || { Y_PB:0, Y_PL:0 }; out.byPct[p.pct][p.y]++; } }
     });
   }
   scan(PTS, true);
@@ -2278,11 +2319,11 @@ function spotStats(ci, lat, lon, radiusM, bin, nbList){
 function plainLine(a, b){
   if (!isNum(a) || !isNum(b) || a < CFG.smallN || b < CFG.smallN) return "";
   var r = b/a;
-  if (r > 3) return "About " + Math.round(r) + " times as many in 2025 as in 2019.";
-  if (r > 1.1) return (Math.round(r*10)/10).toFixed(1) + " times as many in 2025 as in 2019.";
+  if (r > 3) return "About " + Math.round(r) + (" times as many in " + Y_PL + " as in " + Y_PB + ".");
+  if (r > 1.1) return (Math.round(r*10)/10).toFixed(1) + (" times as many in " + Y_PL + " as in " + Y_PB + ".");
   if (r >= 0.9) return "About the same in both years.";
-  if (r <= 0.5) return "About half as many or fewer in 2025 as in 2019.";
-  return (a - b) + " fewer in 2025 than in 2019.";
+  if (r <= 0.5) return ("About half as many or fewer in " + Y_PL + " as in " + Y_PB + ".");
+  return (a - b) + (" fewer in " + Y_PL + " than in " + Y_PB + ".");
 }
 var checkSeq = 0;
 function updateCheck(){
@@ -2291,14 +2332,14 @@ function updateCheck(){
   $("#changeSum").textContent = "Change: " + o.c.label + " · " + (CS.bin === "all" ? "All day" : BINS[CS.bin]) + " · " + fmt(CS.ft) + " ft";
   $("#catSel").value = CHK;
   $$("#lmRow button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-id") === CS.id ? "true" : "false"); });
-  var B = BYCAT[o.i] || { 2019:[], 2025:[] };
+  var B = BYCAT[o.i] || { [Y_PB]:[], [Y_PL]:[] };
   check.filter = CS.bin === "all" ? null : function(p){ return p.bin === CS.bin; };
-  check.layers = [2019, 2025].map(function(y){ return { pts:B[y], year:y, a:dotAlpha(B[y].length, y) }; });
-  $("#checkLegend").innerHTML = '<span><i style="background:var(--dot19)"></i>2019</span><span><i style="background:var(--blue)"></i>2025</span>' + (CS.lat != null ? '<span><i style="background:transparent;border:2px solid var(--accent)"></i>' + fmt(CS.ft) + ' ft around your spot</span>' : "") + '<span class="q">' + esc(o.c.label) + ' reports</span>';
+  check.layers = [Y_PB, Y_PL].map(function(y){ return { pts:B[y], year:y, a:dotAlpha(B[y].length, y) }; });
+  $("#checkLegend").innerHTML = ('<span><i style="background:var(--dot19)"></i>' + Y_PB + '</span><span><i style="background:var(--blue)"></i>' + Y_PL + '</span>') + (CS.lat != null ? '<span><i style="background:transparent;border:2px solid var(--accent)"></i>' + fmt(CS.ft) + ' ft around your spot</span>' : "") + '<span class="q">' + esc(o.c.label) + ' reports</span>';
   if (CS.lat == null){
-    $("#resultBody").innerHTML = '<p class="r-empty">Pick a spot to count the ' + esc(o.c.label.toLowerCase()) + ' reports near it in 2019 and 2025.</p><p class="r-what">Search above, or tap anywhere on the map.</p>';
+    $("#resultBody").innerHTML = '<p class="r-empty">Pick a spot to count the ' + esc(o.c.label.toLowerCase()) + (' reports near it in ' + Y_PB + ' and ' + Y_PL + '.</p><p class="r-what">Search above, or tap anywhere on the map.</p>');
     $("#allMore").hidden = true;
-    check.spot = null; [2019, 2025].forEach(function(y){ B[y].forEach(function(p){ p.near = false; }); });
+    check.spot = null; [Y_PB, Y_PL].forEach(function(y){ B[y].forEach(function(p){ p.near = false; }); });
     if (!check.W) check.render(); else { check.drawPin(); check.draw(); }
     $("#checkMap").setAttribute("aria-label", "Map of " + AREA + " with " + o.c.label.toLowerCase() + " reports. Tap or click to choose a spot; Shift and the arrow keys move it. Plus and minus zoom, the arrow keys pan, 0 resets.");
     return;
@@ -2315,7 +2356,7 @@ function updateCheck(){
     Promise.all(missing.map(function(n){ return loadPct(n).then(function(f){ NBPTS[n] = toPts(f, n); }, function(){ NBPTS[n] = []; NBPTS[n].failed = true; }); })).then(function(){ if (seq === checkSeq) updateCheck(); });
     return;
   }
-  var R = spotStats(o.i, CS.lat, CS.lon, radius, CS.bin, need), s19 = R.spot[2019], s25 = R.spot[2025];
+  var R = spotStats(o.i, CS.lat, CS.lon, radius, CS.bin, need), s19 = R.spot[Y_PB], s25 = R.spot[Y_PL];
   var inPct = CS.inPct != null ? CS.inPct : pctAt(CS.lat, CS.lon), outside = inPct != null ? PCTS.indexOf(inPct) < 0 : true;
   var h = "";
   if (outside){
@@ -2325,36 +2366,36 @@ function updateCheck(){
   }
   if (CHK !== CAT) h += '<p class="r-found">' + esc(CFG.noMap[CAT] || "") + ' Showing ' + esc(o.c.label.toLowerCase()) + ' reports instead.</p>';
   h += '<p class="r-where">Within ' + fmt(CS.ft) + ' ft of ' + esc(CS.name) + '</p>' +
-    '<p class="r-nums"><span class="n19">' + fmt(s19.n) + '</span> <small>in 2019</small> → <span class="n25">' + fmt(s25.n) + '</span> <small>in 2025</small></p>' +
+    '<p class="r-nums"><span class="n19">' + fmt(s19.n) + ('</span> <small>in ' + Y_PB + '</small> → <span class="n25">') + fmt(s25.n) + ('</span> <small>in ' + Y_PL + '</small></p>') +
     '<p class="r-what">' + esc(o.c.label) + ' reports, ' + esc(timeTxt) + '</p>' +
     (plainLine(s19.n, s25.n) ? '<p class="r-mult">' + plainLine(s19.n, s25.n) + '</p>' : "");
   if (s19.n < CFG.spotSmall || s25.n < CFG.spotSmall) h += '<p class="r-note">Small numbers: with fewer than ' + CFG.spotSmall + ' reports in a year, a few cases can swing the comparison a lot.</p>';
   if (CS.found) h += '<p class="r-found">' + esc(CS.found) + '</p>';
-  var nbUsed = Object.keys(R.byPct).filter(function(k){ return R.byPct[k][2019] || R.byPct[k][2025]; });
+  var nbUsed = Object.keys(R.byPct).filter(function(k){ return R.byPct[k][Y_PB] || R.byPct[k][Y_PL]; });
   if (nbUsed.length) h += '<p class="r-found">The circle reaches into ' + listJoin(nbUsed.map(function(k){ return theName(PBY[k]); })) + '; ' + (nbUsed.length > 1 ? "their" : "its") + ' reports are included.</p>';
   if (need.some(function(n){ return NBPTS[n] && NBPTS[n].failed; })) h += '<p class="r-found">Reports from a neighboring precinct couldn’t be loaded, so counts near the edge may be low.</p>';
-  if (!outside) h += '<p class="r-area">All of ' + esc(AREA_T) + ', same crime and time: <b>' + fmt(R.area[2019].n) + '</b> reports in 2019 → <b>' + fmt(R.area[2025].n) + '</b> in 2025.</p>';
+  if (!outside) h += '<p class="r-area">All of ' + esc(AREA_T) + ', same crime and time: <b>' + fmt(R.area[Y_PB].n) + ('</b> reports in ' + Y_PB + ' → <b>') + fmt(R.area[Y_PL].n) + ('</b> in ' + Y_PL + '.</p>');
   $("#resultBody").innerHTML = h;
   // every mapped category here
   if ($("#allMore").open){
     var ul = $("#allCats"); ul.innerHTML = "";
-    $("#allNote").textContent = "Reports within " + fmt(CS.ft) + " ft, " + timeTxt + ", 2019 → 2025. Tap one to switch.";
+    $("#allNote").textContent = "Reports within " + fmt(CS.ft) + " ft, " + timeTxt + (", " + Y_PB + " → " + Y_PL + ". Tap one to switch.");
     MAPPABLE.forEach(function(c){
       var s = spotStats(ST[c.key].i, CS.lat, CS.lon, radius, CS.bin, need).spot;
       var li = HT("li", null, ul), b = HT("button", { type:"button", "aria-pressed":c.key === CHK ? "true" : "false" }, li);
-      HT("span", null, b, c.label); HT("b", null, b, fmt(s[2019].n) + " → " + fmt(s[2025].n));
+      HT("span", null, b, c.label); HT("b", null, b, fmt(s[Y_PB].n) + " → " + fmt(s[Y_PL].n));
       b.addEventListener("click", function(){ setCat(c.key, "check"); });
     });
     spotStats(o.i, CS.lat, CS.lon, radius, CS.bin, need);   // restore "near" flags for the current category
   }
   // map: the area's dots, plus neighbours' dots inside the circle
-  check.layers = [2019, 2025].map(function(y){ return { pts:B[y], year:y, a:dotAlpha(B[y].length, y) }; });
-  need.forEach(function(n){ var arr = NBPTS[n] || []; [2019, 2025].forEach(function(y){ check.layers.push({ pts:arr.filter(function(p){ return p.c === o.i && p.y === y; }), year:y, a:dotAlpha(B[y].length, y), nearOnly:true }); }); });
+  check.layers = [Y_PB, Y_PL].map(function(y){ return { pts:B[y], year:y, a:dotAlpha(B[y].length, y) }; });
+  need.forEach(function(n){ var arr = NBPTS[n] || []; [Y_PB, Y_PL].forEach(function(y){ check.layers.push({ pts:arr.filter(function(p){ return p.c === o.i && p.y === y; }), year:y, a:dotAlpha(B[y].length, y), nearOnly:true }); }); });
   check.layers.sort(function(a, b){ return a.year - b.year; });
   check.spot = { lat:CS.lat, lon:CS.lon, radius:radius };
   if (!check.W) check.render(); else { check.drawPin(); check.draw(); }
-  $("#checkMap").setAttribute("aria-label", "Map of " + AREA + ". Pin at " + CS.name + ", with a " + fmt(CS.ft) + "-foot circle: " + s19.n + " " + o.c.label.toLowerCase() + " reports in 2019 and " + s25.n + " in 2025. Tap or click to choose a spot; Shift and the arrow keys move it. Plus and minus zoom, the arrow keys pan, 0 resets.");
-  window.__lastCount = { 2019:s19.n, 2025:s25.n, neighbors:need.slice() };
+  $("#checkMap").setAttribute("aria-label", "Map of " + AREA + ". Pin at " + CS.name + ", with a " + fmt(CS.ft) + "-foot circle: " + s19.n + " " + o.c.label.toLowerCase() + (" reports in " + Y_PB + " and ") + s25.n + (" in " + Y_PL + ". Tap or click to choose a spot; Shift and the arrow keys move it. Plus and minus zoom, the arrow keys pan, 0 resets."));
+  window.__lastCount = { [Y_PB]:s19.n, [Y_PL]:s25.n, neighbors:need.slice() };
 }
 function pickPlace(p){
   CS.lat = p.lat; CS.lon = p.lon; CS.name = p.label; CS.id = p.id || null; CS.found = p.note || ""; CS.inPct = isNum(p.pct) ? p.pct : null;
@@ -2466,12 +2507,12 @@ $("#sform").addEventListener("submit", function(e){
   var M = $("#method");
   function li(t){ return HT("li", null, M, t); }
   if (MULTI) li("This page sums " + listJoin(UNITS.map(function(u){ return u.ord; })) + ".");
-  li("Changes from 2019 to 2025 use NYPD’s official year-end precinct totals. Citywide totals are the sum of every row in NYPD’s files, including crimes in city jails, which belong to no precinct.");
+  li(("Changes from " + Y_B + " to " + Y_L + " use NYPD’s official year-end precinct totals. Citywide totals are the sum of every row in NYPD’s files, including crimes in city jails, which belong to no precinct."));
   li("With fewer than " + CFG.smallN + " cases in either year, the page shows the counts instead of a percent change, because a few cases swing a percentage a lot.");
   li("The maps, the place and time-of-day charts and Check your block use individual reports from " + srcName("complaints") + ", counted by the date each incident began. These are compiled differently from the official totals, so they don’t match exactly, and the page never computes a percent change from them where an official total exists.");
-  li("2026 so far: NYPD’s weekly CompStat reports, year to date through " + WEEK + " (" + (CITY.weekRange || "") + " is the latest week), vs. the same weeks of 2025. Percentages for single precincts are as NYPD publishes them.");
-  li("Precinct rankings compare precincts whose boundaries didn’t change between 2019 and 2025 and that had at least " + CFG.smallN + " cases in both years." + CITY.precincts.filter(function(p){ return p.dataIssue && (p.dataIssue.keys || []).length; }).map(function(p){
-    return " The " + p.ord + " is left out of the rankings for " + listJoin(p.dataIssue.keys.map(function(k){ var cc = CATS.filter(function(x){ return x.key === k; })[0]; return cc ? lc(cc.label) : k; })) + ", because its official " + (p.dataIssue.year || 2025) + " figures appear misaligned in NYPD’s spreadsheet.";
+  li((Y_C + " so far: NYPD’s weekly CompStat reports, year to date through ") + WEEK + " (" + (CITY.weekRange || "") + (" is the latest week), vs. the same weeks of " + Y_P + ". Percentages for single precincts are as NYPD publishes them."));
+  li(("Precinct rankings compare precincts whose boundaries didn’t change between " + Y_B + " and " + Y_L + " and that had at least ") + CFG.smallN + " cases in both years." + CITY.precincts.filter(function(p){ return p.dataIssue && (p.dataIssue.keys || []).length; }).map(function(p){
+    return " The " + p.ord + " is left out of the rankings for " + listJoin(p.dataIssue.keys.map(function(k){ var cc = CATS.filter(function(x){ return x.key === k; })[0]; return cc ? lc(cc.label) : k; })) + ", because its official " + (p.dataIssue.year || Y_L) + " figures appear misaligned in NYPD’s spreadsheet.";
   }).join(""));
   li("Check your block counts reports within 500 or 1,000 feet (straight-line distance) of a spot, including reports from neighboring precincts when the circle reaches them. These are counts of reported incidents, not a measure of anyone’s chance of being a victim.");
   li("Boundary changes: the 116th Precinct was created on Dec. 19, 2024, from parts of the 105th and 113th; the 121st in 2013 from parts of the 120th and 122nd; and the 77th, 78th and 88th were realigned in 2012. Trend lines start after those changes.");
@@ -2746,6 +2787,7 @@ getJSON("data/midtown_crowd.json").then(function(d){
   // guard: this file is Midtown's, and only Midtown pages ever get here
   if (!d || String(d.pcts) !== "14,18" || !isNum(d.peopleByArrival) || !isNum(d.peopleByWrapUp) || !isNum(d.peopleByEms) || !isNum(d.peopleByEmsDepart) || !d.site || !d.fit) throw new Error("unexpected data");
   CD = d;
+  var wy = /^(\d{4})/.exec(String(d.window || "")); if (wy) Y_M = +wy[1];   // the Midtown crowd/response year
   var rate = d.site.perMin;
   CR_RATE_R = d.site.perMinRounded;
   CROWD_N = d.peopleByArrival; CROWD_N2 = d.peopleByWrapUp; CROWD_NE = d.peopleByEms; CROWD_ND = d.peopleByEmsDepart;
@@ -2757,10 +2799,10 @@ getJSON("data/midtown_crowd.json").then(function(d){
   $("#crowdLede").textContent = "On a busy Midtown block at evening rush, for example 8th Avenue between 44th and 45th Streets, near Times Square, hundreds of people can walk past in the roughly " + Math.round(d.policeArrivalMin) + " minutes before police typically arrive.";
   $("#crowdRange").innerHTML = "Midtown’s counted blocks see <b>" + d.perMinRange[0] + "–" + d.perMinRange[1] + "</b> people a minute on weekday evenings. The example block, 8th Ave between 44th and 45th Streets: about " + CR_RATE_R + ".";
   $("#crowdWrap").textContent = "An ambulance that takes a patient to the hospital typically leaves about " + Math.round(d.emsOnSceneMin) + " minutes after arriving. Police typically wrap up the call about " + Math.round(d.jobClosedMin) + " minutes after it comes in. By then, thousands of people can pass.";
-  $("#crowdNote").textContent = "Illustration: a sidewalk assault on a busy block at evening rush (as an example, 8th Ave between 44th and 45th Streets, about " + CR_RATE_R + " people a minute). Police and ambulance times are typical for all of Midtown at weekday evening rush in 2025, not for this block: about " + Math.round(d.policeArrivalMin) + " minutes for police to reach a critical assault call and about " + Math.round(d.emsArrivalMin) + " minutes for EMS to reach a life-threatening one, counted from when dispatch logs the call, not from the first ring. Ambulances that take a patient to the hospital typically leave about " + Math.round(d.emsOnSceneMin) + " minutes after arriving. The EMS time covers all life-threatening calls, not only assaults. About 1 in " + d.fit.nice + " Midtown felony assaults fit that description. ‘Wrap up the call’ is when the 911 job is closed, a stand-in for when officers leave. Sources: NYC DOT pedestrian counts; NYPD 911 calls for service; FDNY EMS incident dispatch data.";
-  $("#crowdCav").textContent = "An illustration: foot counts are for weekdays from 4 to 7 p.m. Police times are medians for 2025 critical outdoor assault calls (assaults with a weapon in progress) in Midtown’s two precincts (the 14th and 18th) at weekday evening rush, " + fmt(d.nPolice) + " calls with an arrival time; the EMS time is the median for all " + fmt(d.nEms) + " life-threatening EMS calls there at the same hours.";
+  $("#crowdNote").textContent = "Illustration: a sidewalk assault on a busy block at evening rush (as an example, 8th Ave between 44th and 45th Streets, about " + CR_RATE_R + (" people a minute). Police and ambulance times are typical for all of Midtown at weekday evening rush in " + Y_M + ", not for this block: about ") + Math.round(d.policeArrivalMin) + " minutes for police to reach a critical assault call and about " + Math.round(d.emsArrivalMin) + " minutes for EMS to reach a life-threatening one, counted from when dispatch logs the call, not from the first ring. Ambulances that take a patient to the hospital typically leave about " + Math.round(d.emsOnSceneMin) + " minutes after arriving. The EMS time covers all life-threatening calls, not only assaults. About 1 in " + d.fit.nice + " Midtown felony assaults fit that description. ‘Wrap up the call’ is when the 911 job is closed, a stand-in for when officers leave. Sources: NYC DOT pedestrian counts; NYPD 911 calls for service; FDNY EMS incident dispatch data.";
+  $("#crowdCav").textContent = ("An illustration: foot counts are for weekdays from 4 to 7 p.m. Police times are medians for " + Y_M + " critical outdoor assault calls (assaults with a weapon in progress) in Midtown’s two precincts (the 14th and 18th) at weekday evening rush, ") + fmt(d.nPolice) + " calls with an arrival time; the EMS time is the median for all " + fmt(d.nEms) + " life-threatening EMS calls there at the same hours.";
   // About the data: method and sources (Midtown only)
-  HT("li", null, $("#method"), "The crowd: an illustration. NYC DOT counts at Midtown’s " + d.countedBlocks + " counted blocks show " + d.perMinRange[0] + "–" + d.perMinRange[1] + " people a minute pass on weekdays 4–7pm, typically " + d.perMinMedian + ". The scene uses one busy block as an example, 8th Ave between 44th and 45th Streets, at about " + CR_RATE_R + " a minute. In 2025, at weekday evening rush, police typically reached critical outdoor assault calls " + d.policeArrivalMin.toFixed(1) + " minutes after the job was logged (" + rate + " × " + d.policeArrivalMin.toFixed(1) + " ≈ " + fmt(CROWD_N) + " people on that block) and closed the job " + d.jobClosedMin.toFixed(1) + " minutes after it was logged (≈ " + fmt(CROWD_N2) + "); the first ambulance reached life-threatening calls " + d.emsArrivalMin.toFixed(1) + " minutes after the EMS incident was created (≈ " + fmt(CROWD_NE) + "), and ambulances that took a patient to the hospital left a median " + d.emsOnSceneMin.toFixed(1) + " minutes after arriving (" + fmt(d.nEmsOnScene) + " transports), so the scene has the ambulance leave at " + d.emsDepartMin.toFixed(1) + " minutes (≈ " + fmt(CROWD_ND) + "; a sum of two medians, not a measured median). Medians; " + fmt(d.nPolice) + " police calls and " + fmt(d.nEms) + " EMS calls. The sidewalk-assault illustration: " + d.fit.k + " of " + fmt(d.fit.n) + " Midtown felony assault reports in 2025 were on a street, sidewalk or in a park on a weekday between 4 and 7 p.m.");
+  HT("li", null, $("#method"), "The crowd: an illustration. NYC DOT counts at Midtown’s " + d.countedBlocks + " counted blocks show " + d.perMinRange[0] + "–" + d.perMinRange[1] + " people a minute pass on weekdays 4–7pm, typically " + d.perMinMedian + ". The scene uses one busy block as an example, 8th Ave between 44th and 45th Streets, at about " + CR_RATE_R + (" a minute. In " + Y_M + ", at weekday evening rush, police typically reached critical outdoor assault calls ") + d.policeArrivalMin.toFixed(1) + " minutes after the job was logged (" + rate + " × " + d.policeArrivalMin.toFixed(1) + " ≈ " + fmt(CROWD_N) + " people on that block) and closed the job " + d.jobClosedMin.toFixed(1) + " minutes after it was logged (≈ " + fmt(CROWD_N2) + "); the first ambulance reached life-threatening calls " + d.emsArrivalMin.toFixed(1) + " minutes after the EMS incident was created (≈ " + fmt(CROWD_NE) + "), and ambulances that took a patient to the hospital left a median " + d.emsOnSceneMin.toFixed(1) + " minutes after arriving (" + fmt(d.nEmsOnScene) + " transports), so the scene has the ambulance leave at " + d.emsDepartMin.toFixed(1) + " minutes (≈ " + fmt(CROWD_ND) + "; a sum of two medians, not a measured median). Medians; " + fmt(d.nPolice) + " police calls and " + fmt(d.nEms) + " EMS calls. The sidewalk-assault illustration: " + d.fit.k + " of " + fmt(d.fit.n) + (" Midtown felony assault reports in " + Y_M + " were on a street, sidewalk or in a park on a weekday between 4 and 7 p.m."));
   (d.sources || []).forEach(function(s){ addSource(s.name, s.url); });
   crW = $("#crowdBody").clientWidth;
   renderCrowd();
@@ -2788,55 +2830,56 @@ function med(y){ return ok(y) && !y.small; }
 function few(y){ return y && y.small && !y.unavailable && isNum(y.n); }
 var KEY = PCTS.slice().sort(function(a, b){ return a - b; }).join("+");
 getJSON("data/response.json").then(function(R){
+  if (R.years && R.years.length){ Y_RB = R.years.indexOf(BASE_YEAR) >= 0 ? BASE_YEAR : R.years[0]; Y_RL = R.years[R.years.length - 1]; }
   var DEF = R.definitions || {}, CITY_R = R.citywide || {};
   var SMALL = +((String(DEF.small || "").match(/fewer than (\d+)/) || [])[1]) || 200;
   var G = (R.groups || {})[KEY];
   // the rows shown in each card: one (a single precinct, or a group in response.json) or one per precinct
   var rows = G ? [{ name:AREA_L, d:G }] : UNITS.map(function(u){ return { name:MULTI ? u.name : AREA_L, pct:u.pct, d:(R.byPct || {})[u.pct] || {} }; });
   var SIDE = rows.length > 1;
-  $("#respLede").textContent = "Typical (median) times " + (SIDE ? "for each of " + AREA_T : "in " + AREA_T) + " in 2025, from when a call is logged to when help first arrives, with 2019 and the citywide figure for comparison.";
+  $("#respLede").textContent = "Typical (median) times " + (SIDE ? "for each of " + AREA_T : "in " + AREA_T) + (" in " + Y_RL + ", from when a call is logged to when help first arrives, with " + Y_RB + " and the citywide figure for comparison.");
   var nClock = addNote("How fast help arrives: " + curlyQ(DEF.clocks), "respclock");
   seeNote(nClock, $("#respLede"));
   // missing / invalid times, per row
   var miss = rows.map(function(r){
-    var p = (r.d.police || {})["2025"], p0 = (r.d.police || {})["2019"], e = (r.d.ems || {})["2025"];
-    return (SIDE ? r.name + ": " : "") + (p && isNum(p.pctMissing) ? p.pctMissing.toFixed(1) + "% of critical police calls in 2025 had no arrival time" + (p0 && isNum(p0.pctMissing) ? " (" + p0.pctMissing.toFixed(1) + "% in 2019)" : "") : "no police figure") +
-      (ok(e) && isNum(e.pctMissing) ? "; " + e.pctMissing.toFixed(1) + "% of life-threatening EMS incidents in 2025 had no valid response time" : "");
+    var p = (r.d.police || {})[Y_RL], p0 = (r.d.police || {})[Y_RB], e = (r.d.ems || {})[Y_RL];
+    return (SIDE ? r.name + ": " : "") + (p && isNum(p.pctMissing) ? p.pctMissing.toFixed(1) + ("% of critical police calls in " + Y_RL + " had no arrival time") + (p0 && isNum(p0.pctMissing) ? " (" + p0.pctMissing.toFixed(1) + ("% in " + Y_RB + ")") : "") : "no police figure") +
+      (ok(e) && isNum(e.pctMissing) ? "; " + e.pctMissing.toFixed(1) + ("% of life-threatening EMS incidents in " + Y_RL + " had no valid response time") : "");
   });
-  var cp = (CITY_R.police || {})["2025"], ce = (CITY_R.ems || {})["2025"];
-  var nMiss = addNote("Police arrival times are logged by officers when they mark themselves on scene, and calls with no arrival time are left out; EMS times count only incidents with a valid response time. " + miss.join(". ") + "." + (cp ? " Citywide in 2025: " + cp.pctMissing.toFixed(1) + "% of critical police calls" + (ce ? " and " + ce.pctMissing.toFixed(1) + "% of life-threatening EMS incidents" : "") + "." : ""), "respmissing");
-  var nRec = addNote("Some 2025 police arrivals are logged in the same second the call was created (for example, when officers are already at the scene); in a check of Midtown’s records this didn’t happen in 2019, so part of a change from 2019 to 2025 may reflect how arrivals are recorded rather than how long officers took.", "resprec");
-  var touches116 = rows.some(function(r){ var e = r.d.ems || {}; return (e["2025"] || {}).oldBoundary || (e["2019"] || {}).oldBoundary; });
+  var cp = (CITY_R.police || {})[Y_RL], ce = (CITY_R.ems || {})[Y_RL];
+  var nMiss = addNote("Police arrival times are logged by officers when they mark themselves on scene, and calls with no arrival time are left out; EMS times count only incidents with a valid response time. " + miss.join(". ") + "." + (cp ? (" Citywide in " + Y_RL + ": ") + cp.pctMissing.toFixed(1) + "% of critical police calls" + (ce ? " and " + ce.pctMissing.toFixed(1) + "% of life-threatening EMS incidents" : "") + "." : ""), "respmissing");
+  var nRec = addNote(("Some " + Y_RL + " police arrivals are logged in the same second the call was created (for example, when officers are already at the scene); in a check of Midtown’s records this didn’t happen in " + Y_RB + ", so part of a change from " + Y_RB + " to " + Y_RL + " may reflect how arrivals are recorded rather than how long officers took."), "resprec");
+  var touches116 = rows.some(function(r){ var e = r.d.ems || {}; return (e[Y_RL] || {}).oldBoundary || (e[Y_RB] || {}).oldBoundary; });
   var n116 = touches116 && DEF.pct116 ? addNote(curlyQ(DEF.pct116), "resp116") : 0;
   grid.innerHTML = ""; grid.style.minHeight = "";
   [["police", "Police, critical calls", "first officers arrive", "critical calls"], ["ems", "EMS, life-threatening calls", "first ambulance arrives", "life-threatening calls"]].forEach(function(S0){
     var svc = S0[0], card = HT("div", { "class":"ifig resp-card", id:"resp-" + svc }, grid);
     HT("p", { "class":"fig" }, card); HT("p", { "class":"s-title" }, card, S0[1]);
     HT("p", { "class":"resp-def" }, card, curlyQ(String(DEF[svc] || "").replace(/\s*Source:.*$/, "")));
-    var city = ((CITY_R[svc] || {})["2025"]) || null;
-    var rs = rows.map(function(r){ var x = r.d[svc] || {}; return { name:r.name, pct:r.pct, a:x["2019"], b:x["2025"] }; });
+    var city = ((CITY_R[svc] || {})[Y_RL]) || null;
+    var rs = rows.map(function(r){ var x = r.d[svc] || {}; return { name:r.name, pct:r.pct, a:x[Y_RB], b:x[Y_RL] }; });
     var what = HT("p", { "class":"resp-what" }, card, "Typical (median) time from when the call is logged to when the " + S0[2] + ".");
     // 116th EMS: not available on its own
     if (!SIDE && rs[0].b && rs[0].b.unavailable){
       var g = ((R.groups || {})["105+113+116"] || {}).ems || {};
-      var p = HT("p", { "class":"resp-un" }, card, "FDNY’s EMS data doesn’t separate the 116th Precinct yet." + (ok(g["2025"]) ? " For the 105th, 113th and 116th precincts combined, the typical time in 2025 was " + mins(g["2025"].median) + " minutes" + (ok(g["2019"]) ? " (" + mins(g["2019"].median) + " in 2019)" : "") + (city ? "; citywide, " + mins(city.median) + "." : ".") : ""));
+      var p = HT("p", { "class":"resp-un" }, card, "FDNY’s EMS data doesn’t separate the 116th Precinct yet." + (ok(g[Y_RL]) ? (" For the 105th, 113th and 116th precincts combined, the typical time in " + Y_RL + " was ") + mins(g[Y_RL].median) + " minutes" + (ok(g[Y_RB]) ? " (" + mins(g[Y_RB].median) + (" in " + Y_RB + ")") : "") + (city ? "; citywide, " + mins(city.median) + "." : ".") : ""));
       seeNote(n116, p);
       return;
     }
     if (!SIDE){
       var r0 = rs[0], b = r0.b, a = r0.a, unit = svc === "police" ? "critical calls" : "life-threatening calls";
       var big = HT("div", { "class":"resp-big" + (few(b) ? " few" : "") }, card);
-      if (few(b)){ HT("b", null, big, fmt(b.n)); HT("span", { "class":"u" }, big, unit); HT("span", { "class":"lab" }, big, "2025"); }
-      else { HT("b", null, big, med(b) ? mins(b.median) : "—"); HT("span", { "class":"u" }, big, "minutes"); HT("span", { "class":"lab" }, big, "2025"); }
+      if (few(b)){ HT("b", null, big, fmt(b.n)); HT("span", { "class":"u" }, big, unit); HT("span", { "class":"lab" }, big, Y_RL); }
+      else { HT("b", null, big, med(b) ? mins(b.median) : "—"); HT("span", { "class":"u" }, big, "minutes"); HT("span", { "class":"lab" }, big, Y_RL); }
       card.insertBefore(big, what);
-      var cmp = HT("p", { "class":"resp-cmp" }, card, (med(a) ? mins(a.median) + " minutes in 2019" : few(a) ? fmt(a.n) + " " + unit + " in 2019" : "No 2019 figure") + (city ? " · Citywide in 2025: " + mins(city.median) + " minutes" : ""));
+      var cmp = HT("p", { "class":"resp-cmp" }, card, (med(a) ? mins(a.median) + (" minutes in " + Y_RB) : few(a) ? fmt(a.n) + " " + unit + (" in " + Y_RB) : ("No " + Y_RB + " figure")) + (city ? (" · Citywide in " + Y_RL + ": ") + mins(city.median) + " minutes" : ""));
       if (svc === "police") seeNote(nRec, cmp);
-      if (few(b) || few(a)) HT("p", { "class":"resp-few" }, card, "Fewer than " + fmt(SMALL) + " calls in " + (few(a) && few(b) ? "2019 or 2025" : few(b) ? "2025" : "2019") + ", so the card gives the number of calls for " + (few(a) && few(b) ? "those years" : "that year") + ", not a median: a few calls move a median a lot.");
+      if (few(b) || few(a)) HT("p", { "class":"resp-few" }, card, "Fewer than " + fmt(SMALL) + " calls in " + (few(a) && few(b) ? (Y_RB + " or " + Y_RL) : few(b) ? [Y_RL] : Y_RB) + ", so the card gives the number of calls for " + (few(a) && few(b) ? "those years" : "that year") + ", not a median: a few calls move a median a lot.");
     }
     if (SIDE || med(rs[0].b)) respChart(card, rs, city, svc);
     var nl = HT("p", { "class":"resp-n" }, card, rs.map(function(r){
       var t = function(y){ return y && isNum(y.nArrived) ? fmt(y.nArrived) : "—"; };
-      return (SIDE ? r.name + ": " : "") + (r.b && r.b.unavailable ? "no separate EMS figure" : t(r.b) + " " + S0[3] + " with " + (svc === "police" ? "an arrival time" : "a valid response time") + " in 2025, " + t(r.a) + " in 2019");
+      return (SIDE ? r.name + ": " : "") + (r.b && r.b.unavailable ? "no separate EMS figure" : t(r.b) + " " + S0[3] + " with " + (svc === "police" ? "an arrival time" : "a valid response time") + (" in " + Y_RL + ", ") + t(r.a) + (" in " + Y_RB));
     }).join(". ") + ".");
     seeNote(nMiss, nl);
     if (svc === "ems" && n116){ var ob = HT("p", { "class":"resp-n" }, card, "EMS figures for the 105th and 113th cover their areas before the 116th was created" + (rs.some(function(r){ return r.b && r.b.unavailable; }) ? "; the 116th has no separate EMS figure." : ".")); seeNote(n116, ob); }
@@ -2855,7 +2898,7 @@ function respChart(card, rs, city, svc){
   var read = HT("p", { "class":"readout", "aria-live":"polite" }, card);
   var body = HT("div", { "class":"ifig-body resp-body" }, card);
   var leg = HT("p", { "class":"legend resp-leg" }, card);
-  leg.innerHTML = '<span><i style="background:var(--dot19)"></i>2019</span><span><i style="background:var(--blue)"></i>2025</span>' + (city ? '<span><i class="ln" style="background:none;border-top:2px dashed var(--muted);height:0"></i>Citywide, 2025</span>' : "");
+  leg.innerHTML = ('<span><i style="background:var(--dot19)"></i>' + Y_RB + '</span><span><i style="background:var(--blue)"></i>' + Y_RL + '</span>') + (city ? ('<span><i class="ln" style="background:none;border-top:2px dashed var(--muted);height:0"></i>Citywide, ' + Y_RL + '</span>') : "");
   var lbl = svc === "police" ? "Police response, critical calls" : "EMS response, life-threatening calls";
   function draw(){
     var side = rs.length > 1, rowH = side ? 46 : 34, top = 22, bot = 24, h = top + rs.length*rowH + bot;
@@ -2866,7 +2909,7 @@ function respChart(card, rs, city, svc){
     var l = 8, r = 16, X = function(v){ return l + (w - l - r)*v/hi; };
     for (var t = 0; t <= hi + 1e-9; t += st){ var x = X(t); S("line", { "class":"c-grid", x1:x, x2:x, y1:top - 4, y2:h - bot + 4 }, svg); S("text", { "class":"c-lbl m", x:x, y:h - 6, "text-anchor":t === 0 ? "start" : "middle", "font-size":12 }, svg, (Math.round(t*10)/10) + (t + st > hi + 1e-9 ? " min" : "")); }
     function defHTML(){
-      return '<span class="rs"><b>2025</b></span> · ' + rs.map(function(r){ return '<span class="rs">' + esc(r.name) + " " + (med(r.b) ? mins(r.b.median) + " min" : few(r.b) ? fmt(r.b.n) + " calls, too few for a median" : "no figure") + "</span>"; }).join(" · ") + (city ? ' · <span class="rs">Citywide ' + mins(city.median) + " min</span>" : "");
+      return ('<span class="rs"><b>' + Y_RL + '</b></span> · ') + rs.map(function(r){ return '<span class="rs">' + esc(r.name) + " " + (med(r.b) ? mins(r.b.median) + " min" : few(r.b) ? fmt(r.b.n) + " calls, too few for a median" : "no figure") + "</span>"; }).join(" · ") + (city ? ' · <span class="rs">Citywide ' + mins(city.median) + " min</span>" : "");
     }
     read.innerHTML = defHTML();
     if (city){
@@ -2874,17 +2917,17 @@ function respChart(card, rs, city, svc){
       S("line", { x1:cx, x2:cx, y1:top - 2, y2:h - bot, stroke:"var(--muted)", "stroke-width":1.5, "stroke-dasharray":"4 3" }, svg);
       var cl = "Citywide " + mins(city.median), cw = textW(cl, 12, false), anchor = cx + cw/2 > w - 2 ? "end" : cx - cw/2 < 2 ? "start" : "middle";
       S("text", { "class":"c-lbl m halo", x:cx, y:top - 8, "text-anchor":anchor, "font-size":12 }, svg, cl);
-      var ch = S("g", { "aria-label":"Citywide, 2025: " + mins(city.median) + " minutes" }, svg);
+      var ch = S("g", { "aria-label":("Citywide, " + Y_RL + ": ") + mins(city.median) + " minutes" }, svg);
       S("rect", { "class":"hit", x:cx - 11, y:top - 4, width:22, height:h - bot - top + 8 }, ch);
-      barReadout(ch, read, '<span class="rs"><b>2025</b> · Citywide ' + mins(city.median) + " min · " + fmt(city.nArrived) + " calls</span>");
+      barReadout(ch, read, ('<span class="rs"><b>' + Y_RL + '</b> · Citywide ') + mins(city.median) + " min · " + fmt(city.nArrived) + " calls</span>");
     }
     rs.forEach(function(rw, i){
       var y = top + i*rowH + (side ? 30 : rowH/2);
-      var fw = [few(rw.a) ? fmt(rw.a.n) + " calls in 2019" : "", few(rw.b) ? fmt(rw.b.n) + " in 2025" : ""].filter(Boolean).join(", ");
+      var fw = [few(rw.a) ? fmt(rw.a.n) + (" calls in " + Y_RB) : "", few(rw.b) ? fmt(rw.b.n) + (" in " + Y_RL) : ""].filter(Boolean).join(", ");
       if (side) S("text", { "class":"c-lbl b", x:l, y:y - 14, "font-size":12 }, svg, rw.name + (fw ? " (" + fw + ": too few for a median)" : ""));
       if (!med(rw.b) && !med(rw.a)){ S("text", { "class":"c-lbl m", x:l, y:y + 4, "font-size":12 }, svg, rw.b && rw.b.unavailable ? "No separate EMS figure (see the notes)" : fw ? "Too few calls for a median" : "No figure"); return; }
       S("line", { x1:X(0), x2:X(hi), y1:y, y2:y, stroke:"var(--line)", "stroke-width":1 }, svg);
-      [[rw.a, "2019", "var(--dot19)", 5], [rw.b, "2025", "var(--blue)", 6]].forEach(function(m){
+      [[rw.a, Y_RB, "var(--dot19)", 5], [rw.b, Y_RL, "var(--blue)", 6]].forEach(function(m){
         if (!med(m[0])) return;
         var x = X(m[0].median), g = S("g", { "aria-label":rw.name + ", " + m[1] + ": " + mins(m[0].median) + " minutes, " + fmt(m[0].nArrived) + " calls" }, svg);
         S("rect", { "class":"hit", x:x - 22, y:y - 15, width:44, height:30, rx:4 }, g);
@@ -2936,18 +2979,20 @@ Promise.all(PCTS.map(function(n){ return getJSON("data/map/" + pad3(n) + ".json"
   check = new MapView($("#checkMap"), { id:"c", landmarks:IS_MIDTOWN, capEl:$("#checkCap") });
   renderCatMap(true); check.render(); updateCheck();
   return pctP.then(function(files){
+    setPointYears(files);
     PTS = []; files.forEach(function(f, k){ PTS = PTS.concat(toPts(f, PCTS[k])); });
-    BYCAT = {}; ALLC.forEach(function(c, i){ BYCAT[i] = { 2019:[], 2025:[] }; });
+    BYCAT = {}; ALLC.forEach(function(c, i){ BYCAT[i] = {}; BYCAT[i][Y_PB] = []; BYCAT[i][Y_PL] = []; });
     PTS.forEach(function(p){ if (BYCAT[p.c] && BYCAT[p.c][p.y]) BYCAT[p.c][p.y].push(p); });
     CPX = buildCPX(files);
     var notes = files.map(function(f){ return f.reassigned2019 && f.reassigned2019.note; }).filter(Boolean);
     REASSIGN = notes.filter(function(n, i){ return notes.indexOf(n) === i; }).join(" ");
     if (REASSIGN) addNote(REASSIGN, "reassign");
     JAILP = []; files.forEach(function(f){ (f.jailPoints || []).forEach(function(j){ JAILP.push(j); }); });
-    var bd = {}; files.forEach(function(f){ ((f.countsOnly || {}).hate_bias2025 || []).forEach(function(x){ bd[x[0]] = (bd[x[0]] || 0) + x[1]; }); });
-    hateBD = Object.keys(bd).map(function(k){ return [k, bd[k]]; }).sort(function(a, b){ return b[1] - a[1]; });
+    // hate crimes by bias motive: the precinct files' "hate_biasYYYY" list, whichever year it is
+    var bd = {}, hy = null; files.forEach(function(f){ var co = f.countsOnly || {}; Object.keys(co).forEach(function(k){ var m = /^hate_bias(\d{4})$/.exec(k); if (!m) return; hy = +m[1]; (co[k] || []).forEach(function(x){ bd[x[0]] = (bd[x[0]] || 0) + x[1]; }); }); });
+    hateBD = Object.keys(bd).map(function(k){ return [k, bd[k]]; }).sort(function(a, b){ return b[1] - a[1]; }); hateBD.year = hy;
     PTS_READY = true;
-    CATS.forEach(function(c){ var o = ST[c.key], cell = document.getElementById("ovc-" + c.key); if (o.mode === "issue" && cell && CPX[c.key]) cell.innerHTML = fmt(o.a) + ' <small>in 2019</small><br>' + fmt(CPX[c.key].y2025) + ' <small>reports, 2025 · see note ' + noteOf("issue") + '</small>'; });
+    CATS.forEach(function(c){ var o = ST[c.key], cell = document.getElementById("ovc-" + c.key); if (o.mode === "issue" && cell && CPX[c.key]) cell.innerHTML = fmt(o.a) + (' <small>in ' + Y_B + '</small><br>') + fmt(CPX[c.key]["y" + Y_PL]) + (' <small>reports, ' + Y_L + ' · see note ') + noteOf("issue") + '</small>'; });
     renderCounts(); renderCategory(); sizeTop(); updateCheck();
     if (QS.get("lat") && CS.lat != null) setTimeout(function(){ goTo("check"); }, 50);
   }, function(e){
@@ -2958,7 +3003,7 @@ Promise.all(PCTS.map(function(n){ return getJSON("data/map/" + pad3(n) + ".json"
   var msg = "The map for this precinct couldn’t be loaded (" + esc(e.message) + ").";
   $("#catMap").innerHTML = '<p class="loading">' + msg + '</p>'; $("#checkMap").innerHTML = '<p class="loading">' + msg + '</p>';
   $("#resultBody").innerHTML = '<p class="r-what">' + msg + '</p>';
-  pctP.then(function(files){ CPX = buildCPX(files); renderComplaintParts(); numberFigs(); }, function(){});
+  pctP.then(function(files){ setPointYears(files); CPX = buildCPX(files); renderComplaintParts(); numberFigs(); }, function(){});
 });
 var PTS_FAIL = "";
 
