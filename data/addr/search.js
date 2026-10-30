@@ -63,10 +63,15 @@
   }
 
   var IDX = null, IDXP = null, SHARDS = {};
-  function getJSON(path) {
+  function getJSON(path, tries) {
+    // retry brief server errors (GitHub Pages can answer 503 during a redeploy) and network failures
+    tries = tries == null ? 3 : tries;
     return fetch(BASE + path).then(function (r) {
-      if (!r.ok) throw new Error("AddrSearch: could not load " + path);
-      return r.json();
+      if (r.ok) return r.json();
+      var e = new Error("AddrSearch: could not load " + path); e.retry = r.status >= 500 || r.status === 429; throw e;
+    }).catch(function (e) {
+      if (tries > 0 && e.retry !== false) return new Promise(function (res) { setTimeout(res, (4 - tries) * 700); }).then(function () { return getJSON(path, tries - 1); });
+      throw e;
     });
   }
   function index() {

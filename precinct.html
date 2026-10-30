@@ -831,7 +831,17 @@ function HT(tag, attrs, parent, text){
 }
 var mctx = document.createElement("canvas").getContext("2d");
 function textW(t, fs, bold){ mctx.font = (bold ? "700 " : "") + fs + "px Arial, Helvetica, sans-serif"; return mctx.measureText(t).width; }
-function getJSON(u){ return fetch(u, { cache:"no-cache" }).then(function(r){ if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
+function getJSON(u, tries){
+  // GitHub Pages can briefly answer 503 (e.g. during a redeploy): retry server errors and network failures before giving up.
+  tries = tries == null ? 3 : tries;
+  return fetch(u, { cache:"no-cache" }).then(function(r){
+    if (r.ok) return r.json();
+    var e = new Error(u + " " + r.status); e.retry = r.status >= 500 || r.status === 429; throw e;
+  }).catch(function(e){
+    if (tries > 0 && e.retry !== false) return new Promise(function(res){ setTimeout(res, (4 - tries) * 700); }).then(function(){ return getJSON(u, tries - 1); });
+    throw e;
+  });
+}
 function pad3(n){ return String(n); }
 
 /* ---------- theme (shared with the landing page) ---------- */
