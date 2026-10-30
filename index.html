@@ -1807,6 +1807,7 @@ function buildAbout(){
   var i22 = PLIST.filter(function(p){ return p.dataIssue; });
   i22.forEach(function(p){ HT("li", null, ul, "The " + p.ord + " (" + p.name + "): NYPD’s official " + (p.dataIssue.year || Y_L) + " figure appears misaligned in its spreadsheet for " + listJoin(p.dataIssue.keys.map(function(k){ return lc(catByKey(k) ? (catByKey(k).plural || catByKey(k).label) : k); })) + (", so it is left out of comparisons and rankings for those crimes. Citywide " + (p.dataIssue.year || Y_L) + " totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime).")); });
   HT("li", null, ul, "No per-capita rates: business districts like Midtown have few residents, so rates per resident would mislead.");
+  HT("li", null, ul, "This site was built with the help of AI tools (Anthropic’s Claude). Every figure comes from official city data and was checked by script against the source files.");
   HT("h3", null, box, "Boundary changes");
   var ub = HT("ul", null, box);
   HT("li", null, ub, ("The 116th Precinct was created in Dec. 2024 from parts of the 105th and 113th. Their " + Y_B + " and " + Y_L + " numbers cover different areas, so the three are compared only together."));
