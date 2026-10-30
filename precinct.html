@@ -735,8 +735,8 @@ footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:0 0 calc(40px
 
 <!-- Not shown: at the end, after Check your block (collapsed; the overview links here) -->
 <section class="wrap sec" id="counts" aria-labelledby="coH">
-  <h2 id="coH">Not shown</h2>
-  <div class="co-sum"><p class="co-line" id="coLine"></p><button class="co-toggle" type="button" id="coToggle" aria-expanded="false" aria-controls="coBody">Show</button></div>
+  <h2 id="coH" class="sr">Other crimes NYPD counts</h2>
+  <div class="co-sum"><p class="co-line" id="coLine"></p><button class="co-toggle" type="button" id="coToggle" aria-expanded="false" aria-controls="coBody">Show counts</button></div>
   <div id="coBody" hidden>
     <ul class="co" id="coList"></ul>
     <p class="quiet" id="coNote"></p>
@@ -1209,12 +1209,13 @@ function renderCoCharts(){
 function renderCounts(){
   var ul = $("#coList"); ul.innerHTML = ""; coCharts = [];
   if (!CO.length){ $("#counts").hidden = true; return; }
-  $("#coLine").textContent = uc(numWord(CO.length)) + " more kinds of crime NYPD counts. They aren’t in the crime picker or on the maps, for the reasons below.";
+  var CO_WORD = { rape:"rape", sex_crimes:"other felony sex crimes", fraud:"fraud and identity theft", drugs:"felony drug offenses", weapons:"felony weapons offenses", hate_crimes:"hate crimes", contempt:"felony criminal contempt" };
+  $("#coLine").textContent = "NYPD also counts " + numWord(CO.length) + " other kinds of crime: " + listJoin(CO.map(function(it){ return CO_WORD[it.key] || lc(it.label); })) + ". They aren’t in the crime picker or on the maps.";
   // a quiet pointer under the overview: Not shown sits at the end of the page now
   var om = $("#ovMore"); om.innerHTML = ""; om.hidden = false;
-  om.appendChild(document.createTextNode(uc(numWord(CO.length)) + " more kinds of crime NYPD counts are listed under "));
-  HT("a", { href:"#counts", id:"ovMoreLink" }, om, "Not shown");
-  om.appendChild(document.createTextNode(", at the bottom."));
+  om.appendChild(document.createTextNode("NYPD also counts " + numWord(CO.length) + " other kinds of crime, such as rape, fraud and hate crimes: "));
+  HT("a", { href:"#counts", id:"ovMoreLink" }, om, "see them at the bottom of the page");
+  om.appendChild(document.createTextNode("."));
   CO.forEach(function(it){
     var li = HT("li", null, ul), ser = coSeries(it), al = it.label + ". ";
     HT("p", { "class":"co-name" }, li, it.label);
@@ -1275,7 +1276,7 @@ $("#ovMore").addEventListener("click", function(e){
 });
 $("#coToggle").addEventListener("click", function(){
   var open = this.getAttribute("aria-expanded") !== "true";
-  this.setAttribute("aria-expanded", open ? "true" : "false"); this.textContent = open ? "Hide" : "Show";
+  this.setAttribute("aria-expanded", open ? "true" : "false"); this.textContent = open ? "Hide" : "Show counts";
   $("#coBody").hidden = !open;
   if (open) renderCoCharts();
 });

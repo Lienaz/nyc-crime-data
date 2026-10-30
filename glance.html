@@ -274,7 +274,7 @@ h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.0
 
     <div class="tiles" id="tiles"></div>
 
-    <section class="co" aria-labelledby="coH"><h2 class="g-lab" id="coH">Not shown</h2><ul class="co-l" id="coList"></ul></section>
+    <section class="co" aria-labelledby="coH"><h2 class="g-lab" id="coH">Other crimes NYPD counts</h2><ul class="co-l" id="coList"></ul></section>
 
     <footer class="g-foot">
       <p class="g-foot-t"><span id="footTxt"></span> <button type="button" class="f-btn" id="notesBtn" aria-expanded="false" aria-controls="notesBody">Notes</button> <a class="f-a" href="index.html#about">About the data →</a></p>
@@ -728,8 +728,8 @@ function renderCO(M){
   var ul = $("#coList"); ul.innerHTML = "";
   var anyNC = M.cmp && M.co.some(function(r){ return r.nc; });
   var h = $("#coH");
-  h.textContent = "Not shown";
-  HT("span", { "class":"g-key" }, h, "Not in the tiles above: counts only, " + (M.cmp ? B + " → " + L : String(L)) + (anyNC ? " · * Not comparable: rape law broadened Sept. 1, 2024" : ""));
+  h.textContent = "Other crimes NYPD counts";
+  HT("span", { "class":"g-key" }, h, "Counts only, " + (M.cmp ? B + " → " + L : String(L)) + (anyNC ? " · * Not comparable: rape law broadened Sept. 1, 2024" : ""));
   M.co.forEach(function(r){
     var it = r.it, li = HT("li", null, ul), al = r.label + ": ";
     HT("span", { "class":"l" }, li, CO_SHORT[it.key] || r.label);
@@ -791,7 +791,7 @@ function renderFoot(M){
   HT("li", null, ul, CSY + " so far: NYPD CompStat, year to date through " + WEEK + ", vs. the same weeks of " + CPY + (M.PCTS.length > 1 ? " (percentages computed for the summed precincts)" : " (percentages as NYPD prints them)") + "." + (noCS.length ? " CompStat doesn’t report " + listJoin(noCS) + " separately." : ""));
   var nc = CO.filter(function(it){ return it.notComparable; })[0];
   if (nc) HT("li", null, ul, nc.notComparable);
-  var li = HT("li", null, ul, "Not shown: ");
+  var li = HT("li", null, ul, "Other crimes: ");
   li.textContent += CO.map(function(it){ return it.label + ": " + lc(it.why).replace(/\.$/, ""); }).join("; ") + ". Counts from NYPD’s annual totals, except hate crimes (NYPD Hate Crimes data) and criminal contempt (individual NYPD reports).";
 }
 // "See note 1": open the Notes panel and go to that note; "↑ Back" returns to the tile
