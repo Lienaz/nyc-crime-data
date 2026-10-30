@@ -78,7 +78,7 @@ svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-top:env(safe-area-inset-top)}
 .logo{margin:0;line-height:0}
 .logo a{display:inline-block;padding:6px 0 6px}
-.logo img{width:180px;height:auto;display:block}
+.logo img{width:70px;height:auto;display:block}
 .logo .on-dark{display:none}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .logo .on-light{display:none}
@@ -212,7 +212,7 @@ h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.0
 
 /* ---------- sizes ---------- */
 @media (min-width:1240px){ .wrap{max-width:1200px} }
-@media (max-width:1023.98px){ .logo img{width:140px} .co-l{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:1023.98px){ .logo img{width:60px} .co-l{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (max-width:899.98px){
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tile{margin-bottom:16px}
@@ -251,7 +251,7 @@ h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.0
 <header class="wrap">
   <div class="top">
     <div class="brand">
-      <p class="logo"><a href="https://thebiggerapple.manhattan.institute/" aria-label="The Bigger Apple from the Manhattan Institute"><img class="on-light" src="logos/mi-logo-blue.svg" alt="Manhattan Institute" width="180" height="33"><img class="on-dark" src="logos/mi-logo-white.svg" alt="Manhattan Institute" width="180" height="33"></a></p>
+      <p class="logo"><a href="https://thebiggerapple.manhattan.institute/" aria-label="The Bigger Apple from the Manhattan Institute"><img class="on-light" src="logos/mi-crosswalk-blue.svg" alt="Manhattan Institute" width="70" height="33"><img class="on-dark" src="logos/mi-crosswalk-white.svg" alt="Manhattan Institute" width="70" height="33"></a></p>
       <p class="kicker">The Bigger Apple · Crime data</p>
     </div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">Dark</button>
