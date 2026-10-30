@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>At a glance · New York, Precinct by Precinct</title>
+<meta name="description" content="NYPD crime by precinct, 2019 to 2025 and 2026 so far: maps, trends, response times and a check-your-block search for every New York City police precinct. From The Bigger Apple, Manhattan Institute.">
+<meta property="og:title" content="At a glance · New York, Precinct by Precinct">
+<meta property="og:description" content="NYPD crime by precinct, 2019 to 2025 and 2026 so far: maps, trends, response times and a check-your-block search for every New York City police precinct. From The Bigger Apple, Manhattan Institute.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lienaz.github.io/nyc-crime-data/glance.html">
+<link rel="canonical" href="https://lienaz.github.io/nyc-crime-data/glance.html">
+<script>try{var t=localStorage.getItem("citywidePrecinctsTheme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<style>
+:root{
+  --paper:#FFFFFF; --panel:#E8ECFC; --panel-2:#F0F3FF; --panel-3:#E1E6FA;
+  --ink:#20222E; --muted:#5A5D6B; --line:#AEB0B7;
+  --blue:#2C48DC; --blue-dark:#1F38BC; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#FFFFFF;
+  --serif:"Le Monde Livre Pro",Georgia,serif;
+  --sans:"GT America",Arial,Helvetica,sans-serif;
+  /* ---- type scale, identical on index-v2, precinct-v2 and glance: phone values here, ≥600px in the media rule below ---- */
+  --fs-micro:12px;   /* chart axis and value labels, legends, map labels, tiny uppercase labels (FIGURE N, card kickers); the floor */
+  --fs-small:13px;   /* source lines, footnotes, quiet notes, definitions (serif italic), page kicker, section labels, note links */
+  --fs-meta:14px;    /* chart readouts, note boxes, chips and compact strips, form labels, secondary sans lines */
+  --fs-ui:15px;      /* buttons, view tabs, summaries, sans text in cards, lists, results and notes */
+  --fs-body:17px;    /* body and card text (serif); form fields (never under 16px, so iPhones don't zoom) */
+  --fs-lead:18px;    /* ledes and deks */
+  --fs-h3:18px;      /* card, figure and map titles (serif bold) */
+  --fs-h2:24px;      /* section heads */
+  --fs-h1:32px;      /* page title */
+  --fs-num:32px;     /* hero numbers (sans bold, tabular); 36px from 600px, as they sit in 440px cards */
+  --fs-num-2:22px;   /* second-tier numbers: 2026 band, small number cards, clock, map buttons' glyphs */
+  --fs-num-tile:var(--fs-h2);   /* tile numbers (overview and glance tiles, card overlay): the h2 step */
+  --lh-head:1.15; --lh-cap:1.4; --lh-body:1.5;
+  /* spacing scale */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+  --gl:max(16px, env(safe-area-inset-left)); --gr:max(16px, env(safe-area-inset-right));
+  /* change bins, same steps as the city map on index.html: falls in MI Grey tints, rises in blues */
+  --b0:#6E717C; --b1:#AEB0B7; --b2:#D9DADE; --b3:#FFFFFF; --b4:#CDD5F8; --b5:#8D9EEF; --b6:#4A64E1; --b7:#1F38BC;
+  /* text on each bin fill: dark on light fills, white on dark ones */
+  --bt0:#FFFFFF; --bt1:#20222E; --bt2:#20222E; --bt3:#20222E; --bt4:#20222E; --bt5:#20222E; --bt6:#FFFFFF; --bt7:#FFFFFF;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#20222E; --panel:#2A2D3B; --panel-2:#252836; --panel-3:#30344A;
+    --ink:#E8ECFC; --muted:#AEB0B7; --line:#4A4E5E;
+    --blue:#2FA8FF; --blue-dark:#6CC2FF; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#20222E;
+    --b0:#B5B7BE; --b1:#83868F; --b2:#555866; --b3:#1A1C25; --b4:#2E3F7C; --b5:#3A60C9; --b6:#2F86EC; --b7:#2FA8FF;
+    --bt0:#111318; --bt1:#111318; --bt2:#FFFFFF; --bt3:#E8ECFC; --bt4:#FFFFFF; --bt5:#FFFFFF; --bt6:#111318; --bt7:#111318;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#20222E; --panel:#2A2D3B; --panel-2:#252836; --panel-3:#30344A;
+  --ink:#E8ECFC; --muted:#AEB0B7; --line:#4A4E5E;
+  --blue:#2FA8FF; --blue-dark:#6CC2FF; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#20222E;
+  --b0:#B5B7BE; --b1:#83868F; --b2:#555866; --b3:#1A1C25; --b4:#2E3F7C; --b5:#3A60C9; --b6:#2F86EC; --b7:#2FA8FF;
+  --bt0:#111318; --bt1:#111318; --bt2:#FFFFFF; --bt3:#E8ECFC; --bt4:#FFFFFF; --bt5:#FFFFFF; --bt6:#111318; --bt7:#111318;
+  color-scheme:dark;
+}
+@media (min-width:600px){ :root{ --fs-body:18px; --fs-lead:20px; --fs-h3:19px; --fs-h2:30px; --fs-h1:44px; --fs-num:36px; --fs-num-2:24px; } }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+a:hover{color:var(--blue-dark)}
+button,select{font:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sr{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* one content column for every section (shared with index.html and precinct.html) */
+.wrap{max-width:960px;box-sizing:border-box;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr)}
+@media (min-width:768px){ :root{ --gl:max(24px, env(safe-area-inset-left)); --gr:max(24px, env(safe-area-inset-right)); } }
+svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* ---------- header (same as the other two pages) ---------- */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-top:env(safe-area-inset-top)}
+.logo{margin:0;line-height:0}
+.logo a{display:inline-block;padding:6px 0 6px}
+.logo img{width:180px;height:auto;display:block}
+.logo .on-dark{display:none}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .logo .on-light{display:none}
+  :root:not([data-theme="light"]) .logo .on-dark{display:block}
+}
+:root[data-theme="dark"] .logo .on-light{display:none}
+:root[data-theme="dark"] .logo .on-dark{display:block}
+.theme-btn{margin-top:2px;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:700 var(--fs-ui) var(--sans);padding:0 14px;cursor:pointer}
+/* the kicker stays with the logo: directly under its clear space, left-aligned (BRAND.md) */
+.brand{min-width:0}
+.kicker{font:700 var(--fs-small) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:0 0 2px}
+
+/* ---------- view tabs + area picker ---------- */
+.bar{display:flex;flex-wrap:wrap;align-items:flex-end;column-gap:16px}
+.views{flex:1 1 auto;display:flex;gap:24px;border-bottom:1px solid var(--line)}
+.views a{display:inline-flex;align-items:center;min-height:44px;font:700 var(--fs-ui) var(--sans);color:var(--ink);text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-1px}
+.views a[aria-current="page"]{border-bottom-color:var(--blue)}
+.views a:not([aria-current]):hover{color:var(--blue)}
+.pick{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:2px;min-width:0}
+.pick label{font:700 var(--fs-micro) var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none}
+.pick select{min-height:44px;height:44px;font:700 var(--fs-body) var(--sans);padding:0 8px;border:1.5px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);max-width:380px;min-width:0;cursor:pointer}
+.pick select:hover{border-color:var(--blue)}
+@media (min-width:600px){ select,.pick select{font-size:var(--fs-ui)} }   /* form fields: the body size on phones (16px+ so iPhones don't zoom), the UI size from 600px */
+
+/* ---------- title ---------- */
+.g-head{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px;margin:4px 0 0}
+h1{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0;letter-spacing:-.01em}   /* the compact view's title: the section-head step */
+.meta{font:var(--fs-ui)/1.35 var(--sans);margin:0;color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 0}
+.week{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:0 0 0 auto;white-space:nowrap}
+.msg{font:var(--fs-meta)/var(--lh-cap) var(--sans);margin:8px 0 0;padding:6px 10px;background:var(--panel-2);border-left:3px solid var(--accent)}
+
+/* ---------- tiles ---------- */
+/* rows inside the tiles line up across each row of four (subgrid), so a two-line name doesn't shift the charts */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:16px;row-gap:0;margin-top:2px}
+.g-lab{grid-column:1 / -1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 16px;font:700 var(--fs-micro)/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:3px 0 1px}
+.g-key{font:var(--fs-micro)/1.2 var(--sans);letter-spacing:0;text-transform:none;color:var(--muted)}
+.tile{position:relative;background:var(--panel);padding:6px 12px;min-width:0;display:grid;grid-template-rows:subgrid;grid-row:span 5;row-gap:0}
+.t-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-height:20px}
+.t-top h3{font:700 var(--fs-ui)/1.25 var(--sans);margin:0;min-width:0}
+.t-go{flex:none;display:inline-flex;align-items:center;min-height:44px;margin:-11px -8px -11px 0;padding:0 8px;font:700 var(--fs-small) var(--sans);text-decoration:none;white-space:nowrap}
+.t-go:hover{text-decoration:underline}
+.t-def{font:italic var(--fs-small)/1.3 var(--serif);color:var(--muted);margin:1px 0 0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.t-def:empty{margin:0}
+.t-nums{display:flex;align-items:center;gap:4px 12px;margin-top:3px;min-width:0}
+.t-big{flex:none;margin:0;font:700 var(--fs-num-tile)/1.05 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--blue);white-space:nowrap}
+.t-big.note{font-size:var(--fs-lead);line-height:calc(var(--fs-num-tile) * 1.05);color:var(--muted);letter-spacing:0}
+.t-chg{min-width:0;font:var(--fs-micro)/1.3 var(--sans);color:var(--muted);margin:0;font-variant-numeric:tabular-nums}
+.t-chg .c1{display:block;font:700 var(--fs-ui)/1.25 var(--sans);color:var(--ink);white-space:nowrap}
+.sw{display:inline-block;width:12px;height:12px;border:1px solid var(--line);vertical-align:-1px;margin-right:6px}
+.sw.b0{background:var(--b0)} .sw.b1{background:var(--b1)} .sw.b2{background:var(--b2)} .sw.b3{background:var(--b3)}
+.sw.b4{background:var(--b4)} .sw.b5{background:var(--b5)} .sw.b6{background:var(--b6)} .sw.b7{background:var(--b7)}
+.t-spark{min-width:0;align-self:end}
+.ro{font:var(--fs-meta)/18px var(--sans);font-variant-numeric:tabular-nums;min-height:18px;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.ro .nm{color:var(--blue)}
+.plot{display:block;touch-action:pan-y;cursor:crosshair;border-radius:2px;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.plot svg{display:block;width:100%;overflow:visible}
+.sp-line{fill:none;stroke:var(--blue);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.sp-base{stroke:var(--line);stroke-width:1}
+.sp-rule{stroke:var(--line);stroke-width:1}
+.sp-d19{fill:var(--ink)}
+.sp-d25{fill:var(--blue)}
+.sp-dot{fill:var(--blue);stroke:var(--paper);stroke-width:1.5}
+.sp-yr{font-size:var(--fs-micro);fill:var(--muted)}
+.sp-yr.k{fill:var(--ink)}
+.sp-none{font:var(--fs-small)/1.35 var(--sans);color:var(--muted);margin:0;min-height:50px;display:flex;align-items:center}
+/* 2026 so far: its own band at the bottom of each tile */
+.t-foot{margin-top:2px;padding-top:3px;border-top:1px solid var(--line);font-family:var(--sans);display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;align-items:center;align-content:start}
+.y-lab{display:block;margin:0;font:700 var(--fs-micro)/13px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--blue);white-space:nowrap}
+.y-lab .y-d{display:block;font-weight:400;font-size:var(--fs-micro);line-height:13px;letter-spacing:0;text-transform:none;color:var(--muted)}
+.y-row{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-height:25px}
+.y-n{flex:none;font:700 var(--fs-num-2)/25px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:-.01em}
+.y-pill{flex:none;display:inline-block;font:700 var(--fs-small)/18px var(--sans);font-variant-numeric:tabular-nums;padding:0 7px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.y-pill.b0{background:var(--b0);color:var(--bt0)} .y-pill.b1{background:var(--b1);color:var(--bt1)} .y-pill.b2{background:var(--b2);color:var(--bt2)}
+.y-pill.b3{background:var(--b3);color:var(--bt3);border-color:var(--line)} .y-pill.b4{background:var(--b4);color:var(--bt4)} .y-pill.b5{background:var(--b5);color:var(--bt5)}
+.y-pill.b6{background:var(--b6);color:var(--bt6)} .y-pill.b7{background:var(--b7);color:var(--bt7)}
+.y-pill.nt{background:none;color:var(--ink);border-color:var(--line)}
+.y-vs{grid-column:1 / -1;min-width:0;min-height:15px;font:var(--fs-micro)/15px var(--sans);color:var(--muted)}
+.y-none{font:var(--fs-small)/15px var(--sans);color:var(--muted)}
+.t-city{white-space:nowrap}
+.t-city b{color:var(--ink);font-weight:700}
+
+/* ---------- not shown (counts only): one card per crime, page-colour gaps between ---------- */
+.co{margin:0}
+.co .g-lab{justify-content:flex-start;column-gap:16px}
+.co-l{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px;margin:0;padding:0;list-style:none;font:var(--fs-small)/1.3 var(--sans);font-variant-numeric:tabular-nums}
+.co-l li{min-width:0;padding:4px 8px 5px;background:var(--panel-2);border-left:3px solid var(--line)}
+/* name and count share a line when they fit */
+.co-l .l{display:inline;font-weight:700;color:var(--ink);margin-right:6px}
+.co-l .n{display:inline-block;white-space:nowrap}
+.co-l .tag{color:var(--muted);font-style:normal;margin-left:3px}
+.co-l .d{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font:italic var(--fs-small)/1.3 var(--serif);color:var(--muted);margin-top:1px}   /* two lines at most; the full text is the item's title */
+
+/* ---------- footer ---------- */
+.g-foot{margin:2px 0 0;padding-bottom:calc(8px + env(safe-area-inset-bottom));font:var(--fs-micro)/1.45 var(--sans);color:var(--muted)}
+.g-foot p{margin:0}
+/* the main way into the maps: an MI Blue button under the title line and again after the Not-shown strip */
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;background:var(--blue);color:var(--on-blue)!important;font:700 var(--fs-ui)/1.25 var(--sans);text-decoration:none;border-radius:3px;white-space:nowrap}
+.cta:hover{background:var(--blue-dark)}
+.g-head .cta{flex:none}
+.g-foot .cta{margin-top:8px}
+@media (min-width:700px){
+  .g-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:calc(2px + env(safe-area-inset-bottom))}
+  .g-foot .cta{flex:none;margin:0}
+}
+@media (max-width:699.98px){ .g-head .cta{flex:1 0 100%;margin:8px 0 2px} .cta{white-space:normal;text-align:center;padding:8px 16px} }
+/* inline links keep a 44px target without making the line taller */
+.f-btn,.f-a{display:inline-block;padding:13px 4px;margin:-13px 0 -13px 6px;border:0;background:none;font:700 var(--fs-small)/18px var(--sans);color:var(--blue);cursor:pointer;text-decoration:none;white-space:nowrap}
+.f-btn:hover,.f-a:hover{text-decoration:underline}
+.f-btn::before{content:"+";display:inline-block;width:.9em}
+.f-btn[aria-expanded="true"]::before{content:"\2212"}
+.notes-body{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--ink);margin:6px 0 12px;padding:8px 12px;background:var(--panel-2);border-left:3px solid var(--line)}
+.notes-body ul{margin:0;padding-left:1.1em}
+.notes-body li{margin:0 0 4px}
+.notes-body .n-list{margin:0 0 8px;padding-left:1.4em}
+.notes-body .n-list li:focus{outline:2px solid var(--blue);outline-offset:2px}
+.n-back{display:inline-block;padding:13px 4px;margin:-13px -4px;font:700 var(--fs-small)/18px var(--sans);text-decoration:none;white-space:nowrap}
+.n-back:hover{text-decoration:underline}
+.t-note{display:inline-block;padding:7px 0;margin:-7px 0;font:700 var(--fs-small)/20px var(--sans);color:var(--blue);text-decoration:none;white-space:nowrap}
+.t-note:hover{text-decoration:underline}
+.loading{font:var(--fs-ui) var(--sans);color:var(--muted);padding:30px 0}
+.err-box{font:var(--fs-ui)/var(--lh-cap) var(--sans);background:var(--panel);border-left:3px solid var(--accent);padding:12px 14px;margin:20px 0}
+
+/* ---------- sizes ---------- */
+@media (min-width:1240px){ .wrap{max-width:1200px} }
+@media (max-width:1023.98px){ .logo img{width:140px} .co-l{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:899.98px){
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tile{margin-bottom:16px}
+}
+@media (max-width:699.98px){
+  .pick{flex:1 0 100%;border-bottom:0;padding:8px 0 0}
+  .pick select{flex:1;max-width:none}
+  .g-head{margin-top:10px}
+  .logo a{padding:10px 0 14px}   /* BRAND.md clear space; the one-screen squeeze is for desktop only */
+  .week{margin-left:0;flex-basis:100%}
+}
+@media (max-width:599.98px){
+  .tiles{grid-template-columns:1fr;column-gap:12px}
+  .co-l{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .g-lab{margin:8px 0 4px}
+  .tile{grid-template-rows:none;grid-row:auto;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-areas:"top top" "def def" "nums spark" "foot foot";column-gap:14px;padding:7px 12px 8px;margin-bottom:12px}
+  .t-top{grid-area:top}
+  .t-def{grid-area:def}
+  .t-nums{grid-area:nums;align-self:end;flex-wrap:wrap;gap:2px 8px;margin-bottom:2px}
+  .t-city{display:block}
+  .t-city .dot{display:none}
+  .t-def{margin-bottom:1px}
+  .t-spark{grid-area:spark}
+  .t-foot{grid-area:foot}
+  .ro{margin-top:2px}
+}
+@media (max-width:419.98px){ .ro .nm-w{display:none} }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="top">
+    <div class="brand">
+      <p class="logo"><a href="https://thebiggerapple.manhattan.institute/" aria-label="The Bigger Apple from the Manhattan Institute"><img class="on-light" src="logos/mi-logo-blue.svg" alt="Manhattan Institute" width="180" height="33"><img class="on-dark" src="logos/mi-logo-white.svg" alt="Manhattan Institute" width="180" height="33"></a></p>
+      <p class="kicker">The Bigger Apple · Crime data</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">Dark</button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <div class="bar">
+    <nav class="views" aria-label="View">
+      <a href="index.html" id="vAlt">Maps &amp; details</a>
+      <a href="glance.html" aria-current="page" id="vHere">At a glance</a>
+    </nav>
+    <div class="pick"><label for="where">Area</label><select id="where" disabled><option>Citywide</option></select></div>
+  </div>
+
+  <p class="loading" id="loading">Loading the precinct data…</p>
+  <div id="page" hidden>
+    <div class="g-head"><h1 id="hed">Citywide</h1><p class="meta" id="meta"></p><p class="week" id="week"></p><a class="cta" id="ctaTop" href="index.html">See maps, trends and every precinct →</a></div>
+    <p class="msg" id="msg" role="status" hidden></p>
+
+    <div class="tiles" id="tiles"></div>
+
+    <section class="co" aria-labelledby="coH"><h2 class="g-lab" id="coH">Not shown</h2><ul class="co-l" id="coList"></ul></section>
+
+    <footer class="g-foot">
+      <p class="g-foot-t"><span id="footTxt"></span> <button type="button" class="f-btn" id="notesBtn" aria-expanded="false" aria-controls="notesBody">Notes</button> <a class="f-a" href="index.html#about">About the data →</a></p>
+      <a class="cta" id="ctaBot" href="index.html">See maps, trends and every precinct →</a>
+    </footer>
+    <div class="notes-body" id="notesBody" hidden></div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+/* ===================================================================
+   glance.html: one screen of figures for the city or one precinct.
+   glance.html · ?pct=75 · ?pct=14,18 (summed, like precinct.html)
+   Every number comes from data/city.json. Nothing is fetched from any
+   outside service.
+   =================================================================== */
+var CFG = {
+  smallN: 20,          // fewer than this in either year: counts, not a percent
+  themeKey: "citywidePrecinctsTheme",
+  groups: [["violent","Violent crime"],["property","Property crime"]],
+  midtown: [14, 18]
+};
+var $ = function(s, r){ return (r || document).querySelector(s); };
+function isNum(v){ return typeof v === "number" && isFinite(v); }
+function fmt(n){ return isNum(n) ? Number(n).toLocaleString("en-US") : "—"; }
+function sign(v){ return v > 0 ? "+" : v < 0 ? "−" : ""; }
+function pctOf(a, b){ return (isNum(a) && isNum(b) && a > 0) ? (b - a)/a*100 : null; }
+function pctStr(v){ if (!isNum(v)) return "—"; var r = Math.abs(v) < 10 ? Math.round(v*10)/10 : Math.round(v); if (r === 0) return "0%"; return sign(r) + Math.abs(r) + "%"; }
+function pctGiven(v){ if (!isNum(v)) return "—"; var a = Math.abs(v).toFixed(1); return a === "0.0" ? "0.0%" : sign(v) + a + "%"; }   // 2026 so far: one decimal, as CompStat prints it
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+function lc(s){ return s && !/^[A-Z]{2}/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s; }   // keeps "NYPD" intact
+function uc(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function ordN(n){ n = +n; var s = n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1:"st", 2:"nd", 3:"rd" }[n % 10] || "th"); return n + s; }
+function listJoin(a){ if (a.length < 2) return a.join(""); if (a.length === 2) return a[0] + " and " + a[1]; return a.slice(0, -1).join(", ") + " and " + a[a.length-1]; }
+function sum(a){ var s = 0; (a || []).forEach(function(v){ if (isNum(v)) s += v; }); return s; }
+var SVGNS = "http://www.w3.org/2000/svg";
+function S(tag, attrs, parent, text){
+  var e = document.createElementNS(SVGNS, tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function HT(tag, attrs, parent, text){
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// stepped bins for the 2019 → 2025 % change, the same edges as the map on index.html
+var BIN_LBL = ["fell 50% or more", "fell 20% to 50%", "fell 5% to 20%", "about the same", "rose 5% to 20%", "rose 20% to 50%", "rose 50% to 100%", "doubled or more"];
+function binOf(p){ if (p <= -50) return 0; if (p <= -20) return 1; if (p <= -5) return 2; if (p < 5) return 3; if (p < 20) return 4; if (p < 50) return 5; if (p < 100) return 6; return 7; }
+
+/* ---------- theme (shared with index.html and precinct.html) ---------- */
+var root = document.documentElement, darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
+function isDark(){ var a = root.getAttribute("data-theme"); return a ? a === "dark" : darkMQ.matches; }
+function syncThemeBtn(){ var d = isDark(), b = $("#themeBtn"); b.textContent = d ? "Light" : "Dark"; b.setAttribute("aria-label", d ? "Switch to light mode" : "Switch to dark mode"); }
+$("#themeBtn").addEventListener("click", function(){
+  var next = isDark() ? "light" : "dark"; root.setAttribute("data-theme", next);
+  try { localStorage.setItem(CFG.themeKey, next); } catch(e){}
+  syncThemeBtn();
+});
+if (darkMQ.addEventListener) darkMQ.addEventListener("change", syncThemeBtn);
+syncThemeBtn();
+
+/* ---------- data ---------- */
+function getJSON(u){ return fetch(u, { cache:"no-cache" }).then(function(r){ if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
+getJSON("data/city.json").then(start, function(e){
+  var l = $("#loading"); l.className = "err-box"; l.textContent = "The precinct data couldn’t be loaded (" + e.message + ").";
+  if (window.console) console.error(e);
+});
+
+function parsePcts(raw){
+  var out = [], bad = [];
+  String(raw || "").split(/[,+\s]+/).forEach(function(s){ if (!s) return; if (/^\d{1,3}$/.test(s)){ var n = +s; if (out.indexOf(n) < 0) out.push(n); } else bad.push(s); });
+  return { list:out, bad:bad };
+}
+
+function start(C){
+var YEARS = C.years, I19 = YEARS.indexOf(2019), I25 = YEARS.indexOf(2025), LASTY = YEARS[YEARS.length - 1];
+var PBY = {}; C.precincts.forEach(function(p){ PBY[p.pct] = p; });
+var CATS = C.categories.filter(function(c){ return CFG.groups.some(function(g){ return g[0] === c.group; }); });
+var CO = C.countsOnly || [];
+var WEEK = C.weekEnding || "";
+var BORO_ORDER = ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"];
+function named(p){ return p.name && p.name !== p.ord; }
+
+/* ---------- area picker ---------- */
+var sel = $("#where");
+sel.innerHTML = "";
+HT("option", { value:"" }, sel, "Citywide");
+HT("option", { value:CFG.midtown.join(",") }, sel, "Midtown · " + CFG.midtown.map(ordN).join(" + ") + " Precincts");
+BORO_ORDER.concat(C.precincts.map(function(p){ return p.boro; }).filter(function(b, i, a){ return BORO_ORDER.indexOf(b) < 0 && a.indexOf(b) === i; })).forEach(function(b){
+  var ps = C.precincts.filter(function(p){ return p.boro === b; }).sort(function(x, y){ return x.pct - y.pct; });
+  if (!ps.length) return;
+  var og = HT("optgroup", { label:b }, sel);
+  ps.forEach(function(p){
+    var sub = named(p) ? p.name : (p.hoods && p.hoods[0]) || "";
+    HT("option", { value:String(p.pct) }, og, p.ord + (sub ? " · " + sub : ""));
+  });
+});
+sel.disabled = false;
+sel.addEventListener("change", function(){
+  var v = sel.value;
+  try { history.replaceState(null, "", v ? "glance.html?pct=" + v : "glance.html"); } catch(e){}
+  render(v ? parsePcts(v).list : [], null);
+});
+
+/* ---------- one model per area ---------- */
+function sumSeries(arrs, n){
+  n = n || YEARS.length;
+  var out = [];
+  for (var i=0;i<n;i++){ var s = 0, any = false; arrs.forEach(function(a){ if (a && isNum(a[i])){ s += a[i]; any = true; } }); out.push(any ? s : null); }
+  return out;
+}
+function ytdRow(r){ return r && isNum(r[0]) && isNum(r[1]) ? { a:r[0], b:r[1], p:isNum(r[2]) ? r[2] : null } : null; }
+function ytdOf(pcts, key){
+  var Y = C.ytd || {};
+  if (!pcts) return ytdRow((Y.citywide || {})[key]);
+  var rows = pcts.map(function(n){ return ((Y.byPct || {})[n] || {})[key]; });
+  if (rows.some(function(r){ return !r; })) return null;
+  if (rows.length === 1) return ytdRow(rows[0]);
+  var a = sum(rows.map(function(r){ return r[0]; })), b = sum(rows.map(function(r){ return r[1]; })), pc = pctOf(a, b);
+  return { a:a, b:b, p:pc == null ? null : Math.round(pc*10)/10 };
+}
+function ySmall(y){ return !y || Math.min(y.a, y.b) < CFG.smallN || !isNum(y.p); }
+function issueOf(pct, key){ var d = (PBY[pct] || {}).dataIssue; return d && (d.keys || []).indexOf(key) >= 0 ? d : null; }
+
+function model(PCTS){
+  var M = { city:!PCTS.length, PCTS:PCTS, cats:[], co:[], notes:[], issues:[], noteList:[], issueN:0 };
+  var cityOff = C.official.citywide || {};
+  if (M.city){
+    M.title = "Citywide";
+    M.meta = "All five boroughs · " + C.precincts.length + " precincts";
+    M.short = "Citywide"; M.cmp = true;
+    CATS.forEach(function(c){
+      var s = cityOff[c.key] || [], o = { c:c, key:c.key, label:c.label, plural:c.plural || lc(c.label) };
+      o.sp = s; o.spTS = YEARS[0]; o.spName = "Citywide";
+      o.a = s[I19]; o.b = s[I25];
+      o.mode = isNum(o.a) && isNum(o.b) && Math.min(o.a, o.b) >= CFG.smallN ? "cmp" : "small";
+      o.p = o.mode === "cmp" ? pctOf(o.a, o.b) : null;
+      o.ytd = c.compstat ? ytdOf(null, c.key) : null;
+      M.cats.push(o);
+    });
+    CO.forEach(function(it){ M.co.push(coItem(it, null, true)); });
+    M.detail = function(key){ return "index.html?cat=" + encodeURIComponent(key); };
+    M.alt = { href:"index.html", label:"Maps & details", cta:"See maps, trends and every precinct →" };
+    M.jail = true;
+    return M;
+  }
+  var UNITS = PCTS.map(function(n){ return PBY[n]; });
+  var MULTI = UNITS.length > 1;
+  var IS_MID = MULTI && UNITS.length === CFG.midtown.length && UNITS.every(function(u){ return CFG.midtown.indexOf(u.pct) >= 0; });
+  M.title = MULTI ? listJoin(UNITS.map(function(u){ return u.name; })) : UNITS[0].name;
+  M.short = MULTI ? (IS_MID ? "Midtown" : "Combined") : (/Precinct$/.test(UNITS[0].name) ? ordN(UNITS[0].pct) : UNITS[0].name);
+  var BOROS = []; UNITS.forEach(function(u){ if (BOROS.indexOf(u.boro) < 0) BOROS.push(u.boro); });
+  var HOODS = []; UNITS.forEach(function(u){ (u.hoods || []).forEach(function(h){ if (HOODS.indexOf(h) < 0) HOODS.push(h); }); });
+  var lead = MULTI ? listJoin(UNITS.map(function(u){ return ordN(u.pct); })) + " Precincts" : (named(UNITS[0]) ? UNITS[0].ord : "");
+  M.meta = [lead, BOROS.join(" and "), HOODS.slice(0, MULTI ? 0 : 3).join(", ")].filter(Boolean).join(" · ");
+  M.metaFull = [lead, BOROS.join(" and "), HOODS.join(", ")].filter(Boolean).join(" · ");
+  // 2019 vs 2025 comparability (the 116th was carved out of the 105th and 113th in Dec. 2024)
+  var NONCMP = UNITS.filter(function(u){ return u.compare2019 === false; });
+  var CMP = NONCMP.every(function(u){ return u.group && u.group.split("+").map(Number).every(function(m){ return PCTS.indexOf(m) >= 0; }); });
+  var GROUP = (!CMP && !MULTI && UNITS[0].group && C.official.groups && C.official.groups[UNITS[0].group]) ? UNITS[0].group : null;
+  var GROUP_PCTS = GROUP ? GROUP.split("+").map(Number) : [];
+  M.cmp = CMP; M.group = GROUP;
+  M.groupLabel = GROUP ? GROUP_PCTS.map(ordN).join(" + ") + " combined" : "";
+  // shorter on the tile (the Notes name the three precincts); screen readers get the full label
+  M.groupShort = GROUP ? (["", "one", "two", "three", "four", "five"][GROUP_PCTS.length] || GROUP_PCTS.length) + " precincts combined" : "";
+  var TS = (function(){
+    var us = CMP && NONCMP.length ? UNITS.filter(function(u){ return u.compare2019 !== false; }) : UNITS;
+    if (!us.length) return YEARS[0];
+    return Math.max.apply(null, us.map(function(u){ return u.trendStart || YEARS[0]; }));
+  })();
+  var GTS = GROUP ? Math.max.apply(null, GROUP_PCTS.map(function(n){ return PBY[n] && PBY[n].trendStart < 2024 ? PBY[n].trendStart : YEARS[0]; })) : null;
+  CATS.forEach(function(c){
+    var o = { c:c, key:c.key, label:c.label, plural:c.plural || lc(c.label) };
+    var a = sumSeries(UNITS.map(function(u){ return (C.official.byPct[u.pct] || {})[c.key]; })), cw = cityOff[c.key] || [];
+    o.a = a[I19]; o.b = a[I25]; o.cp = pctOf(cw[I19], cw[I25]); o.ca = cw[I19]; o.cb = cw[I25];
+    o.sp = a; o.spTS = TS; o.spName = M.short;
+    var iss = null; UNITS.forEach(function(u){ if (!iss) iss = issueOf(u.pct, c.key); });
+    if (iss && CMP){
+      // NYPD's official figure for that year is wrong: never show it, or a % built on it
+      o.mode = "issue"; o.issue = iss; o.b = null; o.p = null;
+      o.sp = a.map(function(v, i){ return YEARS[i] >= (iss.year || 2025) ? null : v; });
+      if (M.issues.indexOf(iss.note) < 0) M.issues.push(iss.note);
+    } else if (CMP){
+      o.mode = isNum(o.a) && isNum(o.b) && Math.min(o.a, o.b) >= CFG.smallN ? "cmp" : "small";
+      o.p = o.mode === "cmp" ? pctOf(o.a, o.b) : null;
+    } else if (GROUP){
+      var g = (C.official.groups[GROUP] || {})[c.key] || [];
+      o.ga = g[I19]; o.gb = g[I25];
+      o.mode = "group"; o.gsmall = !(isNum(o.ga) && isNum(o.gb) && Math.min(o.ga, o.gb) >= CFG.smallN);
+      o.gp = o.gsmall ? null : pctOf(o.ga, o.gb);
+      o.sp = g; o.spTS = GTS; o.spName = "Combined";
+    } else o.mode = "none";
+    o.ytd = c.compstat ? ytdOf(PCTS, c.key) : null;
+    o.cytd = c.compstat ? ytdOf(null, c.key) : null;
+    M.cats.push(o);
+  });
+  CO.forEach(function(it){ M.co.push(coItem(it, PCTS, CMP)); });
+  var seen = {}; M.issues.forEach(function(n){ seen[n] = 1; });
+  UNITS.forEach(function(u){ (u.notes || []).forEach(function(n){ if (!seen[n]){ seen[n] = 1; M.notes.push(n); } }); });
+  // the data note was written for the full view ("this page shows report counts"); here no 2025 total is shown at all
+  M.noteList = M.issues.map(function(n){ return n.replace(/,? so this page shows report counts for 2025 instead\.?$/, ", so no official 2025 total or change is shown for those crimes here; Maps & details uses report counts instead. Citywide 2025 totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime)."); }).concat(M.notes);
+  if (GROUP) M.noteList.push("Because of the December 2024 boundary change, the change since 2019 and the trend lines are for the " + listJoin(GROUP.split("+").map(ordN)) + " Precincts combined; the 2025 and 2026 figures are this precinct’s own.");
+  M.issueN = M.issues.length ? 1 : 0;
+  var q = PCTS.join(",");
+  M.detail = function(key){ return "precinct.html?pct=" + q + "&cat=" + encodeURIComponent(key); };
+  M.alt = { href:"precinct.html?pct=" + q, label:"Maps & details", cta:"See maps, trends and your block →" };
+  M.selValue = q;
+  return M;
+}
+
+// "Not shown": 2019 → 2025 counts (2025 only when 2019 isn't comparable)
+function coItem(it, pcts, cmp){
+  var r = { it:it, label:it.label, nc:!!it.notComparable, rep:it.src === "complaints", cmp:cmp };
+  var yrs, ser;
+  if (it.src === "official" || it.src === "nonseven"){
+    yrs = YEARS;
+    ser = pcts ? sumSeries(pcts.map(function(n){ return (C.official.byPct[n] || {})[it.key]; })) : (C.official.citywide || {})[it.key];
+    if (pcts){ for (var i=0;i<pcts.length;i++){ var d = issueOf(pcts[i], it.key); if (d){ r.issue = d; break; } } }
+  } else {
+    var A = (C.annual || {})[it.key];
+    if (A){ yrs = A.years; ser = pcts ? sumSeries(pcts.map(function(n){ return (A.byPct || {})[n]; }), A.years.length) : A.citywide; }
+  }
+  if (!ser || !yrs){ r.none = true; return r; }
+  r.a = ser[yrs.indexOf(2019)]; r.b = ser[yrs.indexOf(2025)];
+  return r;
+}
+
+/* ---------- render ---------- */
+var SPARKS = [];
+function render(PCTS, msg){
+  var M = model(PCTS);
+  // picker
+  var v = M.city ? "" : M.selValue, has = false;
+  Array.prototype.forEach.call(sel.options, function(op){ if (op.value === v) has = true; });
+  var tmp = sel.querySelector("option[data-tmp]"); if (tmp) tmp.parentNode.removeChild(tmp);
+  if (!has){ var op = document.createElement("option"); op.value = v; op.setAttribute("data-tmp", "1"); op.textContent = "Combined · " + PCTS.map(ordN).join(" + "); sel.insertBefore(op, sel.options[1]); }
+  sel.value = v;
+  // view tabs
+  $("#vHere").setAttribute("href", M.city ? "glance.html" : "glance.html?pct=" + M.selValue);
+  var alt = $("#vAlt"); alt.setAttribute("href", M.alt.href); alt.textContent = M.alt.label;
+  // the same target as the tab, as a button under the title and after the Not-shown strip
+  ["#ctaTop", "#ctaBot"].forEach(function(s){ var b = $(s); b.setAttribute("href", M.alt.href); b.textContent = M.alt.cta; });
+  document.title = (M.city ? "Citywide" : M.title) + " at a glance · New York, Precinct by Precinct";
+  $("#hed").textContent = M.title;
+  $("#meta").textContent = M.meta;
+  $("#meta").setAttribute("title", M.metaFull || M.meta);   // one line on screen (ellipsis if long); the full list on hover
+  $("#week").textContent = "2026 figures through " + WEEK;
+  var m = $("#msg"); m.hidden = !msg; m.textContent = msg || "";
+
+  var box = $("#tiles"); box.innerHTML = ""; SPARKS = [];
+  CFG.groups.forEach(function(g){
+    var cs = M.cats.filter(function(o){ return o.c.group === g[0]; });
+    if (!cs.length) return;
+    var gl = HT("h2", { "class":"g-lab" }, box, g[1]);
+    if (g === CFG.groups[0]) HT("span", { "class":"g-key" }, gl, "Big numbers: NYPD’s official 2025 totals" + (M.city ? ", citywide" : "") + " · change since 2019 · trend · 2026 so far vs. the same weeks of 2025");
+    cs.forEach(function(o){ tile(box, o, M); });
+  });
+  renderCO(M);
+  renderFoot(M);
+  SPARKS.forEach(function(s){ s.draw(); });
+}
+
+function changeHTML(o, M){
+  // [visible html, plain text for screen readers]
+  function sw(p){ return '<i class="sw b' + binOf(p) + '" aria-hidden="true"></i>'; }
+  if (o.mode === "cmp") return ['<span class="c1">' + sw(o.p) + pctStr(o.p) + "</span>since 2019",
+    pctStr(o.p) + " since 2019, from " + fmt(o.a) + " in 2019"];
+  if (o.mode === "small") return ['<span class="c1">' + fmt(o.a) + " → " + fmt(o.b) + "</span>2019 → 2025",
+    fmt(o.a) + " in 2019 and " + fmt(o.b) + " in 2025, too few for a percent change"];
+  if (o.mode === "issue") return ['<span class="c1">' + fmt(o.a) + " in 2019</span>",
+    fmt(o.a) + " in 2019. NYPD’s official 2025 figure appears misaligned in its spreadsheet; see note " + M.issueN + " at the bottom"];
+  if (o.mode === "group"){
+    var h = o.gsmall ? '<span class="c1">' + fmt(o.ga) + " → " + fmt(o.gb) + "</span>2019 → 2025" : '<span class="c1">' + sw(o.gp) + pctStr(o.gp) + "</span>since 2019";
+    return [h + ", " + esc(M.groupShort),
+      (o.gsmall ? fmt(o.ga) + " in 2019 and " + fmt(o.gb) + " in 2025" : pctStr(o.gp) + " since 2019, from " + fmt(o.ga) + " to " + fmt(o.gb)) + ", " + M.groupLabel];
+  }
+  return ['<span class="c1">—</span>2019 not comparable', "2019 not comparable because of the 2024 boundary change"];
+}
+// the 2026 band: label + as-of date, then the year-to-date count, a change pill in the map's bin colours, and the 2025 count
+var THRU = WEEK.replace(/, \d{4}$/, "");
+function y26Band(box, o, tag){
+  var lab = HT(tag, { "class":"y-lab" }, box, "2026 so far");
+  HT("span", { "class":"y-d" }, lab, "through " + THRU);
+  var row = HT(tag, { "class":"y-row" }, box), y = o.ytd, vs = HT(tag, { "class":"y-vs" }, box);
+  if (!o.c.compstat){ HT("span", { "class":"y-none" }, row, "Not in CompStat"); return; }
+  if (!y){ HT("span", { "class":"y-none" }, row, "No 2026 figure"); return; }
+  HT("span", { "class":"y-n" }, row, fmt(y.b));
+  if (ySmall(y)){
+    HT("span", { "class":"y-pill nt" }, row, "vs. " + fmt(y.a));
+    vs.textContent = "in the same weeks of 2025";
+  } else {
+    HT("span", { "class":"y-pill b" + binOf(y.p) }, row, pctGiven(y.p));
+    vs.textContent = "vs. " + fmt(y.a) + " in the same weeks of 2025";
+  }
+}
+function ytdHTML(o){
+  if (!o.c.compstat) return ["2026 so far: not in CompStat", "NYPD’s weekly CompStat report doesn’t track this separately"];
+  var y = o.ytd; if (!y) return ["2026 so far: —", "no 2026 figure"];
+  if (ySmall(y)) return ["2026 so far <b>" + fmt(y.b) + "</b> vs. " + fmt(y.a), "2026 so far: " + fmt(y.b) + ", vs. " + fmt(y.a) + " in the same weeks of 2025"];
+  return ["2026 so far <b>" + pctGiven(y.p) + "</b> vs. 2025", "2026 so far: " + pctGiven(y.p) + " vs. the same weeks of 2025, " + fmt(y.b) + " vs. " + fmt(y.a)];
+}
+
+function tile(box, o, M){
+  var t = HT("article", { "class":"tile", "aria-labelledby":"t-" + o.key }, box);
+  var top = HT("div", { "class":"t-top" }, t);
+  HT("h3", { id:"t-" + o.key }, top, o.label);
+  HT("a", { "class":"t-go", href:M.detail(o.key), "aria-label":o.label + ": details" + (M.city ? " in Maps & details" : " for " + M.title) }, top, "Details →");
+  var def = HT("p", { "class":"t-def" }, t, o.c.short || "");
+  if (o.c.plain && o.c.short) def.setAttribute("title", o.c.plain);
+  var nums = HT("div", { "class":"t-nums" }, t);
+  var big = HT("p", { "class":"t-big" + (o.mode === "issue" ? " note" : "") }, nums);
+  var ch = changeHTML(o, M), yt = ytdHTML(o);
+  if (o.mode === "issue"){ var nr = HT("a", { "class":"t-note", href:"#note-" + M.issueN, id:"nref-" + o.key, tabindex:"-1" }, big, "See note " + M.issueN); nr.setAttribute("data-note", M.issueN); }
+  else big.textContent = fmt(o.b);
+  var chg = HT("p", { "class":"t-chg" }, nums); chg.innerHTML = ch[0];
+  var sp = HT("div", { "class":"t-spark" }, t);
+  var al = o.label + (M.city ? ", citywide" : ", " + M.title) + ": " + (o.mode === "issue" ? "no official 2025 figure. " : fmt(o.b) + " in 2025, ") + ch[1] + ". " + yt[1] + ".";
+  var foot = HT("div", { "class":"t-foot" }, t);
+  y26Band(foot, o, "span");
+  if (!M.city){
+    // the citywide comparison sits on the change line: "since 2019 · Citywide +44%"
+    var cTxt = isNum(o.cp) && Math.min(o.ca, o.cb) >= CFG.smallN ? pctStr(o.cp) : fmt(o.ca) + " → " + fmt(o.cb);
+    var cs = HT("span", { "class":"t-city" }, chg);
+    if (o.mode !== "issue") HT("span", { "class":"dot" }, cs, " · ");
+    cs.appendChild(document.createTextNode("Citywide "));
+    HT("b", null, cs, cTxt);
+    al += " Citywide since 2019: " + cTxt + ".";
+  }
+  // hidden summary for screen readers; the visible bits are aria-hidden duplicates
+  var sr = HT("p", { "class":"sr" }, t, al); t.insertBefore(sr, nums);
+  nums.setAttribute("aria-hidden", "true"); foot.setAttribute("aria-hidden", "true");
+  SPARKS.push(spark(sp, o, M));
+}
+
+/* ---------- sparkline with the shared year readout (INTERACTION_SPEC.md) ---------- */
+function spark(host, o, M){
+  var pts = [];
+  (o.sp || []).forEach(function(v, i){ if (isNum(v) && YEARS[i] >= o.spTS && YEARS[i] <= LASTY) pts.push({ y:YEARS[i], v:v }); });
+  var ro = HT("p", { "class":"ro", "aria-live":"polite" }, host);
+  if (pts.length < 2){
+    ro.textContent = "";
+    HT("p", { "class":"sp-none" }, host, "No comparable trend before 2025.");
+    return { draw:function(){} };
+  }
+  var nameFor = o.spName;
+  var plot = HT("div", { "class":"plot", tabindex:"0", role:"group",
+    "aria-label":o.label + ", " + (o.mode === "group" ? M.groupLabel : (M.city ? "citywide" : M.title)) + ", NYPD annual totals " + pts[0].y + " to " + pts[pts.length-1].y + ". Left and right arrow keys step through the years." }, host);
+  var DEF = pts.length - 1, cur = DEF, geo = null;
+  var svg = null;
+  function setRO(){
+    var p = pts[cur];
+    ro.innerHTML = "<b>" + p.y + "</b> · <span class=\"nm nm-w\">" + esc(nameFor) + "</span> " + fmt(p.v);
+  }
+  function draw(){
+    var W = Math.max(80, Math.round(plot.clientWidth || 180)), PH = 22, AX = 13, H = PH + AX, L = 5, R = 5, T = 5;
+    var mx = 0; pts.forEach(function(p){ mx = Math.max(mx, p.v); }); if (mx <= 0) mx = 1;
+    var y0 = pts[0].y, y1 = pts[pts.length-1].y;
+    function X(y){ return L + (W - L - R) * (y - y0) / (y1 - y0); }
+    function Y(v){ return T + (PH - T) * (1 - v / mx); }
+    geo = { X:X, Y:Y, W:W, L:L, R:R };
+    plot.innerHTML = "";
+    svg = S("svg", { viewBox:"0 0 " + W + " " + H, width:W, height:H, "aria-hidden":"true", focusable:"false" }, plot);
+    S("line", { "class":"sp-base", x1:L, x2:W - R, y1:PH + .5, y2:PH + .5 }, svg);
+    S("path", { "class":"sp-line", d:pts.map(function(p, i){ return (i ? "L" : "M") + X(p.y).toFixed(1) + " " + Y(p.v).toFixed(1); }).join("") }, svg);
+    var p19 = null; pts.forEach(function(p){ if (p.y === 2019) p19 = p; });
+    if (p19) S("circle", { "class":"sp-d19", cx:X(2019), cy:Y(p19.v), r:2.5 }, svg);
+    var pl = pts[pts.length-1]; S("circle", { "class":"sp-d25", cx:X(pl.y), cy:Y(pl.v), r:2.5 }, svg);
+    S("text", { "class":"sp-yr", x:L - 2, y:H - 2 }, svg, String(y0));
+    S("text", { "class":"sp-yr", x:W - R + 2, y:H - 2, "text-anchor":"end" }, svg, String(y1));
+    if (p19 && X(2019) - X(y0) > 40 && X(y1) - X(2019) > 40) S("text", { "class":"sp-yr k", x:X(2019), y:H - 2, "text-anchor":"middle" }, svg, "2019");
+    svg._rule = S("line", { "class":"sp-rule", y1:0, y2:PH }, svg);
+    svg._dot = S("circle", { "class":"sp-dot", r:4 }, svg);
+    mark();
+  }
+  function mark(){
+    if (!svg) return;
+    var p = pts[cur], x = geo.X(p.y), active = cur !== DEF || plot === document.activeElement || hovering;
+    svg._rule.setAttribute("x1", x); svg._rule.setAttribute("x2", x);
+    svg._rule.style.display = active ? "" : "none";
+    svg._dot.setAttribute("cx", x); svg._dot.setAttribute("cy", geo.Y(p.v));
+    svg._dot.style.display = active ? "" : "none";
+    setRO();
+  }
+  function setIdx(i){ i = Math.max(0, Math.min(pts.length - 1, i)); if (i !== cur){ cur = i; mark(); } else mark(); }
+  function idxAt(clientX){
+    var r = plot.getBoundingClientRect(), x = (clientX - r.left) * (geo.W / (r.width || geo.W)), best = 0, bd = Infinity;
+    pts.forEach(function(p, i){ var d = Math.abs(geo.X(p.y) - x); if (d < bd){ bd = d; best = i; } });
+    return best;
+  }
+  var hovering = false, touch = null;
+  plot.addEventListener("pointermove", function(e){
+    if (e.pointerType === "mouse" || e.pointerType === "pen"){ hovering = true; setIdx(idxAt(e.clientX)); return; }
+    if (!touch) return;
+    var dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+    if (!touch.scrub && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) touch.scrub = true;
+    if (touch.scrub){ setIdx(idxAt(e.clientX)); if (e.cancelable) e.preventDefault(); }
+  });
+  plot.addEventListener("pointerdown", function(e){
+    if (e.pointerType === "touch") touch = { x:e.clientX, y:e.clientY, scrub:false };
+  });
+  plot.addEventListener("pointerup", function(e){
+    if (e.pointerType === "touch" && touch){
+      if (!touch.scrub && Math.abs(e.clientX - touch.x) < 10 && Math.abs(e.clientY - touch.y) < 10){ hovering = true; setIdx(idxAt(e.clientX)); }
+      touch = null;
+    }
+  });
+  plot.addEventListener("pointercancel", function(){ touch = null; });
+  plot.addEventListener("pointerleave", function(e){
+    if (e.pointerType === "mouse" || e.pointerType === "pen"){ hovering = false; cur = DEF; mark(); }
+  });
+  plot.addEventListener("keydown", function(e){
+    var k = e.key, i = cur;
+    if (k === "ArrowLeft") i = cur - 1; else if (k === "ArrowRight") i = cur + 1;
+    else if (k === "Home") i = 0; else if (k === "End") i = pts.length - 1;
+    else if (k === "Escape"){ hovering = false; cur = DEF; mark(); e.preventDefault(); return; }
+    else return;
+    e.preventDefault(); setIdx(i);
+  });
+  plot.addEventListener("focus", mark);
+  plot.addEventListener("blur", function(){ hovering = false; cur = DEF; mark(); });
+  // a tap elsewhere on the page puts a tapped sparkline back to its default year
+  document.addEventListener("pointerdown", function(e){ if (e.pointerType === "touch" && !plot.contains(e.target) && cur !== DEF){ hovering = false; cur = DEF; mark(); } });
+  setRO();
+  return { draw:draw };
+}
+
+/* ---------- not shown (counts only) ---------- */
+var CO_SHORT = { fraud:"Fraud, ID theft", drugs:"Felony drugs", weapons:"Felony weapons", contempt:"Felony contempt" };
+function renderCO(M){
+  var ul = $("#coList"); ul.innerHTML = "";
+  var anyNC = M.cmp && M.co.some(function(r){ return r.nc; });
+  var h = $("#coH");
+  h.textContent = "Not shown";
+  HT("span", { "class":"g-key" }, h, "Not in the tiles above: counts only, " + (M.cmp ? "2019 → 2025" : "2025") + (anyNC ? " · * Not comparable: rape law broadened Sept. 1, 2024" : ""));
+  M.co.forEach(function(r){
+    var it = r.it, li = HT("li", null, ul), al = r.label + ": ";
+    HT("span", { "class":"l" }, li, CO_SHORT[it.key] || r.label);
+    var n = HT("span", { "class":"n" }, li), b = HT("b", null, n);
+    if (r.none){ b.textContent = "—"; al += "no figures"; }
+    else if (r.issue){ b.textContent = fmt(r.a) + " → see note " + M.issueN; al += fmt(r.a) + " in 2019; the official 2025 figure appears misaligned in NYPD’s spreadsheet"; }
+    else if (r.cmp){ b.textContent = fmt(r.a) + " → " + fmt(r.b); al += fmt(r.a) + " in 2019, " + fmt(r.b) + " in 2025"; }
+    else { b.textContent = fmt(r.b); al += fmt(r.b) + " in 2025"; }
+    if (r.nc && r.cmp){ HT("i", { "class":"tag" }, n, "*"); al += ", not comparable: " + it.notComparable.replace(/\.$/, ""); }
+    if (r.rep){ HT("i", { "class":"tag" }, n, "reports"); al += " (individual NYPD reports)"; }
+    al += ". ";
+    if (it.short){ HT("span", { "class":"d" }, li, it.short); al += it.short + ". "; }
+    var full = it.plain || it.why || "";
+    if (full){ li.setAttribute("title", full); if (full !== it.short) al += full; }
+    Array.prototype.forEach.call(li.children, function(ch){ ch.setAttribute("aria-hidden", "true"); });
+    HT("span", { "class":"sr" }, li, al.trim());
+  });
+}
+
+/* ---------- footer, notes ---------- */
+function renderFoot(M){
+  var f = $("#footTxt"); f.innerHTML = "";
+  function line(t){ if (f.firstChild) f.appendChild(document.createTextNode(" ")); HT("span", null, f, t); }
+  line("Official NYPD totals; no per-capita rates.");
+  if (M.city) line("Citywide totals include crimes in city jails, which aren’t part of any precinct.");
+  else if (M.PCTS.length > 1) line(M.PCTS.map(ordN).join(" + ") + " Precincts summed.");
+  line("Sources: NYPD annual precinct totals, " + YEARS[0] + "–" + LASTY + "; NYPD CompStat, week ending " + WEEK + "; NYC Open Data.");
+  // Notes: the precinct's own notes, numbered (tiles link to them as "See note 1"), then how to read the numbers
+  var nb = $("#notesBody"), btn = $("#notesBtn");
+  nb.innerHTML = ""; nb.hidden = true; btn.setAttribute("aria-expanded", "false");
+  var NN = M.noteList;
+  btn.textContent = NN.length ? "Notes (" + NN.length + ")" : "Notes";
+  if (NN.length){
+    var ol = HT("ol", { "class":"n-list" }, nb);
+    NN.forEach(function(n, i){
+      var li = HT("li", { id:"note-" + (i + 1), tabindex:"-1" }, ol, n);
+      var ref = i + 1 === M.issueN ? $("[data-note='" + M.issueN + "']") : null;
+      if (ref){ li.appendChild(document.createTextNode(" ")); HT("a", { "class":"n-back", href:"#" + ref.id }, li, "↑ Back"); }
+    });
+  }
+  var ul = HT("ul", null, nb);
+  HT("li", null, ul, "Big numbers are NYPD’s official " + LASTY + " totals" + (M.city ? ", citywide." : ".") + " With fewer than " + CFG.smallN + " in either year, a few cases swing a percentage a lot, so tiles show the two counts instead. Colors step with the change since 2019: greys for falls, blues for rises.");
+  var noCS = CATS.filter(function(c){ return !c.compstat; }).map(function(c){ return lc(c.label); });
+  HT("li", null, ul, "2026 so far: NYPD CompStat, year to date through " + WEEK + ", vs. the same weeks of 2025" + (M.PCTS.length > 1 ? " (percentages computed for the summed precincts)" : " (percentages as NYPD prints them)") + "." + (noCS.length ? " CompStat doesn’t report " + listJoin(noCS) + " separately." : ""));
+  var nc = CO.filter(function(it){ return it.notComparable; })[0];
+  if (nc) HT("li", null, ul, nc.notComparable);
+  var li = HT("li", null, ul, "Not shown: ");
+  li.textContent += CO.map(function(it){ return it.label + ": " + lc(it.why).replace(/\.$/, ""); }).join("; ") + ". Counts from NYPD’s annual totals, except hate crimes (NYPD Hate Crimes data) and criminal contempt (individual NYPD reports).";
+}
+// "See note 1": open the Notes panel and go to that note; "↑ Back" returns to the tile
+document.addEventListener("click", function(e){
+  var a = e.target.closest && e.target.closest("a[href^='#note-'], a.n-back"); if (!a) return;
+  var t = document.getElementById(a.getAttribute("href").slice(1)); if (!t) return;
+  e.preventDefault();
+  var nb = $("#notesBody");
+  if (nb.hidden && nb.contains(t)){ nb.hidden = false; $("#notesBtn").setAttribute("aria-expanded", "true"); }
+  t.scrollIntoView({ block:"center", behavior:reducedMotion() ? "auto" : "smooth" });
+  if (t.focus) t.focus({ preventScroll:true });
+});
+$("#notesBtn").addEventListener("click", function(){
+  var nb = $("#notesBody"), open = nb.hidden;
+  nb.hidden = !open; this.setAttribute("aria-expanded", open ? "true" : "false");
+  if (open && nb.scrollIntoView) nb.scrollIntoView({ block:"nearest", behavior:reducedMotion() ? "auto" : "smooth" });
+});
+function reducedMotion(){ return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+
+var rz = null;
+window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(function(){ SPARKS.forEach(function(s){ s.draw(); }); }, 80); });
+
+/* ---------- boot from the URL ---------- */
+var QS = new URLSearchParams(location.search), raw = (QS.get("pct") || "").trim(), P = parsePcts(raw), msg = null;
+var bad = P.bad.concat(P.list.filter(function(n){ return !PBY[n]; }).map(String));
+if (bad.length){ msg = "There’s no NYPD precinct “" + bad.join(", ") + "” in our data, so this shows the city. Precincts are numbered from 1 to 123, but not every number is used."; P.list = []; }
+$("#loading").hidden = true; $("#page").hidden = false;
+render(P.list, msg);
+}
+})();
+</script>
+</body>
+</html>

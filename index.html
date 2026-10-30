@@ -1,0 +1,1920 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>New York, Precinct by Precinct</title>
+<meta name="description" content="NYPD crime by precinct, 2019 to 2025 and 2026 so far: maps, trends, response times and a check-your-block search for every New York City police precinct. From The Bigger Apple, Manhattan Institute.">
+<meta property="og:title" content="New York, Precinct by Precinct">
+<meta property="og:description" content="NYPD crime by precinct, 2019 to 2025 and 2026 so far: maps, trends, response times and a check-your-block search for every New York City police precinct. From The Bigger Apple, Manhattan Institute.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lienaz.github.io/nyc-crime-data/">
+<link rel="canonical" href="https://lienaz.github.io/nyc-crime-data/">
+<script>try{var t=localStorage.getItem("citywidePrecinctsTheme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<style>
+:root{
+  --paper:#FFFFFF; --panel:#E8ECFC; --panel-2:#F0F3FF; --panel-3:#E1E6FA;
+  --ink:#20222E; --muted:#5A5D6B; --line:#AEB0B7;
+  --blue:#2C48DC; --blue-dark:#1F38BC; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#FFFFFF;
+  --serif:"Le Monde Livre Pro",Georgia,serif;
+  --sans:"GT America",Arial,Helvetica,sans-serif;
+  /* ---- type scale, identical on index-v2, precinct-v2 and glance: phone values here, ≥600px in the media rule below ---- */
+  --fs-micro:12px;   /* chart axis and value labels, legends, map labels, tiny uppercase labels (FIGURE N, card kickers); the floor */
+  --fs-small:13px;   /* source lines, footnotes, quiet notes, definitions (serif italic), page kicker, section labels, note links */
+  --fs-meta:14px;    /* chart readouts, note boxes, chips and compact strips, form labels, secondary sans lines */
+  --fs-ui:15px;      /* buttons, view tabs, summaries, sans text in cards, lists, results and notes */
+  --fs-body:17px;    /* body and card text (serif); form fields (never under 16px, so iPhones don't zoom) */
+  --fs-lead:18px;    /* ledes and deks */
+  --fs-h3:18px;      /* card, figure and map titles (serif bold) */
+  --fs-h2:24px;      /* section heads */
+  --fs-h1:32px;      /* page title */
+  --fs-num:32px;     /* hero numbers (sans bold, tabular); 36px from 600px, as they sit in 440px cards */
+  --fs-num-2:22px;   /* second-tier numbers: 2026 band, small number cards, clock, map buttons' glyphs */
+  --fs-num-tile:var(--fs-h2);   /* tile numbers (overview and glance tiles, card overlay): the h2 step */
+  --lh-head:1.15; --lh-cap:1.4; --lh-body:1.5;
+  /* spacing scale */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+  --pad:16px; --col:960px; --fpad:16px;
+  --gl:max(var(--pad), env(safe-area-inset-left)); --gr:max(var(--pad), env(safe-area-inset-right));
+  /* map bins: falls in MI Grey tints, about the same in white, rises from light blue through MI Blue to MI Dark Blue */
+  --b0:#6E717C; --b1:#AEB0B7; --b2:#D9DADE; --b3:#FFFFFF; --b4:#CDD5F8; --b5:#8D9EEF; --b6:#4A64E1; --b7:#1F38BC;
+  --edge:#E8ECFC; --hatch-bg:#FFFFFF; --hatch-line:#9A9CA6; --na:#E1E6FA; --cnt:#FFFFFF;
+  --grp:#20222E;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#20222E; --panel:#2A2D3B; --panel-2:#252836; --panel-3:#30344A;
+    --ink:#E8ECFC; --muted:#AEB0B7; --line:#4A4E5E;
+    --blue:#2FA8FF; --blue-dark:#6CC2FF; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#20222E;
+    --b0:#B5B7BE; --b1:#83868F; --b2:#555866; --b3:#1A1C25; --b4:#2E3F7C; --b5:#3A60C9; --b6:#2F86EC; --b7:#2FA8FF;
+    --edge:#2A2D3B; --hatch-bg:#30344A; --hatch-line:#7A7E8E; --na:#30344A; --cnt:#3A3E4E;
+    --grp:#E8ECFC;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#20222E; --panel:#2A2D3B; --panel-2:#252836; --panel-3:#30344A;
+  --ink:#E8ECFC; --muted:#AEB0B7; --line:#4A4E5E;
+  --blue:#2FA8FF; --blue-dark:#6CC2FF; --y2019:#AEB0B7; --accent:#FF8000; --on-blue:#20222E;
+  --b0:#B5B7BE; --b1:#83868F; --b2:#555866; --b3:#1A1C25; --b4:#2E3F7C; --b5:#3A60C9; --b6:#2F86EC; --b7:#2FA8FF;
+  --edge:#2A2D3B; --hatch-bg:#30344A; --hatch-line:#7A7E8E; --na:#30344A; --cnt:#3A3E4E;
+  --grp:#E8ECFC;
+  color-scheme:dark;
+}
+@media (min-width:600px){ :root{ --fs-body:18px; --fs-lead:20px; --fs-h3:19px; --fs-h2:30px; --fs-h1:44px; --fs-num:36px; --fs-num-2:24px; } }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+a:hover{color:var(--blue-dark)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* v2: the Midtown story's page width (1240px including gutters: 16px, 24px from 768px) */
+.wrap{max-width:1240px;box-sizing:border-box;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr)}
+@media (min-width:768px){ :root{ --pad:24px; } }
+svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* ---------- header ---------- */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-top:env(safe-area-inset-top)}
+.logo{margin:0;line-height:0}
+.logo a{display:inline-block;padding:10px 0 14px}
+.logo img{width:180px;height:auto;display:block}
+.logo .on-dark{display:none}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .logo .on-light{display:none}
+  :root:not([data-theme="light"]) .logo .on-dark{display:block}
+}
+:root[data-theme="dark"] .logo .on-light{display:none}
+:root[data-theme="dark"] .logo .on-dark{display:block}
+.theme-btn{margin-top:8px;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:700 var(--fs-ui) var(--sans);padding:0 14px;cursor:pointer}
+/* view tabs, shared with precinct.html and glance.html */
+.views{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:0 0 16px}
+.views a{display:inline-flex;align-items:center;min-height:44px;font:700 var(--fs-ui) var(--sans);color:var(--ink);text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-1px}
+.views a[aria-current="page"]{border-bottom-color:var(--blue)}
+.views a:hover{color:var(--blue)}
+/* the kicker stays with the logo: directly under its clear space, left-aligned (BRAND.md) */
+.brand{min-width:0}
+.kicker{font:700 var(--fs-small) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:0 0 10px}
+h1{font-family:var(--serif);font-weight:700;font-size:var(--fs-h1);line-height:var(--lh-head);margin:0 0 10px;letter-spacing:-.01em;max-width:16em}
+.dek{font-size:var(--fs-lead);line-height:var(--lh-cap);margin:0 0 18px;max-width:34em}
+
+/* ---------- crime-type picker: chips, or one select on phones ---------- */
+.pick{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top);box-sizing:border-box;height:var(--pick-h);overflow:hidden}
+:root{--pick-h:calc(57px + env(safe-area-inset-top))}
+@media (min-width:1024px){ :root{--pick-h:calc(79px + env(safe-area-inset-top))} }
+.chips{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 10px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.cg{display:flex;flex-direction:column;flex:none}
+.cg-l{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 4px 2px}
+.cg-b{display:flex;gap:4px}
+.chip{flex:none;min-height:44px;padding:0 9px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:700 var(--fs-meta) var(--sans);cursor:pointer;white-space:nowrap}
+.chip:hover{border-color:var(--blue)}
+.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.pick-sel{display:none;align-items:center;gap:10px;padding:6px 0}
+.pick-sel label{font:700 var(--fs-micro) var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none}
+select{min-height:44px;font:var(--fs-body) var(--sans);padding:0 10px;border:1.5px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);max-width:100%}
+.pick-sel select{flex:1;min-width:0;height:44px;font-weight:700}
+@media (min-width:600px){ select{font-size:var(--fs-ui)} }   /* form fields: the body size on phones (16px+ so iPhones don't zoom), the UI size from 600px */
+@media (max-width:1023.98px){
+  .chips{display:none}
+  .pick-sel{display:flex}
+}
+
+/* ---------- citywide headline ---------- */
+.head{padding:22px 0 8px}
+.sec-k{font:700 var(--fs-micro) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.head-grid{display:flex;flex-direction:column;gap:18px}
+.hero-nums{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end;margin:0 0 4px}
+.hn b{display:block;font:700 var(--fs-num)/1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hn .lab{display:block;font:700 var(--fs-micro)/1.4 var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+.hn .c25{color:var(--blue)}
+.hn .arrow{color:var(--muted);font-weight:400}
+.hn.chg b{color:var(--ink)}
+/* crime definitions: smaller than the kicker above, serif italic, muted (13px is the floor) */
+.cdef{font:italic var(--fs-small)/var(--lh-cap) var(--serif);color:var(--muted);margin:0 0 12px;max-width:40em}
+.head-sum{font-size:var(--fs-body);line-height:var(--lh-body);margin:12px 0 8px;max-width:34em}
+@media (min-width:700px){ .head-sum{min-height:calc(3 * 1.5em)} }
+.ytd{font:var(--fs-ui)/var(--lh-cap) var(--sans);margin:8px 0 0;padding:8px 12px;background:var(--panel-2);border-left:3px solid var(--blue)}
+.ytd b{font-variant-numeric:tabular-nums}
+.quiet{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:6px 0 0}
+.trend{background:var(--panel);padding:var(--fpad)}
+#trendSlot .trend{margin:12px -4px 12px!important;padding:12px}
+.trend svg{display:block;width:100%;overflow:visible}
+.readout{min-height:22px;margin:0 0 4px;font:var(--fs-meta)/22px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.readout .sw-l{display:inline-block;width:14px;height:3px;background:var(--blue);vertical-align:middle;margin:0 5px 2px 0}
+.plot{touch-action:pan-y;cursor:crosshair;-webkit-user-select:none;user-select:none}
+.plot:focus{outline:none}
+.plot:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.t-rule{stroke:var(--line);stroke-width:1}
+.t-sel{fill:var(--blue);stroke:var(--paper);stroke-width:1.5}
+.fig{font:700 var(--fs-micro) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:0}
+.f-title{font:700 var(--fs-h3)/1.2 var(--serif);margin:2px 0 8px}
+.f-foot{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:8px 0 0}
+.t-line{fill:none;stroke:var(--blue);stroke-width:2.25;stroke-linejoin:round;stroke-linecap:round}
+.t-axis{stroke:var(--line);stroke-width:1}
+.t-lbl{font-size:var(--fs-micro);fill:var(--muted)}
+.t-val{font-size:var(--fs-micro);font-weight:700;fill:var(--ink)}
+.t-val.b{fill:var(--blue)}
+.t-dot{fill:var(--blue);stroke:var(--panel);stroke-width:2}
+.t-dot.y19{fill:var(--ink)}
+.more-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:8px 0 0;padding:0 16px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--blue);font:700 var(--fs-ui) var(--sans);cursor:pointer}
+.more-btn::before{content:"+";font-weight:700;width:.8em}
+.more-btn[aria-expanded="true"]::before{content:"\2212"}
+.more-btn:hover{border-color:var(--blue)}
+.detail{border-top:1px solid var(--line);margin-top:10px;padding-top:8px;max-width:40em}
+.detail p{font-size:var(--fs-body);line-height:var(--lh-body);margin:0 0 8px}
+
+/* ---------- map section ---------- */
+h2{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0 0 8px}
+.zoom{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;margin:4px 0 2px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.zoom button{flex:none;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:700 var(--fs-meta) var(--sans);cursor:pointer;white-space:nowrap}
+.zoom button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.legend{margin:4px 0 0;font:var(--fs-micro)/1.3 var(--sans);color:var(--ink)}
+.lg-cnt{display:flex;flex-direction:column;gap:8px}
+.lg-ckey{min-width:0;flex:1}
+.lg-ct{font-weight:700;margin:0 0 3px}
+.lg-crow{display:flex;max-width:420px}
+.lg-crow div{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.lg-crow i{display:block;width:100%;height:14px;border:1px solid var(--line);border-left-width:0}
+.lg-crow div:first-child i{border-left-width:1px}
+.seg{display:flex;gap:6px;flex:none}
+.seg button{min-height:44px;min-width:64px;padding:0 14px;border:1.5px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);font:700 var(--fs-ui) var(--sans);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+@media (min-width:700px){ .lg-cnt{flex-direction:row;align-items:flex-start;gap:20px} }
+.lg-ends{display:flex;justify-content:space-between;font-weight:700;font-size:var(--fs-micro);margin:0 0 3px}
+.lg-ends span:first-child{color:var(--ink)}
+.lg-row{display:flex;height:14px;border:1px solid var(--line)}
+.lg-row i{flex:1;display:block}
+.lg-ticks{position:relative;height:16px;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.lg-ticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.lg-extra{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px}
+.lg-extra span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:16px;height:12px;display:inline-block;border:1px solid var(--line);flex:none}
+.sw.hatch{background:repeating-linear-gradient(135deg, var(--hatch-line) 0 1.5px, var(--hatch-bg) 1.5px 5px)}
+.sw.grp{border:2px solid var(--grp);background:transparent}
+/* the map runs the full column width: it bleeds through the figure's inner padding */
+.mapbox{position:relative;width:calc(100% + 2 * var(--fpad));margin:0 calc(-1 * var(--fpad));aspect-ratio:1 / 1;overflow:hidden}
+@media (min-width:700px){ .mapbox{aspect-ratio:4 / 3} }
+.mapbox svg{position:absolute;inset:0;display:block;width:100%;height:100%}
+.pc{stroke:var(--edge);stroke-width:.75;stroke-linejoin:round;cursor:pointer}
+.pc:focus{outline:none}
+.pc.b0{fill:var(--b0)} .pc.b1{fill:var(--b1)} .pc.b2{fill:var(--b2)} .pc.b3{fill:var(--b3)}
+.pc.b4{fill:var(--b4)} .pc.b5{fill:var(--b5)} .pc.b6{fill:var(--b6)} .pc.b7{fill:var(--b7)}
+.pc.few{fill:url(#hatch);stroke:var(--hatch-line);stroke-width:.9} .pc.na{fill:var(--na)}
+.pc.cnt{fill:var(--cnt);stroke:var(--line);stroke-width:.9}
+.pc.issue{fill:var(--panel);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 3}
+.sw.issue{background:var(--panel);border:1.5px dashed var(--muted)}
+.h-bg{fill:var(--hatch-bg)} .h-ln{stroke:var(--hatch-line);stroke-width:1.4}
+.g-line{fill:none;stroke:var(--grp);stroke-width:3.2;stroke-linejoin:round;pointer-events:none}
+.o-hov{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;pointer-events:none}
+.o-sel{fill:none;stroke:var(--ink);stroke-width:3;stroke-linejoin:round;pointer-events:none}
+.o-sel2{fill:none;stroke:var(--paper);stroke-width:1.2;stroke-linejoin:round;pointer-events:none}
+.o-foc{fill:none;stroke:var(--blue);stroke-width:3;stroke-dasharray:5 3;pointer-events:none}
+.m-lbl{font-family:var(--sans);font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round;pointer-events:none;letter-spacing:.1em}
+.m-num{font-family:var(--sans);font-weight:700;font-size:var(--fs-micro);fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:2.5px;stroke-linejoin:round;pointer-events:none}
+.pin-ring{fill:none;stroke:var(--paper);stroke-width:5;pointer-events:none}
+.pin-dot{fill:var(--accent);stroke:var(--ink);stroke-width:1.5;pointer-events:none}
+.mapnote{font:var(--fs-meta)/var(--lh-cap) var(--sans);margin:10px 0 0;padding:8px 12px;background:var(--panel-2);border-left:3px solid var(--line)}
+
+/* search */
+.ctl-l{font:700 var(--fs-meta) var(--sans);color:var(--ink);margin:0 0 6px;display:block}
+.combo{position:relative}
+.combo-row{display:flex;gap:8px}
+.combo input{flex:1;min-width:0;min-height:48px;font:var(--fs-body) var(--sans);padding:0 12px;border:1.5px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink)}
+.combo input:focus{border-color:var(--blue);outline:none}
+.combo input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.btn{min-height:44px;padding:0 18px;border:1.5px solid var(--blue);border-radius:4px;background:var(--blue);color:var(--on-blue);font:700 var(--fs-ui) var(--sans);cursor:pointer}
+.sugg{position:absolute;left:0;right:0;top:100%;z-index:25;list-style:none;margin:4px 0 0;padding:0;background:var(--paper);border:1.5px solid var(--line);border-radius:4px;max-height:340px;overflow-y:auto}
+.sugg li{min-height:44px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;border-top:1px solid var(--line);font:var(--fs-ui)/1.25 var(--sans)}
+.sugg li:first-child{border-top:0}
+.sugg li small{font-size:var(--fs-small);color:var(--muted);margin-top:2px}
+.sugg li[aria-selected="true"],.sugg li:hover{background:var(--panel)}
+.smsg{font:var(--fs-ui)/var(--lh-cap) var(--sans);margin:8px 0 0}
+.smsg:empty{display:none}
+.smsg.err{background:var(--panel);padding:8px 12px;border-left:3px solid var(--accent)}
+
+/* "Find your precinct" under the title: one search box (precinct, neighborhood, address) and the full list */
+.finder{position:relative;z-index:31;display:grid;grid-template-columns:1fr;gap:var(--sp-3);margin:0 0 var(--sp-5);padding:var(--sp-4);background:var(--panel);max-width:880px}
+.find-l{display:block;font:700 var(--fs-h3)/1.2 var(--serif);color:var(--ink);margin:0 0 var(--sp-2)}
+.find-list{display:flex;flex-direction:column;justify-content:flex-end}
+.find-list select{width:100%;height:48px}
+.finder .quiet,.finder .smsg{margin:0}
+@media (min-width:700px){
+  .finder{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);column-gap:var(--sp-4);align-items:end}
+  .find-note,.find-msg{grid-column:1 / -1}
+}
+/* precinct card */
+.pcard{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:var(--fpad);scroll-margin-top:80px}
+.pcard:focus{outline:none}
+.pcard .c-k{font:700 var(--fs-micro)/1.3 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.pcard h3{font:700 var(--fs-h3)/1.2 var(--serif);margin:0 48px 4px 0}
+.pcard h3 small{font:400 var(--fs-ui) var(--sans);color:var(--muted);display:block;margin-top:4px}
+.c-hoods{font:var(--fs-ui)/var(--lh-cap) var(--sans);color:var(--ink);margin:0 0 10px}
+.c-where{font:var(--fs-ui)/var(--lh-cap) var(--sans);margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--accent);background:var(--paper)}
+.c-nums{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-end;border-top:1px solid var(--line);padding-top:10px}
+.c-nums .hn b{font-size:var(--fs-num-tile)}
+.c-note{font-size:var(--fs-body);line-height:var(--lh-body);margin:12px 0 0}
+.c-ytd{font:var(--fs-ui)/var(--lh-cap) var(--sans);margin:12px 0 0}
+.c-ytd b{font-variant-numeric:tabular-nums}
+.go{display:flex;align-items:center;justify-content:center;min-height:44px;margin:14px 0 0;padding:8px 18px;background:var(--blue);color:var(--on-blue)!important;font:700 var(--fs-ui)/1.25 var(--sans);text-decoration:none;border-radius:3px;text-align:center}
+.go:hover{background:var(--blue-dark)}
+.c-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.see-note{display:inline-flex;align-items:center;min-height:44px;font:700 var(--fs-small) var(--sans);color:var(--blue);text-decoration:none}
+.see-note:hover{text-decoration:underline}
+
+/* ---------- ranking ---------- */
+.ranksec{padding:30px 0 8px}
+.rankfig{background:var(--panel);padding:var(--fpad)}
+.rk-title{font-size:var(--fs-h2);line-height:var(--lh-head)}
+.rk-h{font:700 var(--fs-small) var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin:14px 0 4px}
+.rk-list{list-style:none;margin:0;padding:0}
+.rk-list li{border-top:1px solid var(--line)}
+.rk{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:center;min-height:44px;padding:7px 2px 8px;color:var(--ink)!important;text-decoration:none}
+a.rk:hover .rk-n{text-decoration:underline}
+.rk-n{font:700 var(--fs-ui)/1.25 var(--sans);min-width:0;overflow-wrap:anywhere}
+.rk-n small{font-weight:400;color:var(--muted);font-size:var(--fs-small)}
+.rk-p{font:700 var(--fs-body)/1 var(--sans);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.rk-bar{grid-column:1 / -1;position:relative;height:12px;margin:5px 0 3px}
+.rk-bar .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--ink)}
+.rk-bar i{position:absolute;top:0;bottom:0;display:block}
+.rk-bar i.b0{background:var(--b0)} .rk-bar i.b1{background:var(--b1)} .rk-bar i.b2{background:var(--b2)} .rk-bar i.b3{background:var(--line)}
+.rk-bar i.b4{background:var(--b4)} .rk-bar i.b5{background:var(--b5)} .rk-bar i.b6{background:var(--b6)} .rk-bar i.b7{background:var(--b7)}
+.rk-c{grid-column:1 / -1;font:var(--fs-small)/1.3 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
+.rk-tag{display:inline-block;font:700 var(--fs-micro)/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--grp);padding:2px 6px;margin-left:6px;vertical-align:2px;color:var(--ink)}
+.rk-links{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:0 16px;font:var(--fs-ui) var(--sans)}
+.rk-links a{display:inline-flex;align-items:center;min-height:44px}
+.rk-note{display:inline-flex;align-items:center;min-height:44px;margin:-10px 0 -6px 2px}
+.few-box{margin-top:16px;border-top:1px solid var(--line);padding-top:4px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.pills a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:700 var(--fs-meta) var(--sans);text-decoration:none;font-variant-numeric:tabular-nums}
+.pills a:hover{border-color:var(--blue)}
+.pills a small{font-weight:400;font-size:var(--fs-micro);color:var(--muted);margin-left:4px}
+
+/* ---------- all precincts ---------- */
+.allsec{padding:30px 0 10px}
+.boro-h{font:700 var(--fs-small) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:16px 0 2px}
+
+/* ---------- about / footer ---------- */
+.about{padding:30px 0 10px;border-top:1px solid var(--line);margin-top:32px;font:var(--fs-ui)/var(--lh-body) var(--sans);overflow-wrap:anywhere}
+.about h2{font:700 var(--fs-h2)/var(--lh-head) var(--serif)}
+.about h3{font:700 var(--fs-small) var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:18px 0 6px}
+.about ul{padding-left:1.1em;margin:0}
+.about li{margin:0 0 8px}
+.about p{margin:0 0 8px}
+footer{font:var(--fs-small) var(--sans);color:var(--muted);padding:10px 0 calc(40px + env(safe-area-inset-bottom))}
+.loading{font:var(--fs-ui) var(--sans);color:var(--muted);padding:30px 0}
+.err-box{font:var(--fs-ui)/var(--lh-cap) var(--sans);background:var(--panel);border-left:3px solid var(--accent);padding:12px 14px;margin:20px 0}
+
+/* ---------- sizes ---------- */
+@media (max-width:1023.98px){ .logo img{width:140px} }
+@media (max-width:599.98px){
+  .hero-nums{gap:8px 12px}
+  .c-nums{gap:8px 12px}
+  .about a,footer a{display:inline-block;min-height:44px;padding-block:12px;line-height:1.3}
+}
+@media (min-width:700px){
+  .rk-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+}
+
+/* ================= v2 layout: the Midtown story's scrolly (sticky map + cards) ================= */
+.scrolly{position:relative}
+.graphic{position:sticky;top:var(--pick-h,57px);z-index:3;background:var(--paper);height:56vh;height:56svh;min-height:320px;padding:6px 0 8px}
+.gfig{margin:0;height:100%;display:flex;flex-direction:column;background:var(--panel);padding:10px 12px 8px}
+.cap{flex:none;height:104px;overflow:hidden}
+.cap .f-title{font-size:var(--fs-h3);line-height:1.2;height:1.2em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 0 4px}
+.cap .legend{margin:0}
+.cap .lg-ends{display:none}
+.cap .lg-extra{gap:2px 12px;margin-top:4px;font-size:var(--fs-micro)}
+.cap .lg-cnt{flex-direction:row;align-items:flex-start;gap:12px}
+.cap .lg-cnt .seg button{min-width:56px;padding:0 10px}
+.cap .lg-crow{max-width:none}
+.mapwrap{position:relative;flex:1;min-height:0}
+.mapwrap .mapbox{position:absolute;inset:0;width:auto;margin:0;aspect-ratio:auto}
+.mapwrap .zoom{position:absolute;left:0;right:0;top:0;z-index:2;margin:0;padding:0 0 6px}
+.mapwrap .zoom button{min-height:44px;padding:0 12px}
+.g-foot{flex:none;font:var(--fs-micro)/18px var(--sans);color:var(--muted);margin:4px 0 0;height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+/* the precinct card is an overlay inside the map box, so opening it never moves anything */
+.mapwrap .pcard{position:absolute;z-index:4;left:0;right:0;bottom:0;max-height:62%;overflow:auto;padding:12px 14px;border-radius:4px;border-color:var(--ink)}
+
+
+/* ---------- How fast help arrives ---------- */
+.resp2{display:grid;grid-template-columns:1fr;gap:8px;background:var(--paper);margin:0 -2px}
+.rhalf{background:var(--panel);padding:12px 12px 10px;min-width:0}
+.rh-k{font:700 var(--fs-micro)/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
+.rh-big{font:700 var(--fs-num-tile)/1 var(--sans);font-variant-numeric:tabular-nums;margin:0}
+.rh-big small{font-size:var(--fs-ui);font-weight:700;margin-left:3px}
+.rh-line{font:var(--fs-meta)/var(--lh-cap) var(--sans);font-variant-numeric:tabular-nums;margin:6px 0 0}
+.rh-n{font:var(--fs-small)/var(--lh-cap) var(--sans);color:var(--muted);margin:2px 0 0}
+.rh-def{font:italic var(--fs-small)/var(--lh-cap) var(--serif);color:var(--muted);margin:6px 0 0}
+.rh-range{font:var(--fs-meta)/var(--lh-cap) var(--sans);margin:6px 0 0}
+.rh-range a{display:inline-block;padding:13px 2px;margin:-13px 0}
+.r-tog{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0}
+.r-tog .ctl-l{margin:0}
+.see-n{font:700 var(--fs-small) var(--sans);white-space:nowrap;text-decoration:none}
+.see-n:hover{text-decoration:underline}
+.pr-row{border-top:1px solid var(--line);padding:6px 0 0;margin:6px 0 0;font:var(--fs-ui)/var(--lh-cap) var(--sans);font-variant-numeric:tabular-nums}
+.pr-row b.v{font-size:var(--fs-num-2)}
+.pr-row .m{color:var(--muted);font-size:var(--fs-small)}
+.r-notes ol{padding-left:1.4em;margin:0}
+.r-notes li{margin:0 0 8px}
+@media (min-width:600px){ .resp2{grid-template-columns:1fr 1fr} }
+
+/* ---------- In the subway ---------- */
+.sub-fig{margin:12px -4px 0!important;padding:12px}
+.sub-rate{margin:14px 0 0}
+.sr-t{font:700 var(--fs-meta)/1.3 var(--sans);margin:0 0 6px}
+.sr-row{display:grid;grid-template-columns:40px minmax(0,1fr) 44px;align-items:center;gap:8px;font:var(--fs-meta) var(--sans);font-variant-numeric:tabular-nums;margin:0 0 6px}
+.sr-row .bar{height:14px;display:block}
+.sr-row .bar.y19{background:var(--y2019)} .sr-row .bar.y25{background:var(--blue)}
+.sr-row b{text-align:right}
+/* zoom controls (top-right of the map; below the borough strip on wider screens) */
+.mapwrap .mapbox{touch-action:pan-y}
+.mapbox:focus{outline:none}
+.mapbox:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.zg path{vector-effect:non-scaling-stroke}
+.zctl{position:absolute;right:0;top:52px;z-index:3;display:flex;flex-direction:column;gap:4px}
+.zctl button{width:44px;height:44px;border:1.5px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);font:700 var(--fs-num-2)/1 var(--sans);cursor:pointer;padding:0}
+.zctl button:hover:not([disabled]){border-color:var(--blue)}
+.zctl button[disabled]{color:var(--muted);cursor:default}
+.zhint{position:absolute;right:52px;top:56px;z-index:2;margin:0;font:var(--fs-micro)/1.3 var(--sans);color:var(--muted);pointer-events:none;text-align:right;max-width:200px}
+.zhint:empty{display:none}
+@media (max-width:599.98px){ .zctl{top:0} .zhint{top:4px;right:52px} }
+/* phones: tighter figure, the zoom strip along the map's bottom edge, the three special keys on one small wrapped line */
+@media (max-width:599.98px){
+  .graphic{padding:4px 0 6px}
+  .gfig{padding:8px 8px 6px}
+  .cap{height:96px}
+  .cap .f-title{margin-bottom:2px}
+  .cap .lg-row{height:12px}
+  .cap .lg-ticks{height:14px}
+  .cap .lg-extra{gap:0 10px;margin-top:2px;line-height:14px}
+  .cap .lg-extra .sw{width:12px;height:9px}
+  .g-foot{display:none}
+  .mapwrap .zoom{top:auto;bottom:0;padding:4px 0 0;scrollbar-width:none}
+  .mapwrap .zoom::-webkit-scrollbar{display:none}
+}
+/* phones: a compact card so the map stays visible; the full detail is one tap away on the precinct page */
+@media (max-width:599.98px){
+  .mapwrap .pcard{padding:8px 12px 10px;max-height:70%}
+  .mapwrap .pcard .c-k,.mapwrap .pcard .c-hoods,.mapwrap .pcard .c-ytd,.mapwrap .pcard .c-row,.mapwrap .pcard .detail,.mapwrap .pcard .c-note:not(.imp){display:none}
+  .mapwrap .pcard h3{margin:2px 48px 4px 0}
+  .mapwrap .pcard .c-nums{padding-top:6px;gap:4px 10px}
+  .mapwrap .pcard .c-nums .hn b{font-size:var(--fs-num-2)}
+  .mapwrap .pcard .c-note{font-size:var(--fs-meta);line-height:var(--lh-cap);margin-top:8px}
+  .mapwrap .pcard .go{margin-top:8px;padding:6px 12px}
+}
+.c-x{position:absolute;top:4px;right:4px;width:44px;height:44px;border:0;background:none;color:var(--ink);font:700 var(--fs-num-2)/1 var(--sans);cursor:pointer}
+.steps{position:relative;z-index:1}
+.step{min-height:62vh;min-height:62svh;padding:14px 0 0}
+.step.last{min-height:70vh;min-height:70svh}
+.card{max-width:34em;font-size:var(--fs-body);line-height:var(--lh-body);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:var(--sp-4)}
+.step.active .card{border-color:var(--ink)}
+.card .hero-nums{gap:8px 14px}
+
+.c-h{font:700 var(--fs-h2)/var(--lh-head) var(--serif);margin:0 0 8px}
+.c-tip{font:var(--fs-ui) var(--sans);color:var(--muted);margin:12px 0 0}
+.card .rk-list li:first-child{border-top:0}
+.ranksec{padding:36px 0 8px}
+.rk-cols{display:grid;grid-template-columns:1fr;gap:0 32px}
+.boro-grid{display:grid;grid-template-columns:1fr;gap:4px 28px}
+.boro-col .pills{display:flex;flex-direction:column;gap:6px}
+.boro-col .pills a{justify-content:flex-start;border-radius:6px}
+@media (min-width:600px){ .gfig{padding:12px 16px 10px} }
+@media (min-width:700px){ .rk-cols{grid-template-columns:1fr 1fr} .boro-grid{grid-template-columns:1fr 1fr} .mapwrap .pcard{left:auto;width:340px;max-height:calc(100% - 56px)} }
+@media (min-width:1024px){
+  .scrolly{display:grid;grid-template-columns:clamp(360px, 34vw, 440px) minmax(0,1fr);grid-template-areas:"steps graphic";column-gap:48px;align-items:start}
+  .steps{grid-area:steps}
+  .graphic{grid-area:graphic;height:calc(100vh - var(--pick-h,57px) - 16px);height:calc(100svh - var(--pick-h,57px) - 16px);min-height:520px;padding:12px 0 0}
+  .gfig{padding:14px 18px 10px}
+  .cap{height:104px}
+  .step{min-height:80vh;padding-top:18vh}
+  .step:first-child{padding-top:16px;min-height:72vh}
+  .step.last{min-height:85vh}
+  .boro-grid{grid-template-columns:repeat(4, 1fr)}
+  #allBtn{display:none}
+  #allBox[hidden]{display:block!important}
+  .mapwrap .pcard{left:0;right:auto;bottom:0}
+}
+/* "← Fell / Rose →" only where the three special keys fit on one line (they wrap to two below 1280px and the caption slot would clip) */
+@media (min-width:1280px){ .cap .lg-ends{display:flex} }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="top">
+    <div class="brand">
+      <p class="logo"><a href="https://thebiggerapple.manhattan.institute/" aria-label="The Bigger Apple from the Manhattan Institute"><img class="on-light" src="logos/mi-logo-blue.svg" alt="Manhattan Institute" width="180" height="33"><img class="on-dark" src="logos/mi-logo-white.svg" alt="Manhattan Institute" width="180" height="33"></a></p>
+      <p class="kicker">The Bigger Apple · Crime data</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">Dark</button>
+  </div>
+  <nav class="views" aria-label="View"><a href="index.html" aria-current="page">Maps &amp; details</a><a href="glance.html">At a glance</a></nav>
+  <h1>New York, Precinct by Precinct</h1>
+  <p class="dek">How crime changed in each of the city’s police precincts from 2019 to 2025, and where 2026 stands so far.</p>
+  <div class="finder" id="finder">
+    <form class="combo find-q" id="tform" role="search" autocomplete="off">
+      <label class="find-l" for="tq">Find your precinct</label>
+      <div class="combo-row">
+        <input id="tq" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="tsugg" aria-describedby="tqnote" placeholder="75th, Astoria, 1501 Broadway…" spellcheck="false" autocapitalize="off" enterkeyhint="go">
+        <button class="btn" type="submit">Go</button>
+      </div>
+      <ul class="sugg" id="tsugg" role="listbox" aria-label="Precincts, neighborhoods and addresses" hidden></ul>
+    </form>
+    <div class="find-list">
+      <label class="ctl-l" for="pctList">or choose from the list</label>
+      <select id="pctList" disabled><option value="">All precincts, by borough…</option></select>
+    </div>
+    <p class="quiet find-note" id="tqnote">For example 75th, Midtown South, Astoria or 1501 Broadway. Search runs on your device; nothing you type is sent anywhere.</p>
+    <p class="smsg find-msg" id="tmsg" role="status"></p>
+  </div>
+</header>
+
+<main id="main">
+<div class="pick" id="pick">
+  <div class="wrap">
+    <div class="chips" id="chips" role="group" aria-label="Crime type"></div>
+    <div class="pick-sel"><label for="catSel">Crime type</label><select id="catSel"></select></div>
+  </div>
+</div>
+
+<div class="wrap" id="app">
+  <p class="loading" id="loading">Loading the precinct data…</p>
+
+  <div class="scrolly" id="scrolly" hidden>
+    <div class="graphic" id="graphic">
+      <figure class="gfig" aria-labelledby="mapT">
+        <div class="cap">
+          <p class="f-title" id="mapT"></p>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="mapwrap">
+          <div class="mapbox" id="mapbox" tabindex="0" aria-label="Citywide precinct map. Plus and minus zoom, arrow keys move the map when zoomed in, 0 resets."></div>
+          <div class="zoom" id="zoomRow" role="group" aria-label="Zoom the map to"></div>
+          <div class="zctl" role="group" aria-label="Map zoom"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out" disabled>−</button><button type="button" id="zReset" aria-label="Reset view" disabled>⟲</button></div>
+          <p class="zhint" id="zHint" aria-hidden="true"></p>
+          <div class="pcard" id="card" tabindex="-1" aria-live="polite" hidden></div>
+        </div>
+        <p class="g-foot" id="mapFoot"></p>
+      </figure>
+    </div>
+
+    <div class="steps" id="steps">
+      <section class="step" data-state="change" id="head" aria-labelledby="headH"><div class="card">
+        <p class="sec-k" id="headH">Citywide</p>
+        <p class="cdef" id="catDef"></p>
+        <div class="hero-nums" id="heroNums" role="group"></div>
+        <p class="head-sum" id="headSum"></p>
+        <div id="trendSlot"></div>
+        <p class="ytd" id="ytdLine"></p>
+        <p class="quiet" id="docNote"></p>
+        <p class="mapnote" id="mapNote" hidden></p>
+        <button class="more-btn" type="button" id="defBtn" aria-expanded="false" aria-controls="defBox">More detail</button>
+        <div class="detail" id="defBox" hidden></div>
+      </div></section>
+
+      <section class="step" data-state="change" id="trendStep" aria-labelledby="trendT"><div class="card" id="trendHome">
+        <figure class="trend" id="trendFig" style="margin:0" aria-labelledby="trendT">
+          <p class="f-title" id="trendT">Citywide, every year</p>
+          <p class="readout" id="trendRead" aria-live="polite"></p>
+          <div class="plot" id="trendBox" tabindex="0" role="group" aria-label="Citywide chart by year"></div>
+          <p class="f-foot">NYPD official annual totals.</p>
+        </figure>
+      </div></section>
+
+      <section class="step" data-state="resp" id="respStep" aria-labelledby="respH" hidden><div class="card">
+        <h2 class="c-h" id="respH">How fast help arrives</h2>
+        <p class="quiet" style="margin:0 0 8px">Citywide, 2025 compared with 2019.</p>
+        <div class="resp2">
+          <div class="rhalf" id="rPolice"></div>
+          <div class="rhalf" id="rEms"></div>
+        </div>
+        <div class="r-tog"><span class="ctl-l" id="rTogL">Shade the map by</span>
+          <div class="seg" role="group" aria-labelledby="rTogL" id="rTog"><button type="button" data-v="police" aria-pressed="true">Police</button><button type="button" data-v="ems" aria-pressed="false">EMS</button></div></div>
+        <p class="quiet" id="rNote"></p>
+      </div></section>
+
+      <section class="step" data-state="change" id="subStep" aria-labelledby="subH" hidden><div class="card">
+        <h2 class="c-h" id="subH">In the subway</h2>
+        <p class="cdef" id="subDef"></p>
+        <div class="hero-nums" id="subNums" role="group" aria-label="Felony assaults on subway riders"></div>
+        <figure class="trend sub-fig" aria-labelledby="subT">
+          <p class="f-title" id="subT">Felony assaults on subway riders</p>
+          <p class="readout" id="subRead" aria-live="polite"></p>
+          <div class="plot" id="subPlot" tabindex="0" role="group" aria-label="Felony assaults on subway riders by year"></div>
+        </figure>
+        <div class="sub-rate" id="subRate"></div>
+        <p class="quiet" id="subNote"></p>
+      </div></section>
+
+      <section class="step" data-state="change" aria-labelledby="chgH"><div class="card">
+        <h2 class="c-h" id="chgH">Biggest changes</h2>
+        <p class="quiet" id="chgNote" style="margin:0 0 4px" hidden></p>
+        <div id="risesBox">
+          <h3 class="rk-h" id="risesH">Biggest rises</h3>
+          <p class="quiet" id="risesSub" style="margin:0 0 4px"></p>
+          <div id="risesBody"></div>
+        </div>
+        <div id="fallsBox">
+          <h3 class="rk-h" id="fallsH">Biggest falls</h3>
+          <p class="quiet" id="fallsSub" style="margin:0 0 4px"></p>
+          <div id="fallsBody"></div>
+        </div>
+      </div></section>
+
+      <section class="step last" data-state="find" aria-labelledby="findH"><div class="card">
+        <h2 class="c-h" id="findH">Find a precinct</h2>
+        <form class="combo" id="sform" role="search" autocomplete="off">
+          <label class="ctl-l" for="q">Precinct number, name, neighborhood, address or cross streets</label>
+          <div class="combo-row">
+            <input id="q" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg" aria-describedby="qnote" placeholder="75th, Astoria, 1501 Broadway…" spellcheck="false" autocapitalize="off" enterkeyhint="search">
+            <button class="btn" type="submit">Find</button>
+          </div>
+          <ul class="sugg" id="sugg" role="listbox" aria-label="Suggestions" hidden></ul>
+        </form>
+        <p class="quiet" id="qnote">Search runs on your device; nothing you type is sent anywhere.</p>
+        <p class="smsg" id="smsg" role="status"></p>
+        <p class="c-tip">Or tap any precinct on the map.</p>
+      </div></section>
+    </div>
+  </div>
+
+  <section class="ranksec" id="ranksec" aria-labelledby="rankH" hidden>
+    <figure class="rankfig" style="margin:0" aria-labelledby="rankH">
+      <h2 class="f-title rk-title" id="rankH"></h2>
+      <p class="quiet" id="rankSub" style="margin:0 0 4px"></p>
+      <div id="rankBody"></div>
+      <p class="f-foot" id="rankFoot"></p>
+    </figure>
+  </section>
+
+  <section class="allsec" id="allsec" aria-labelledby="allH" hidden>
+    <h2 id="allH">Every precinct</h2>
+    <p class="quiet" id="allSub" style="margin:0 0 4px"></p>
+    <button class="more-btn" type="button" id="allBtn" aria-expanded="false" aria-controls="allBox">Show</button>
+    <div id="allBox" hidden></div>
+  </section>
+
+  <section class="about" id="about" aria-labelledby="aboutH" hidden>
+    <h2 id="aboutH">About the data</h2>
+    <div id="aboutBody"></div>
+    <div id="respNotes"></div>
+    <div id="subNotes"></div>
+  </section>
+</div>
+</main>
+<footer class="wrap" id="foot">The Bigger Apple · Manhattan Institute</footer>
+
+<script>
+(function(){
+"use strict";
+var $ = function(s, r){ return (r || document).querySelector(s); };
+var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+function HT(tag, attrs, parent, text){
+  var el = document.createElement(tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) el.setAttribute(k, attrs[k]);
+  if (text != null) el.textContent = text;
+  if (parent) parent.appendChild(el);
+  return el;
+}
+var SVGNS = "http://www.w3.org/2000/svg";
+function S(tag, attrs, parent, text){
+  var el = document.createElementNS(SVGNS, tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) el.setAttribute(k, attrs[k]);
+  if (text != null) el.textContent = text;
+  if (parent) parent.appendChild(el);
+  return el;
+}
+var MINUS = "−";
+function fmt(n){ return n == null ? "n/a" : Number(n).toLocaleString("en-US"); }
+function pctNum(p){ var a = Math.abs(p); return a < 10 ? (Math.round(a * 10) / 10).toFixed(a < 0.05 ? 0 : 1) : String(Math.round(a)); }
+function pctTxt(p){ if (p == null) return "n/a"; var s = pctNum(p); if (s === "0" || s === "0.0") return "0%"; return (p > 0 ? "+" : MINUS) + s + "%"; }
+function ytdPct(p){ if (p == null) return "n/a"; var a = Math.abs(p).toFixed(1); if (a === "0.0") return "0.0%"; return (p > 0 ? "+" : MINUS) + a + "%"; }   // CompStat prints one decimal
+function lc(s){ return s && !/^[A-Z]{2}/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s; }   // keeps "NYPD" intact
+function listJoin(a){ if (a.length < 2) return a.join(""); if (a.length === 2) return a[0] + " and " + a[1]; return a.slice(0, -1).join(", ") + " and " + a[a.length-1]; }
+// "1 murder", "2 murders"; "1 felony criminal mischief offense"
+function nOf(n, c){ var pl = lc(c.plural || c.label); return fmt(n) + " " + (n === 1 ? (/ offenses$/.test(pl) ? pl.replace(/s$/, "") : lc(c.label)) : pl); }
+function uc(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+var reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+var phoneMQ = window.matchMedia("(max-width: 699.98px)");
+var selMQ = window.matchMedia("(max-width: 1023.98px)");   // the crime-type select replaces the chips below 1024px
+function reduced(){ return reduceMQ.matches; }
+
+/* ---------- theme (shared with precinct.html) ---------- */
+var root = document.documentElement, darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
+function isDark(){ var a = root.getAttribute("data-theme"); return a ? a === "dark" : darkMQ.matches; }
+function syncThemeBtn(){ var d = isDark(), b = $("#themeBtn"); b.textContent = d ? "Light" : "Dark"; b.setAttribute("aria-label", d ? "Switch to light mode" : "Switch to dark mode"); }
+$("#themeBtn").addEventListener("click", function(){
+  var next = isDark() ? "light" : "dark"; root.setAttribute("data-theme", next);
+  try { localStorage.setItem("citywidePrecinctsTheme", next); } catch(e){}
+  syncThemeBtn();
+});
+if (darkMQ.addEventListener) darkMQ.addEventListener("change", syncThemeBtn);
+syncThemeBtn();
+
+/* ---------- data ---------- */
+function getJSON(u){ return fetch(u).then(function(r){ if (!r.ok) throw new Error(u + ": " + r.status); return r.json(); }); }
+Promise.all([getJSON("data/city.json"), getJSON("data/outlines.json"), getJSON("data/response.json").catch(function(){ return null; }), getJSON("data/subway.json").catch(function(){ return null; })]).then(function(d){ RESP = d[2]; SUB = d[3]; init(d[0], d[1]); }).catch(function(e){
+  var l = $("#loading"); l.className = "err-box"; l.textContent = "The precinct data couldn’t be loaded (" + e.message + ").";
+  if (window.console) console.error(e);
+});
+
+var RESP = null, RSVC = "police", SUB = null;
+var C, OUT, PCT = {}, PLIST = [], CATS = [], CATK = {}, CAT, SEL = null, PIN = null, VIEW = "city";
+var I19, I25, Y0;
+var BOROS = ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"];
+// borough label anchors (geographic positions only, chosen to sit in open space)
+var BORO_LBL = { "Manhattan":[-73.992, 40.800, "end"], "Bronx":[-73.865, 40.868, "middle"], "Brooklyn":[-73.945, 40.645, "middle"], "Queens":[-73.815, 40.725, "middle"], "Staten Island":[-74.150, 40.585, "middle"] };
+var SMALL = 20;
+// stepped bins for the 2019 → 2025 % change; edges in percent
+var EDGES = [-50, -20, -5, 5, 20, 50, 100];
+var BIN_LBL = ["Fell 50% or more", "Fell 20% to 50%", "Fell 5% to 20%", "About the same (within 5%)", "Rose 5% to 20%", "Rose 20% to 50%", "Rose 50% to 100%", "Doubled or more"];
+function binOf(p){ if (p <= -50) return 0; if (p <= -20) return 1; if (p <= -5) return 2; if (p < 5) return 3; if (p < 20) return 4; if (p < 50) return 5; if (p < 100) return 6; return 7; }
+
+function named(p){ return p.name && p.name !== p.ord; }
+function title(p){ return named(p) ? p.name : p.ord; }
+function longName(p){ return named(p) ? p.name + " (" + p.ord + ")" : p.ord; }
+function theName(p){ return named(p) ? p.name : "the " + p.ord; }
+function shortOrd(p){ return p.ord.replace(/ Precinct$/, ""); }
+function pageURL(pct, extra){ return "precinct.html?pct=" + pct + "&cat=" + encodeURIComponent(CAT) + (extra || ""); }
+
+function series(scope, key){
+  var o = C.official, t = scope === "city" ? o.citywide : (typeof scope === "number" ? (o.byPct || {})[String(scope)] : (o.groups || {})[scope]);
+  return t && t[key] ? t[key] : null;
+}
+function chg(scope, key){
+  var s = series(scope, key); if (!s) return { kind:"na" };
+  var a = s[I19], b = s[I25]; if (a == null || b == null) return { kind:"na" };
+  var r = { a:a, b:b, kind:(a < SMALL || b < SMALL) ? "few" : "ok" };
+  if (r.kind === "ok") r.p = (b - a) / a * 100;
+  return r;
+}
+// the change a precinct is shaded by: its own, or its boundary group's when it can't be compared alone
+// a known problem in NYPD's own figures for this precinct and crime (e.g. the 22nd's 2025 row): no change shown
+function issueFor(pct, key){ var d = PCT[pct] && PCT[pct].dataIssue; return d && d.keys && d.keys.indexOf(key) >= 0 ? d : null; }
+function pctChange(pct, key){
+  var p = PCT[pct], di = issueFor(pct, key);
+  if (di) return { kind:"issue", note:di.note || "NYPD’s published figures for this precinct have a known error, so no change is shown." };
+  if (p.compare2019 === false && p.group){ var g = chg(p.group, key); g.group = p.group; return g; }
+  return chg(pct, key);
+}
+function ytd(scope, key){
+  var y = C.ytd || {}, t = scope === "city" ? y.citywide : (typeof scope === "number" ? (y.byPct || {})[String(scope)] : (y.groups || {})[scope]);
+  var v = t && t[key]; if (!v || v[0] == null || v[1] == null) return null;
+  var p = v[2] != null ? v[2] : (v[0] > 0 ? Math.round((v[1] - v[0]) / v[0] * 1000) / 10 : null);
+  return { a:v[0], b:v[1], p:p, few:(v[0] < SMALL || v[1] < SMALL) };
+}
+function catByKey(k){ return CATK[k]; }
+// when most precincts have too few for a percentage (murder), the page shows counts only: no shading by change, no ranking
+function countsOnlyCat(key){
+  var ok = 0; PLIST.forEach(function(p){ if (pctChange(p.pct, key).kind === "ok") ok++; });
+  return ok < PLIST.length / 2;
+}
+// counts mode shades by the official count in one year, in steps chosen from the 2019 and 2025 murder counts by precinct (0 to 15)
+var CNT_EDGES = [1, 3, 6, 10], CNT_LBL = ["0", "1–2", "3–5", "6–9", "10+"], CNT_BIN = ["b3", "b4", "b5", "b6", "b7"], MYEAR = 2025;
+function cntBin(n){ var i = 0; while (i < CNT_EDGES.length && n >= CNT_EDGES[i]) i++; return i; }
+// a precinct's count in MYEAR; in 2019 the 105th, 113th and 116th are one area (the 116th didn't exist yet)
+function countFor(p, key){
+  var yi = C.years.indexOf(MYEAR), grp = MYEAR < 2025 && p.compare2019 === false && p.group;
+  var sr = grp ? series(p.group, key) : series(p.pct, key);
+  return { n:sr && sr[yi] != null ? sr[yi] : null, group:grp || null };
+}
+function countsMapNote(c){ return uc(lc(c.plural || c.label)) + " are too few in most precincts for a percent change, so the map shows the number of " + lc(c.plural || c.label) + "."; }
+function countsNote(c){ return uc(lc(c.plural || c.label)) + " are too few in most precincts for a percent change; tap a precinct for its counts."; }
+
+function init(city, outlines){
+  C = city; OUT = outlines;
+  I19 = C.years.indexOf(2019); I25 = C.years.indexOf(2025); Y0 = C.years[0];
+  C.precincts.forEach(function(p){ PCT[p.pct] = p; });
+  PLIST = C.precincts.slice().sort(function(a, b){ return a.pct - b.pct; });
+  buildPctList();
+  CATS = C.categories.slice();
+  CATS.forEach(function(c){ CATK[c.key] = c; });
+  var qs = new URLSearchParams(location.search);
+  CAT = CATK[qs.get("cat")] ? qs.get("cat") : CATS[0].key;
+  buildPicker();
+  prepMap();
+  buildViews();
+  buildAbout();
+  buildResp();
+  buildSubway();
+  buildAll();
+  $("#loading").hidden = true;
+  ["#scrolly", "#ranksec", "#allsec", "#about"].forEach(function(s){ $(s).hidden = false; });
+  setPickH();
+  placeTrend();
+  if (smallMQ.addEventListener) smallMQ.addEventListener("change", function(){ placeTrend(); sizeDef(); onScroll(); });
+  zHintInit();
+  sizeDef();
+  var qp = parseInt(qs.get("pct"), 10);
+  if (PCT[qp]) SEL = qp;
+  renderCat();
+  if (window.ResizeObserver){
+    var lastW = 0, lastH = 0;
+    new ResizeObserver(function(){ var w = $("#mapbox").clientWidth, h = $("#mapbox").clientHeight; if (Math.abs(w - lastW) > 1 || Math.abs(h - lastH) > 1){ lastW = w; lastH = h; renderMap(); renderTrend(); subChart(); } }).observe($("#mapbox"));
+  }
+  window.addEventListener("resize", function(){ setPickH(); sizeDef(); onScroll(); });
+  window.addEventListener("scroll", onScroll, { passive:true });
+  onScroll();
+  window.__cw = { C:C, PCT:PCT, chg:chg, pctChange:pctChange, ytd:ytd, select:select, setCat:setCat };
+}
+// reserve the tallest definition's height at the current width, so nothing below moves when the crime changes
+function sizeDef(){
+  var el = $("#catDef"); if (!el || !CATS.length) return;
+  var m = el.cloneNode(false); m.removeAttribute("id"); m.setAttribute("aria-hidden", "true");
+  m.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;min-height:0;width:" + el.clientWidth + "px";
+  el.parentNode.appendChild(m);
+  var mx = 0; CATS.forEach(function(c){ m.textContent = c.plain || c.short || ""; mx = Math.max(mx, m.offsetHeight); });
+  m.parentNode.removeChild(m);
+  el.style.minHeight = mx + "px";
+}
+// phones (< 600px): the trend chart sits in the first card right under the numbers; wider screens keep it in its own card
+var smallMQ = window.matchMedia("(max-width: 599.98px)");
+function placeTrend(){
+  var fig = $("#trendFig"), into = smallMQ.matches ? $("#trendSlot") : $("#trendHome");
+  if (fig.parentNode !== into){ into.appendChild(fig); $("#trendStep").hidden = smallMQ.matches; renderTrend(); }
+}
+// the picker's height is fixed in CSS (--pick-h: 57px with the select, 79px with the chips), so the sticky map's
+// height never depends on a resize event having run
+function setPickH(){}
+
+/* ---------- steps: the card nearest the reading line drives the sticky map (like the Midtown story) ---------- */
+var STATE = "change";
+function onScroll(){
+  (function(){
+    var steps = $$("#steps .step").filter(function(st){ return !st.hidden; }); if (!steps.length) return;
+    var g = $("#graphic").getBoundingClientRect(), wide = window.innerWidth >= 1024;
+    var line = wide ? window.innerHeight * 0.5 : g.bottom + (window.innerHeight - g.bottom) * 0.45;
+    var act = steps[0];
+    steps.forEach(function(st){ var c = $(".card", st).getBoundingClientRect(); if (c.top <= line) act = st; });
+    steps.forEach(function(st){ st.classList.toggle("active", st === act); });
+    ACT = act;
+    if (SEL != null && act !== SEL_STEP){ if (SEL_STEP) autoClose(); if (SEL != null) SEL_STEP = act; }
+    var ns = act.getAttribute("data-state");
+    if (ns !== STATE){ var was = STATE; STATE = ns; if (was === "resp" || ns === "resp"){ renderLegend(); renderCard(); } renderMap(); }
+  })();
+}
+
+/* ---------- picker ---------- */
+function buildPicker(){
+  var box = $("#chips"), sel = $("#catSel");
+  [["violent", "Violent"], ["property", "Property"]].forEach(function(g){
+    var cs = CATS.filter(function(c){ return c.group === g[0]; }); if (!cs.length) return;
+    var grp = HT("div", { "class":"cg", role:"group", "aria-label":g[1] }, box);
+    HT("span", { "class":"cg-l", "aria-hidden":"true" }, grp, g[1]);
+    var row = HT("div", { "class":"cg-b" }, grp);
+    var og = HT("optgroup", { label:g[1] }, sel);
+    cs.forEach(function(c){
+      var b = HT("button", { type:"button", "class":"chip", "data-cat":c.key, "aria-pressed":"false", title:c.short || c.plain || null, "aria-description":c.short || null }, row, c.label);
+      b.addEventListener("click", function(){ setCat(c.key); });
+      HT("option", { value:c.key, title:c.short || null }, og, c.label);
+    });
+  });
+  sel.addEventListener("change", function(){ setCat(sel.value); });
+}
+function setCat(key){
+  if (!CATK[key] || key === CAT) return;
+  CAT = key;
+  autoClose();   // phones and tablets only (see cardBusy)
+  renderCat();
+  try { var u = new URL(location.href); u.searchParams.set("cat", key); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch(e){}
+  if (selMQ.matches && $("#scrolly").getBoundingClientRect().top > $("#pick").offsetHeight + 2) goTo($("#scrolly"));
+}
+// smooth-scroll a section to just under the sticky picker; finish the scroll if a re-render interrupted it
+function goTo(el){
+  var off = $("#pick").offsetHeight;
+  function want(){ return Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - off - 6); }
+  window.scrollTo({ top:want(), behavior:reduced() ? "auto" : "smooth" });
+  clearTimeout(goTo.t);
+  goTo.t = setTimeout(function(){ var w = want(); if (Math.abs(window.pageYOffset - w) > 4) window.scrollTo({ top:w, behavior:"auto" }); }, reduced() ? 0 : 650);
+}
+
+function renderCat(){
+  $$(".chip").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-cat") === CAT ? "true" : "false"); });
+  $("#catSel").value = CAT;
+  var chip = $('.chip[data-cat="' + CAT + '"]');
+  if (chip && !selMQ.matches){ var row = $("#chips"), r = chip.getBoundingClientRect(), rr = row.getBoundingClientRect(); if (r.left < rr.left || r.right > rr.right) row.scrollLeft += (r.left - rr.left) - (rr.width - r.width) / 2; }
+  renderHead();
+  renderTrend();
+  renderLegend();
+  renderMap();
+  renderCard();
+  renderRank();
+  renderSteps();
+  updateLinks();
+  updateRespLinks();
+}
+
+/* ---------- citywide headline ---------- */
+function renderHead(){
+  var c = catByKey(CAT), pl = c.plural || c.label, cw = chg("city", CAT);
+  $("#headH").textContent = "Citywide · " + pl;
+  $("#catDef").textContent = c.plain || c.short || "";
+  var hn = $("#heroNums"); hn.innerHTML = "";
+  hn.setAttribute("aria-label", uc(pl) + " citywide, 2019 and 2025");
+  function cell(v, lab, cls){ var d = HT("div", { "class":"hn" + (cls ? " " + cls : "") }, hn); var b = HT("b", null, d); b.innerHTML = v; HT("span", { "class":"lab" }, d, lab); return d; }
+  if (cw.kind === "na"){ cell("n/a", "2019 → 2025"); }
+  else {
+    cell(fmt(cw.a), "2019");
+    cell('<span class="arrow" aria-hidden="true">→</span>', "");
+    cell('<span class="c25">' + fmt(cw.b) + "</span>", "2025");
+    if (cw.kind === "ok") cell(pctTxt(cw.p), "Change", "chg");
+  }
+  // one plain summary line, from the precinct numbers
+  var rows = comparable(), rose = 0, fell = 0, same = 0;
+  rows.forEach(function(r){ if (r.c.p > 0) rose++; else if (r.c.p < 0) fell++; else same++; });
+  var n = rows.length, s = "";
+  if (cw.kind !== "na"){
+    var ser = series("city", CAT), mx = Math.max.apply(null, ser), mn = Math.min.apply(null, ser);
+    var mxN = ser.filter(function(v){ return v === mx; }).length, mnN = ser.filter(function(v){ return v === mn; }).length;
+    if (cw.b === mx && mxN === 1) s += "The 2025 total is the highest in NYPD’s precinct-by-precinct annual data, which starts in " + Y0 + ". ";
+    else if (cw.b === mn && mnN === 1) s += "The 2025 total is the lowest in NYPD’s precinct-by-precinct annual data, which starts in " + Y0 + ". ";
+  }
+  if (n){
+    var lp = lc(pl), why = leftOut();
+    if (rose === n) s += uc(lp) + " rose in all " + n + " precincts that can be compared (" + why + ").";
+    else if (fell === n) s += uc(lp) + " fell in all " + n + " precincts that can be compared (" + why + ").";
+    else s += "Of the " + n + " precincts that can be compared (" + why + "), " + lp + " rose in " + rose + " and fell in " + fell + (same ? ", and were unchanged in " + same : "") + ".";
+  } else s += "No precinct had at least " + SMALL + " " + lc(pl) + " in both 2019 and 2025, too few to compare as a percentage, so the map and the precinct list show counts.";
+  if (countsOnlyCat(CAT)) s = s.replace(/Of the .*$|[^.]*rose in all.*$|[^.]*fell in all.*$|No precinct had.*$/, "") + countsNote(c);
+  $("#headSum").textContent = s;
+  // 2026 so far
+  var y = $("#ytdLine"), Y = c.compstat ? ytd("city", CAT) : null;
+  y.innerHTML = "";
+  if (Y){
+    HT("b", null, y, "2026 so far: ");
+    y.appendChild(document.createTextNode(nOf(Y.b, c) + ", "));
+    if (Y.p != null && !Y.few){ var w = Y.p > 0 ? "up " : Y.p < 0 ? "down " : "unchanged from "; y.appendChild(document.createTextNode((Y.p === 0 ? w : w + ytdPct(Y.p).replace(/^[+−]/, "") + " from ") + fmt(Y.a) + " at this point in 2025")); }
+    else y.appendChild(document.createTextNode("vs. " + fmt(Y.a) + " at this point in 2025"));
+    y.appendChild(document.createTextNode(" (NYPD CompStat, through " + C.weekEnding + ")."));
+  } else y.textContent = "NYPD’s weekly CompStat report doesn’t include " + lc(c.label) + ", so there is no 2026 figure yet.";
+  $("#docNote").textContent = "Citywide totals include complaints inside city jails (Department of Correction), which aren’t part of any precinct.";
+  // definition + caveat behind More detail
+  var box = $("#defBox"); box.innerHTML = "";
+  if (c.caveat) HT("p", null, box, c.caveat);
+  var m = c.official && c.official.src && C.sources[c.official.src];
+  if (m){ var p = HT("p", { "class":"quiet" }, box, "2019 and 2025 figures: "); HT("a", { href:m.url, rel:"noopener" }, p, m.name); p.appendChild(document.createTextNode(".")); }
+}
+$("#defBtn").addEventListener("click", function(){ var open = this.getAttribute("aria-expanded") !== "true"; this.setAttribute("aria-expanded", open ? "true" : "false"); $("#defBox").hidden = !open; this.textContent = open ? "Less detail" : "More detail"; });
+
+/* small citywide line chart, every year in the official series */
+var TS = null;   // trend chart state: series, selected index, geometry
+function renderTrend(){
+  var box = $("#trendBox"); if (!box || !C) return;
+  var c = catByKey(CAT), ser = series("city", CAT), name = uc(c.plural || c.label);
+  var y0 = C.years[0], y1 = C.years[C.years.length - 1];
+  $("#trendT").textContent = name + " citywide, " + y0 + "–" + y1;
+  box.setAttribute("aria-label", name + " citywide by year, " + y0 + " to " + y1 + ". Left and right arrow keys pick a year.");
+  box.innerHTML = "";
+  if (!ser){ TS = null; $("#trendRead").textContent = ""; return; }
+  var W = Math.max(240, box.clientWidth || 300), H = W >= 600 ? 190 : 150, pl = 6, pr = 52, pt = 22, pb = 22;
+  var svg = S("svg", { viewBox:"0 0 " + W + " " + H, width:W, height:H, "aria-hidden":"true" }, box);
+  var mx = 0; ser.forEach(function(v){ if (v != null && v > mx) mx = v; });
+  var x = function(i){ return pl + i * (W - pl - pr) / (ser.length - 1); }, y = function(v){ return pt + (H - pt - pb) * (1 - v / (mx || 1)); };
+  S("line", { "class":"t-axis", x1:pl, x2:W - pr, y1:y(0), y2:y(0) }, svg);
+  var d = ""; ser.forEach(function(v, i){ if (v == null) return; d += (d ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1); });
+  S("path", { "class":"t-line", d:d }, svg);
+  S("text", { "class":"t-lbl", x:pl, y:H - 4 }, svg, String(y0));
+  S("text", { "class":"t-lbl", x:x(I19), y:H - 4, "text-anchor":"middle" }, svg, "2019");
+  S("text", { "class":"t-lbl", x:x(I25), y:H - 4, "text-anchor":"middle" }, svg, "2025");
+  S("circle", { "class":"t-dot y19", cx:x(I19), cy:y(ser[I19]), r:4 }, svg);
+  S("text", { "class":"t-val", x:x(I19), y:y(ser[I19]) - 9, "text-anchor":"middle" }, svg, fmt(ser[I19]));
+  S("circle", { "class":"t-dot", cx:x(I25), cy:y(ser[I25]), r:4.5 }, svg);
+  S("text", { "class":"t-val b", x:x(I25) + 8, y:y(ser[I25]) + 4 }, svg, fmt(ser[I25]));
+  var gSel = S("g", null, svg);
+  var last = ser.length - 1; while (last > 0 && ser[last] == null) last--;
+  var first = 0; while (first < last && ser[first] == null) first++;
+  TS = { ser:ser, x:x, y:y, H:H, pt:pt, pb:pb, pl:pl, step:(W - pl - pr) / (ser.length - 1), first:first, last:last, def:last, i:last, g:gSel, active:false };
+  trendSet(last, false);
+}
+function trendSet(i, active){
+  if (!TS) return;
+  i = Math.max(TS.first, Math.min(TS.last, i));
+  while (i > TS.first && TS.ser[i] == null) i--;     // gaps aren't selectable
+  TS.i = i; TS.active = !!active;
+  var g = TS.g; g.innerHTML = "";
+  if (TS.active){
+    S("line", { "class":"t-rule", x1:TS.x(i), x2:TS.x(i), y1:TS.pt - 6, y2:TS.H - TS.pb }, g);
+    S("circle", { "class":"t-sel", cx:TS.x(i), cy:TS.y(TS.ser[i]), r:4 }, g);
+  }
+  var r = $("#trendRead"); r.innerHTML = "";
+  HT("b", null, r, String(C.years[i]));
+  r.appendChild(document.createTextNode(" · "));
+  HT("span", { "class":"sw-l", "aria-hidden":"true" }, r);
+  r.appendChild(document.createTextNode("Citywide " + fmt(TS.ser[i])));
+}
+(function(){
+  var box = $("#trendBox"), start = null, scrub = false;
+  function idxAt(e){ var r = box.getBoundingClientRect(); return Math.round((e.clientX - r.left - TS.pl) / TS.step); }
+  box.addEventListener("pointerdown", function(e){ if (!TS) return; start = { x:e.clientX, y:e.clientY, t:e.pointerType }; scrub = false; if (e.pointerType === "mouse") trendSet(idxAt(e), true); });
+  box.addEventListener("pointermove", function(e){
+    if (!TS) return;
+    if (e.pointerType === "mouse"){ trendSet(idxAt(e), true); return; }
+    if (!start) return;
+    var dx = Math.abs(e.clientX - start.x), dy = Math.abs(e.clientY - start.y);
+    if (!scrub && dx > 6 && dx > dy) scrub = true;     // horizontal drag scrubs; vertical drags scroll the page (touch-action: pan-y)
+    if (scrub) trendSet(idxAt(e), true);
+  });
+  box.addEventListener("pointerup", function(e){ if (TS && start && e.pointerType !== "mouse" && !scrub) trendSet(idxAt(e), true); start = null; scrub = false; });
+  box.addEventListener("pointercancel", function(){ start = null; scrub = false; });
+  box.addEventListener("pointerleave", function(e){ if (TS && e.pointerType === "mouse") trendSet(TS.def, false); });
+  box.addEventListener("keydown", function(e){
+    if (!TS) return;
+    var k = e.key, i = TS.i;
+    if (k === "ArrowLeft"){ i--; while (i > TS.first && TS.ser[i] == null) i--; }
+    else if (k === "ArrowRight"){ i++; while (i < TS.last && TS.ser[i] == null) i++; }
+    else if (k === "Home") i = TS.first; else if (k === "End") i = TS.last;
+    else if (k === "Escape"){ trendSet(TS.def, false); return; }
+    else return;
+    e.preventDefault(); trendSet(i, true);
+  });
+})();
+
+/* ---------- map ---------- */
+var LAT0 = 40.7, LON0 = -73.95, KX = Math.cos(LAT0 * Math.PI / 180);
+var SHAPES = {};     // pct → [[ring of [x, y]], ...] in projected units
+var ALLB = null;     // projected bounds of the whole city
+function prepMap(){
+  var P = OUT.precincts || {};
+  Object.keys(P).forEach(function(k){
+    var pct = parseInt(k, 10); if (!PCT[pct]) return;
+    var rings = [], b = [Infinity, Infinity, -Infinity, -Infinity];
+    P[k].forEach(function(poly){ poly.forEach(function(ring){
+      var r = ring.map(function(pt){ var X = (pt[0] - LON0) * KX, Y = LAT0 - pt[1]; if (X < b[0]) b[0] = X; if (Y < b[1]) b[1] = Y; if (X > b[2]) b[2] = X; if (Y > b[3]) b[3] = Y; return [X, Y]; });
+      rings.push(r);
+    }); });
+    SHAPES[pct] = { rings:rings, b:b };
+  });
+  ALLB = boundsFor(function(){ return true; });
+}
+function boundsFor(test){
+  var b = [Infinity, Infinity, -Infinity, -Infinity];
+  Object.keys(SHAPES).forEach(function(k){ if (!test(PCT[k])) return; var s = SHAPES[k].b; b[0] = Math.min(b[0], s[0]); b[1] = Math.min(b[1], s[1]); b[2] = Math.max(b[2], s[2]); b[3] = Math.max(b[3], s[3]); });
+  return b;
+}
+function buildViews(){
+  var box = $("#zoomRow");
+  [["city", "Whole city"]].concat(BOROS.map(function(b){ return [b, b]; })).forEach(function(v){
+    var bt = HT("button", { type:"button", "data-v":v[0], "aria-pressed":v[0] === VIEW ? "true" : "false" }, box, v[1]);
+    bt.addEventListener("click", function(){ setView(v[0]); });
+  });
+}
+// the borough buttons are zoom presets: fit that borough inside the map area (the whole city = 1×)
+function setView(v){
+  if (!MP) return;
+  VIEW = v; syncViewBtns();
+  if (v === "city"){ zTo(1, 0, 0); return; }
+  var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  PLIST.forEach(function(p){ if (p.boro !== v || !SHAPES[p.pct]) return; var sb = SHAPES[p.pct].b, a = px(sb[0], sb[1]), c = px(sb[2], sb[3]); x0 = Math.min(x0, a[0]); y0 = Math.min(y0, a[1]); x1 = Math.max(x1, c[0]); y1 = Math.max(y1, c[1]); });
+  if (!isFinite(x0)) return;
+  var aw = MP.W, ah = MP.H - MP.top - MP.bot, ns = Math.max(1, Math.min(ZMAX, Math.min(aw / ((x1 - x0) * 1.1), ah / ((y1 - y0) * 1.1))));
+  var cc = zCenter();
+  zTo(ns, cc[0] - (x0 + x1) / 2 * ns, cc[1] - (y0 + y1) / 2 * ns);
+}
+function syncViewBtns(){ $$("#zoomRow button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-v") === VIEW ? "true" : "false"); }); }
+
+/* ---------- zoom (1× to 6×): +/−/reset buttons, pinch, Ctrl/⌘ + wheel, mouse drag when zoomed in, keyboard ---------- */
+var Z = { s:1, fx:0.5, fy:0.5 }, ZMAX = 6, ZDRAG = { suppress:false };
+function zCenter(){ return [MP.W / 2, (MP.top + MP.H - MP.bot) / 2]; }
+function zGet(){
+  var W = MP.W, H = MP.H, sc = Z.s, c = zCenter();
+  var ox = c[0] - Z.fx * W * sc, oy = c[1] - Z.fy * H * sc;
+  ox = Math.min(0, Math.max(W - W * sc, ox)); oy = Math.min(0, Math.max(H - H * sc, oy));   // never dragged off screen
+  return { s:sc, ox:ox, oy:oy };
+}
+function zPut(sc, ox, oy){
+  if (!MP) return;
+  sc = Math.max(1, Math.min(ZMAX, sc));
+  var W = MP.W, H = MP.H, c = zCenter();
+  Z.s = sc; Z.fx = (c[0] - ox) / (W * sc); Z.fy = (c[1] - oy) / (H * sc);
+  var z = zGet(); Z.fx = (c[0] - z.ox) / (W * sc); Z.fy = (c[1] - z.oy) / (H * sc);
+  applyZoom();
+}
+function zScreen(x, y){ var z = zGet(); return [x * z.s + z.ox, y * z.s + z.oy]; }
+function zManual(sc, ox, oy){ zPut(sc, ox, oy); VIEW = Z.s <= 1.0001 ? "city" : null; syncViewBtns(); zHintSeen(); }
+function zoomAt(x, y, ns){ var z = zGet(); ns = Math.max(1, Math.min(ZMAX, ns)); var bx = (x - z.ox) / z.s, by = (y - z.oy) / z.s; zManual(ns, x - bx * ns, y - by * ns); }
+function zTo(ns, ox, oy){
+  var z0 = zGet();
+  if (reduced()){ zPut(ns, ox, oy); return; }
+  var t0 = performance.now(), D = 140;
+  clearTimeout(zTo.t);
+  function step(){
+    var t = Math.min(1, (performance.now() - t0) / D), e = 1 - Math.pow(1 - t, 3);
+    zPut(z0.s + (ns - z0.s) * e, z0.ox + (ox - z0.ox) * e, z0.oy + (oy - z0.oy) * e);
+    if (t < 1) zTo.raf = requestAnimationFrame(step);
+  }
+  cancelAnimationFrame(zTo.raf); zTo.raf = requestAnimationFrame(step);
+  zTo.t = setTimeout(function(){ cancelAnimationFrame(zTo.raf); zPut(ns, ox, oy); }, D + 60);   // land exactly even if frames were skipped
+}
+function applyZoom(){
+  var gz = renderMap.gz; if (!gz || !MP) return;
+  var z = zGet();
+  gz.setAttribute("transform", "translate(" + z.ox.toFixed(2) + "," + z.oy.toFixed(2) + ") scale(" + z.s.toFixed(4) + ")");
+  renderLabels(z);
+  drawPin();
+  var at1 = z.s <= 1.0001;
+  $("#zReset").disabled = at1; $("#zOut").disabled = at1; $("#zIn").disabled = z.s >= ZMAX - 0.0001;
+}
+// labels in screen pixels: borough names at city scale, precinct numbers once zoomed in (and for the highlighted ten)
+function renderLabels(z){
+  var g = renderMap.lbl; if (!g) return; g.innerHTML = "";
+  var W = MP.W, H = MP.H;
+  function num(pp){ if (!pp.label) return; var q0 = lonlatPx(pp.label[0], pp.label[1]), q = [q0[0] * z.s + z.ox, q0[1] * z.s + z.oy]; if (q[0] < 8 || q[0] > W - 8 || q[1] < 8 || q[1] > H - 8) return; S("text", { "class":"m-num", x:q[0], y:q[1] + 4, "text-anchor":"middle" }, g, String(pp.pct)); }
+  if (z.s < 1.8){
+    var fs = 12;   /* --fs-micro: map labels never go below 12px */
+    BOROS.forEach(function(bn){ var L = BORO_LBL[bn], q0 = lonlatPx(L[0], L[1]); S("text", { "class":"m-lbl", x:q0[0] * z.s + z.ox, y:q0[1] * z.s + z.oy, "text-anchor":L[2], "font-size":fs }, g, bn.toUpperCase()); });
+  } else PLIST.forEach(num);
+}
+var ZHINT_KEY = "citywidePrecinctsZoomHint";
+function zHintInit(){
+  var h = $("#zHint"), seen = false; try { seen = localStorage.getItem(ZHINT_KEY) === "seen"; } catch(e){}
+  if (seen){ h.textContent = ""; return; }
+  h.textContent = window.matchMedia("(pointer: coarse)").matches ? "Pinch with two fingers or tap + to zoom" : "Ctrl/⌘ + scroll or the + button to zoom";
+}
+function zHintSeen(){ var h = $("#zHint"); if (h && h.textContent){ h.textContent = ""; try { localStorage.setItem(ZHINT_KEY, "seen"); } catch(e){} } }
+(function(){
+  var box = $("#mapbox"), ptrs = {}, pinch = null, drag = null;
+  function rel(e){ var r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  $("#zIn").addEventListener("click", function(){ var c = zCenter(); var z = zGet(); var ns = Math.min(ZMAX, z.s * 1.6), bx = (c[0] - z.ox) / z.s, by = (c[1] - z.oy) / z.s; VIEW = null; syncViewBtns(); zHintSeen(); zTo(ns, c[0] - bx * ns, c[1] - by * ns); });
+  $("#zOut").addEventListener("click", function(){ var c = zCenter(); var z = zGet(); var ns = Math.max(1, z.s / 1.6), bx = (c[0] - z.ox) / z.s, by = (c[1] - z.oy) / z.s; VIEW = ns <= 1.0001 ? "city" : null; syncViewBtns(); zTo(ns, c[0] - bx * ns, c[1] - by * ns); });
+  $("#zReset").addEventListener("click", function(){ setView("city"); });
+  // Ctrl/⌘ + wheel and trackpad pinch (which arrives as wheel + ctrlKey) zoom around the pointer; a plain wheel scrolls the page
+  box.addEventListener("wheel", function(e){
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    var p = rel(e); zoomAt(p[0], p[1], Z.s * Math.exp(-e.deltaY * 0.01));
+  }, { passive:false });
+  box.addEventListener("pointerdown", function(e){
+    if (e.pointerType === "touch"){
+      ptrs[e.pointerId] = rel(e);
+      var ids = Object.keys(ptrs);
+      if (ids.length === 2){ var a = ptrs[ids[0]], b = ptrs[ids[1]]; pinch = { d:Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, c:[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], z:zGet() }; }
+    } else if (e.pointerType === "mouse" && e.button === 0 && Z.s > 1.0001){
+      drag = { p:rel(e), z:zGet(), moved:false };
+    }
+  });
+  box.addEventListener("pointermove", function(e){
+    if (e.pointerType === "touch"){
+      if (!(e.pointerId in ptrs)) return;
+      ptrs[e.pointerId] = rel(e);
+      if (!pinch) return;     // one finger never moves the map; the page scrolls (touch-action: pan-y)
+      var ids = Object.keys(ptrs); if (ids.length < 2) return;
+      var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      var z0 = pinch.z, ns = Math.max(1, Math.min(ZMAX, z0.s * d / pinch.d)), bx = (pinch.c[0] - z0.ox) / z0.s, by = (pinch.c[1] - z0.oy) / z0.s;
+      e.preventDefault(); ZDRAG.suppress = true;
+      zManual(ns, c[0] - bx * ns, c[1] - by * ns);
+    } else if (drag){
+      var p = rel(e), dx = p[0] - drag.p[0], dy = p[1] - drag.p[1];
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+      drag.moved = true; ZDRAG.suppress = true; box.style.cursor = "grabbing";
+      zManual(drag.z.s, drag.z.ox + dx, drag.z.oy + dy);
+    }
+  });
+  function end(e){
+    if (e.pointerType === "touch"){ delete ptrs[e.pointerId]; if (Object.keys(ptrs).length < 2){ if (pinch) setTimeout(function(){ ZDRAG.suppress = false; }, 350); pinch = null; } }
+    else if (drag){ var mv = drag.moved; drag = null; box.style.cursor = ""; if (mv) setTimeout(function(){ ZDRAG.suppress = false; }, 0); }
+  }
+  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end); box.addEventListener("pointerleave", function(e){ if (e.pointerType === "mouse") end(e); });
+  // keyboard: + / − zoom, arrows pan (when zoomed in), 0 resets
+  box.addEventListener("keydown", function(e){
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key, z = zGet(), c = zCenter(), st = 80;
+    if (k === "+" || k === "="){ e.preventDefault(); var ns = Math.min(ZMAX, z.s * 1.6), bx = (c[0] - z.ox) / z.s, by = (c[1] - z.oy) / z.s; zManual(ns, c[0] - bx * ns, c[1] - by * ns); }
+    else if (k === "-" || k === "_"){ e.preventDefault(); var ns2 = Math.max(1, z.s / 1.6), bx2 = (c[0] - z.ox) / z.s, by2 = (c[1] - z.oy) / z.s; zManual(ns2, c[0] - bx2 * ns2, c[1] - by2 * ns2); }
+    else if (k === "0"){ e.preventDefault(); setView("city"); }
+    else if (z.s > 1.0001 && /^Arrow/.test(k)){
+      e.preventDefault();
+      zManual(z.s, z.ox + (k === "ArrowLeft" ? st : k === "ArrowRight" ? -st : 0), z.oy + (k === "ArrowUp" ? st : k === "ArrowDown" ? -st : 0));
+    }
+  });
+})();
+var MP = null;   // current projection {k, ox, oy}
+function px(X, Y){ return [MP.ox + (X - MP.b[0]) * MP.k, MP.oy + (Y - MP.b[1]) * MP.k]; }
+function lonlatPx(lon, lat){ return px((lon - LON0) * KX, LAT0 - lat); }
+function pathFor(pct){
+  var s = SHAPES[pct]; if (!s) return "";
+  var d = "";
+  s.rings.forEach(function(r){ r.forEach(function(pt, i){ var q = px(pt[0], pt[1]); d += (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }); d += "Z"; });
+  return d;
+}
+function fillClass(c, cntMode, cn){ if (c.kind === "issue") return "issue"; if (cntMode) return cn && cn.n != null ? CNT_BIN[cntBin(cn.n)] : "na"; return c.kind === "ok" ? "b" + binOf(c.p) : c.kind === "few" ? "few" : "na"; }
+function ariaFor(p, c){
+  var lab = longName(p) + ", " + p.boro + ": ";
+  if (c.kind === "issue") return lab + "data issue: NYPD’s official 2025 figures appear misaligned in its spreadsheet; see the precinct page.";
+  if (countsOnlyCat(CAT)){ var cn = countFor(p, CAT), lp0 = lc(catByKey(CAT).plural || catByKey(CAT).label); return cn.n == null ? lab + "no data" : lab + (cn.group ? "105th, 113th and 116th area combined, " : "") + nOf(cn.n, catByKey(CAT)) + " in " + MYEAR; }
+  if (c.kind === "ok") lab += (c.group ? "with the 105th, 113th and 116th combined, " : "") + (c.p > 0 ? "rose " : c.p < 0 ? "fell " : "unchanged, ") + (c.p !== 0 ? pctTxt(c.p).replace(/^[+−]/, "") + ", " : "") + fmt(c.a) + " to " + fmt(c.b);
+  else if (c.kind === "few") lab += (c.group ? "combined with the 105th, 113th and 116th, " : "") + fmt(c.a) + " in 2019 and " + fmt(c.b) + " in 2025, too few to compare";
+  else lab += "no data";
+  return lab;
+}
+function renderMap(){
+  var box = $("#mapbox"); if (!box || !ALLB) return;
+  var c = catByKey(CAT);
+  var cntMode = countsOnlyCat(CAT);
+  var RM = STATE === "resp" && RESP;
+  $("#mapT").textContent = RM ? (RSVC === "police" ? "Police, critical calls: median minutes to arrive, 2025" : "EMS, life-threatening calls: median minutes to arrive, 2025")
+    : cntMode ? uc(c.plural || c.label) + " by precinct, " + MYEAR
+    : uc(c.label) + ": change by precinct, 2019 to 2025";
+  // the base view is always the whole city; boroughs and closer views are zoom levels on top of it
+  var b = ALLB;
+  var bw = b[2] - b[0], bh = b[3] - b[1], pad = 0.03;
+  b = [b[0] - bw * pad, b[1] - bh * pad, b[2] + bw * pad, b[3] + bh * pad]; bw = b[2] - b[0]; bh = b[3] - b[1];
+  // the box has a fixed shape (1:1 on phones, 4:3 wider); every view is fitted and centered inside it
+  // v2: the map fills the sticky box; the zoom buttons sit in a strip across its top
+  // the zoom strip sits across the top of the map (wider screens) or its bottom edge (phones); keep the map clear of it
+  var W = Math.max(200, box.clientWidth), H = Math.max(200, box.clientHeight), zr = $("#zoomRow").getBoundingClientRect(), br = box.getBoundingClientRect();
+  var zh = zr.height ? zr.height + 4 : 0, atBottom = zr.top > br.top + br.height / 2, top = atBottom ? 0 : zh, bot = atBottom ? zh : 0;
+  var k = Math.min(W / bw, (H - top - bot) / bh);
+  MP = { k:k, b:b, ox:(W - bw * k) / 2, oy:top + (H - top - bot - bh * k) / 2, W:W, H:H, top:top, bot:bot };
+  box.innerHTML = "";
+  var svg = S("svg", { viewBox:"0 0 " + W + " " + H, role:"group", "aria-label":"Map of New York City police precincts" + (cntMode ? ", shaded by the number of " + lc(c.plural || c.label) + " in " + MYEAR : ", shaded by the change in " + lc(c.plural || c.label) + " from 2019 to 2025") + ". Each precinct is a button that shows its numbers." }, box);
+  var defs = S("defs", null, svg), pat = S("pattern", { id:"hatch", width:6, height:6, patternUnits:"userSpaceOnUse", patternTransform:"rotate(45)" }, defs);
+  S("rect", { "class":"h-bg", width:6, height:6 }, pat); S("line", { "class":"h-ln", x1:0, y1:0, x2:0, y2:6 }, pat);
+  // gZ holds the shapes in base-map units and carries the zoom transform; gLbl and gPin are drawn in screen pixels,
+  // so labels and the pin keep their size at every zoom (outline widths stay constant via non-scaling strokes)
+  var gZ = S("g", { "class":"zg" }, svg);
+  var gBase = S("g", null, gZ), gGrpLine = S("g", null, gZ), gGrp = S("g", null, gZ), gOver = S("g", null, gZ), gLbl = S("g", null, svg), gPin = S("g", null, svg);
+  var inView = function(){ return true; };
+  PLIST.forEach(function(p){
+    if (!SHAPES[p.pct] || !inView(p)) return;
+    var ch = pctChange(p.pct, CAT), d = pathFor(p.pct);
+    var cn = cntMode ? countFor(p, CAT) : null;
+    var isG = !RM && p.compare2019 === false && p.group && (!cntMode || cn.group);
+    var fc = RM ? respClass(p.pct) : fillClass(ch, cntMode, cn);
+    S("path", { "class":"pc " + fc, d:d, "data-pct":p.pct, tabindex:"0", role:"button", "aria-label":RM ? respAria(p) : ariaFor(p, ch) }, gBase);
+    // boundary group: a heavy outline around the three, then copies of their fills on top so only the outer edge shows
+    // (the copies ignore the pointer, so clicks and the tab order stay on the real precinct shapes, in number order)
+    if (isG){ S("path", { "class":"g-line", d:d }, gGrpLine); S("path", { "class":"pc " + fc, d:d, "aria-hidden":"true", style:"pointer-events:none" }, gGrp); }
+  });
+  renderMap.lbl = gLbl; renderMap.gz = gZ;
+  renderMap.over = gOver; renderMap.pin = gPin; renderMap.svg = svg;
+  drawOver();
+  applyZoom();
+  // events
+  svg.addEventListener("click", function(e){ if (ZDRAG.suppress){ ZDRAG.suppress = false; return; } var t = e.target.closest("[data-pct]"); if (t) select(+t.getAttribute("data-pct"), { from:"map" }); });
+  svg.addEventListener("keydown", function(e){ var t = e.target.closest && e.target.closest("[data-pct]"); if (!t) return; if (e.key === "Enter" || e.key === " "){ e.preventDefault(); select(+t.getAttribute("data-pct"), { from:"key" }); } });
+  svg.addEventListener("pointerover", function(e){ if (e.pointerType !== "mouse") return; var t = e.target.closest("[data-pct]"); HOV = t ? +t.getAttribute("data-pct") : null; drawOver(); });
+  svg.addEventListener("pointerleave", function(){ HOV = null; drawOver(); });
+  svg.addEventListener("focusin", function(e){ var t = e.target.closest("[data-pct]"); FOC = t ? +t.getAttribute("data-pct") : null; drawOver(); });
+  svg.addEventListener("focusout", function(){ FOC = null; drawOver(); });
+  var nt = [];
+  if (cntMode) nt.push(countsMapNote(c));
+  if (c.mapNote) nt.push(c.mapNote);
+  var note = $("#mapNote"); note.textContent = nt.join(" "); note.hidden = !nt.length;
+  $("#mapFoot").textContent = "NYPD official precinct totals, 2019 and 2025.";
+}
+var HOV = null, FOC = null;
+function drawOver(){
+  var g = renderMap.over; if (!g) return;
+  g.innerHTML = "";
+  var inView = function(n){ return PCT[n] && SHAPES[n]; };
+  if (HOV != null && HOV !== SEL && inView(HOV)) S("path", { "class":"o-hov", d:pathFor(HOV) }, g);
+  if (SEL != null && inView(SEL)){ var d = pathFor(SEL); S("path", { "class":"o-sel", d:d }, g); S("path", { "class":"o-sel2", d:d }, g); }
+  if (FOC != null && inView(FOC)) S("path", { "class":"o-foc", d:pathFor(FOC) }, g);
+  drawPin();
+}
+function drawPin(){
+  var pg = renderMap.pin; if (!pg) return; pg.innerHTML = "";
+  if (PIN && PCT[PIN.pct]){ var q0 = lonlatPx(PIN.lon, PIN.lat), q = zScreen(q0[0], q0[1]); S("circle", { "class":"pin-ring", cx:q[0], cy:q[1], r:6 }, pg); S("circle", { "class":"pin-dot", cx:q[0], cy:q[1], r:6 }, pg); }
+}
+
+function renderLegend(){
+  var box = $("#legend"); box.innerHTML = "";
+  if (STATE === "resp" && RESP){ respLegend(box); return; }
+  var c = catByKey(CAT), nIssue = PLIST.filter(function(p){ return pctChange(p.pct, CAT).kind === "issue"; }).length;
+  function issueKey(ex){ if (!nIssue) return; var s3 = HT("span", null, ex); HT("i", { "class":"sw issue", "aria-hidden":"true" }, s3); s3.appendChild(document.createTextNode("Data issue: see the precinct")); }
+  if (countsOnlyCat(CAT)){
+    // year toggle + count key
+    var wrapC = HT("div", { "class":"lg-cnt" }, box);
+    var seg = HT("div", { "class":"seg", role:"group", "aria-label":"Year shown on the map" }, wrapC);
+    [2019, 2025].forEach(function(y){
+      var bt = HT("button", { type:"button", "aria-pressed":y === MYEAR ? "true" : "false" }, seg, String(y));
+      bt.addEventListener("click", function(){ if (MYEAR === y) return; MYEAR = y; renderLegend(); renderMap(); });
+    });
+    var kk = HT("div", { "class":"lg-ckey" }, wrapC);
+    HT("div", { "class":"lg-ct" }, kk, uc(lc(c.plural || c.label)) + " in " + MYEAR);
+    var row = HT("div", { "class":"lg-crow", role:"list", "aria-label":"Color key" }, kk);
+    CNT_LBL.forEach(function(l, i){ var cell = HT("div", { role:"listitem" }, row); HT("i", { style:"background:var(--" + CNT_BIN[i] + ")", "aria-hidden":"true" }, cell); HT("span", null, cell, l); });
+    var ex0 = HT("div", { "class":"lg-extra" }, kk);
+    if (MYEAR < 2025){ var sg = HT("span", null, ex0); HT("i", { "class":"sw grp", "aria-hidden":"true" }, sg); sg.appendChild(document.createTextNode("105th, 113th, 116th as one area")); }
+    issueKey(ex0);
+    return;
+  }
+  var ends = HT("div", { "class":"lg-ends", "aria-hidden":"true" }, box); HT("span", null, ends, "← Fell"); HT("span", null, ends, "Rose →");
+  var row = HT("div", { "class":"lg-row", role:"list", "aria-label":"Color key" }, box);
+  BIN_LBL.forEach(function(l, i){ HT("i", { role:"listitem", "aria-label":l, title:l, style:"background:var(--b" + i + ")" }, row); });
+  var tk = HT("div", { "class":"lg-ticks", "aria-hidden":"true" }, box);
+  EDGES.forEach(function(e, i){ var s = HT("span", { style:"left:" + ((i + 1) / BIN_LBL.length * 100) + "%" }, tk, (e > 0 ? "+" : e < 0 ? MINUS : "") + Math.abs(e) + "%"); });
+  var nFew = PLIST.filter(function(p){ return pctChange(p.pct, CAT).kind === "few"; }).length;
+  var ex = HT("div", { "class":"lg-extra" }, box);
+  if (nFew){ var s1 = HT("span", null, ex); HT("i", { "class":"sw hatch", "aria-hidden":"true" }, s1); s1.appendChild(document.createTextNode("Under " + SMALL + " in a year: counts only (" + nFew + ")")); }
+  var s2 = HT("span", null, ex); HT("i", { "class":"sw grp", "aria-hidden":"true" }, s2); s2.appendChild(document.createTextNode("Combined: boundary change"));
+  issueKey(ex);
+}
+
+/* ---------- card ---------- */
+function select(pct, opt){
+  opt = opt || {};
+  SEL = pct; SEL_STEP = ACT;
+  if (!opt.keepPin) PIN = null;
+  if (opt.pin) PIN = opt.pin;
+  var p = PCT[pct];
+  if (opt.zoom && p && VIEW !== "city" && VIEW !== p.boro) setView(p.boro);
+  else if (opt.zoom && p && VIEW === "city") setView(p.boro);
+  drawOver();
+  renderCard();
+  try { var u = new URL(location.href); u.searchParams.set("pct", pct); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch(e){}
+  if (opt.from === "key" || opt.from === "search"){ var cd = $("#card"); try { cd.focus({ preventScroll:true }); } catch(e){ cd.focus(); } }
+}
+/* phones and tablets (the map sticks on top and the cards scroll over it): the precinct card closes by itself once
+   it's out of sight: when the reader moves on to another card, when the map scrolls away, or when the crime type
+   changes. Never mid-pinch or while the card is being used. Desktop (two columns) keeps it open. */
+var stackMQ = window.matchMedia("(max-width: 1023.98px)"), ACT = null, SEL_STEP = null, CARD_TOUCH = 0;
+function cardBusy(){
+  var cd = $("#card"), ae = document.activeElement;
+  return !!(ZDRAG && ZDRAG.suppress) || (cd && ae && ae !== cd && cd.contains(ae)) || Date.now() - CARD_TOUCH < 1500;
+}
+function autoClose(){ if (SEL == null || !stackMQ.matches || cardBusy()) return; clearSel(); }
+(function(){
+  var cd = $("#card");
+  ["pointerdown", "focusin", "scroll", "wheel"].forEach(function(ev){ cd.addEventListener(ev, function(){ CARD_TOUCH = Date.now(); }, { passive:true }); });
+  if ("IntersectionObserver" in window) new IntersectionObserver(function(es){
+    es.forEach(function(en){ if (!en.isIntersecting) autoClose(); });
+  }, { threshold:0 }).observe($("#graphic"));
+})();
+function clearSel(){
+  SEL = null; PIN = null; SEL_STEP = null; drawOver(); renderCard();
+  try { var u = new URL(location.href); u.searchParams.delete("pct"); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch(e){}
+}
+// bring the card into view (phones: below the map), then finish the scroll if a re-render interrupted it
+function revealCard(focus){
+  var card = $("#card");
+  function want(){
+    var r = card.getBoundingClientRect(), off = $("#pick").offsetHeight;
+    if (r.bottom > window.innerHeight - 8){
+      var dy = Math.min(r.bottom - window.innerHeight + 16, r.top - off - 8);
+      if (dy > 0) return window.pageYOffset + dy;
+    }
+    return null;
+  }
+  if (focus){ try { card.focus({ preventScroll:true }); } catch(e){ card.focus(); } }
+  var t = want(); if (t == null) return;
+  window.scrollTo({ top:t, behavior:reduced() ? "auto" : "smooth" });
+  clearTimeout(revealCard.t);
+  revealCard.t = setTimeout(function(){ var t2 = want(); if (t2 != null && Math.abs(window.pageYOffset - t2) > 4) window.scrollTo({ top:t2, behavior:"auto" }); }, reduced() ? 0 : 650);
+}
+function renderCard(){
+  var box = $("#card"); box.innerHTML = "";
+  var c = catByKey(CAT), pl = c.plural || c.label, lp = lc(pl);
+  if (SEL == null || !PCT[SEL]){ box.hidden = true; return; }
+  box.hidden = false;
+  var xb = HT("button", { "class":"c-x", type:"button", "aria-label":"Close" }, box, "×");
+  if (STATE === "resp" && RESP){ respCard(box, xb); return; }
+  xb.addEventListener("click", clearSel);
+  var p = PCT[SEL], ch = pctChange(SEL, CAT), cntMode = countsOnlyCat(CAT);
+  HT("p", { "class":"c-k" }, box, p.boro + (named(p) ? " · " + p.ord : ""));
+  HT("h3", null, box, title(p));
+  if (p.hoods && p.hoods.length) HT("p", { "class":"c-hoods" }, box, p.hoods.slice(0, 3).join(" · "));
+  if (PIN && PIN.pct === SEL) HT("p", { "class":"c-where" }, box, PIN.label + " is in " + theName(p) + ".");
+  var nums = ch.kind === "issue" ? HT("div") : HT("div", { "class":"c-nums", role:"group", "aria-label":uc(pl) + ", 2019 and 2025" + (ch.group ? ", 105th, 113th and 116th combined" : "") }, box);
+  function cell(v, lab, cls){ var d = HT("div", { "class":"hn" + (cls ? " " + cls : "") }, nums); var b = HT("b", null, d); b.innerHTML = v; HT("span", { "class":"lab" }, d, lab); }
+  if (ch.kind === "na") cell("n/a", "2019 → 2025");
+  else if (cntMode && ch.group){
+    // counts mode: the 2019 figure covers the three precincts' area; 2025 is this precinct alone
+    var own0 = series(SEL, CAT);
+    cell(fmt(ch.a), "2019 · all three");
+    cell('<span class="arrow" aria-hidden="true">→</span>', "");
+    cell('<span class="c25">' + fmt(own0 ? own0[I25] : null) + "</span>", "2025 · this precinct");
+  }
+  else if (ch.kind !== "issue") {
+    cell(fmt(ch.a), "2019");
+    cell('<span class="arrow" aria-hidden="true">→</span>', "");
+    cell('<span class="c25">' + fmt(ch.b) + "</span>", "2025");
+    if (ch.kind === "ok" && !cntMode) cell(pctTxt(ch.p), "Change", "chg");
+  }
+  var note = HT("p", { "class":"c-note" }, box);
+  // the data note is written for the precinct page; drop its "this page shows ..." clause here
+  if (ch.kind === "issue" || ch.group || ch.kind === "few") note.className = "c-note imp";
+  if (ch.kind === "issue") note.textContent = "NYPD’s official 2025 figures for this precinct appear misaligned in its spreadsheet, so no 2019-to-2025 change is shown here.";
+  else if (ch.group && cntMode) note.textContent = "In 2019 the area of today’s 105th, 113th and 116th had " + nOf(ch.a, c) + "; in 2025 it had " + fmt(ch.b) + ". " + countsNote(c).replace(/;.*$/, ".");
+  else if (ch.group){
+    var own = series(SEL, CAT), own25 = own ? own[I25] : null;
+    note.textContent = "Combined " + lp + " for the 105th, 113th and 116th, the only way to compare 2019 and 2025 after a 2024 boundary change." + (own25 != null ? " " + uc(theName(p)) + " alone had " + fmt(own25) + " in 2025." : "");
+  } else if (cntMode) note.textContent = countsNote(c).replace(/;.*$/, ".");
+  else if (ch.kind === "few") note.textContent = "Fewer than " + SMALL + " " + lp + " in at least one of the two years: too few to compare as a percentage.";
+  else if (ch.kind === "ok") note.textContent = uc(lp) + " " + (ch.p > 0 ? "rose" : ch.p < 0 ? "fell" : "were unchanged") + " here, " + (function(){ var cw = chg("city", CAT); return cw.kind === "ok" ? "compared with " + pctTxt(cw.p) + " citywide." : "NYPD official totals."; })();
+  else note.textContent = "No official figures for this precinct.";
+  var Y = c.compstat ? ytd(SEL, CAT) : null;
+  if (Y){
+    var y = HT("p", { "class":"c-ytd" }, box); HT("b", null, y, "2026 so far: ");
+    y.appendChild(document.createTextNode(fmt(Y.b) + " vs. " + fmt(Y.a) + " at this point in 2025" + (!Y.few && Y.p != null ? " (" + ytdPct(Y.p) + ")" : "") + ", through " + C.weekEnding + "."));
+  }
+  var extra = PIN && PIN.pct === SEL ? "&lat=" + PIN.lat.toFixed(5) + "&lon=" + PIN.lon.toFixed(5) : "";
+  HT("a", { "class":"go", href:pageURL(SEL, extra) }, box, (named(p) ? "See " + p.name : "See the " + p.ord) + (extra ? ": check your block" : "") + " →");
+  var cr = HT("div", { "class":"c-row" }, box);
+  var notes = (p.notes || []).filter(Boolean);
+  // the precinct's own notes (boundary changes, jails, data errors) are on its page, numbered at the bottom
+  if (notes.length) HT("a", { "class":"see-note", href:pageURL(SEL) + "#notes" }, cr, (notes.length > 1 ? "See notes" : "See note") + " on the precinct page");
+  else HT("span", null, cr);
+
+}
+
+/* ---------- How fast help arrives (data/response.json) ---------- */
+// medians are in minutes to one decimal; map steps chosen from the 2025 precinct medians (police 2.7–6.1, EMS 5.5–9.2)
+var R_EDGES = { police:[3.5, 4, 4.5], ems:[7, 7.5, 8] }, R_BIN = ["b4", "b5", "b6", "b7"];
+var R_LABEL = { police:"Police · critical calls", ems:"EMS · life-threatening calls" };
+var R_DEF = { police:"Typical (median) time from when the call is logged to when the first officers arrive", ems:"Typical (median) time from when the call is logged to when the first ambulance arrives" };
+var R_NOTES = [
+  ["clock", ""],     // text from response.json definitions.clocks
+  ["arrive", ""],    // built from the data (share of calls with no arrival time)
+  ["116", "FDNY’s EMS records carry a precinct but no location, and almost none are coded to the 116th, which was created in Dec. 2024 from parts of the 105th and 113th. So the 116th has no EMS figure, and the 105th’s and 113th’s EMS figures cover their old, larger areas."],
+  ["small", "Where a precinct had fewer than 200 calls in a year, the map shows it in white and its card gives the count, not a median: a median of so few calls swings a lot."],
+  ["defs", "Critical police calls are NYPD’s “critical” crime-in-progress jobs (such as shots fired, robbery, assault with a weapon), any call type. Life-threatening EMS calls are FDNY segments 1–3 at close (such as cardiac arrest, choking, unconsciousness, difficulty breathing, major trauma). The EMS calls are not the same incidents as the police calls."]
+];
+function respNoteText(key){
+  if (key === "clock") return (RESP.definitions && RESP.definitions.clocks) || "Both clocks start after the 911 call is answered and processed, so neither is the caller’s full wait.";
+  if (key === "arrive"){
+    var a = rCity("police", 2019), b = rCity("police", 2025);
+    return "Police arrival times are logged by the officers themselves when they mark themselves on scene. Calls with no arrival time are left out" + (a && b && a.pctMissing != null && b.pctMissing != null ? " (" + Math.round(b.pctMissing) + "% of critical calls citywide in 2025, " + Math.round(a.pctMissing) + "% in 2019)." : ".");
+  }
+  for (var i = 0; i < R_NOTES.length; i++) if (R_NOTES[i][0] === key) return R_NOTES[i][1];
+  return "";
+}
+function rNoteN(key){ for (var i = 0; i < R_NOTES.length; i++) if (R_NOTES[i][0] === key) return i + 1; return 0; }
+function seeNote(parent, key){ var n = rNoteN(key); if (!n) return; parent.appendChild(document.createTextNode(" ")); HT("a", { "class":"see-n", href:"#rnote-" + n }, parent, "See note " + n); }
+function rVal(pct, svc, yr){ var b = RESP && RESP.byPct && RESP.byPct[String(pct)]; var v = b && b[svc] && b[svc][String(yr)]; return v || null; }
+function rCity(svc, yr){ var v = RESP && RESP.citywide && RESP.citywide[svc]; return v ? v[String(yr)] : null; }
+function mins(x){ return x == null ? "n/a" : x.toFixed(1); }
+function rKind(v){ if (!v) return "na"; if (v.unavailable || v.oldBoundary) return "old"; if (v.small || v.median == null) return "small"; return "ok"; }
+function respClass(pct){
+  var v = rVal(pct, RSVC, 2025), k = rKind(v);
+  if (k === "old") return "few";       // hatched: no figure for today's boundaries
+  if (k === "small") return "cnt";     // plain neutral: too few calls for a median
+  if (k === "na") return "na";
+  var e = R_EDGES[RSVC], i = 0; while (i < e.length && v.median >= e[i]) i++;
+  return R_BIN[i];
+}
+function respAria(p){
+  var v = rVal(p.pct, RSVC, 2025), k = rKind(v), lab = longName(p) + ", " + p.boro + ": ";
+  if (k === "ok") return lab + (RSVC === "police" ? "police" : "EMS") + " median " + mins(v.median) + " minutes in 2025";
+  if (k === "old") return lab + "no " + (RSVC === "police" ? "police" : "EMS") + " figure for today's boundaries";
+  if (k === "small") return lab + "only " + fmt(v.nArrived) + " calls in 2025, too few for a median";
+  return lab + "no data";
+}
+function respLegend(box){
+  var e = R_EDGES[RSVC], labs = ["under " + e[0].toFixed(1), e[0].toFixed(1) + "–" + (e[1] - 0.1).toFixed(1), e[1].toFixed(1) + "–" + (e[2] - 0.1).toFixed(1), e[2].toFixed(1) + "+"];
+  var kk = HT("div", { "class":"lg-ckey" }, box);
+  HT("div", { "class":"lg-ct" }, kk, "Median minutes to arrive, 2025 (longer is darker)");
+  var row = HT("div", { "class":"lg-crow", role:"list", "aria-label":"Color key" }, kk);
+  labs.forEach(function(l, i){ var cell = HT("div", { role:"listitem" }, row); HT("i", { style:"background:var(--" + R_BIN[i] + ")", "aria-hidden":"true" }, cell); HT("span", null, cell, l); });
+  var ex = HT("div", { "class":"lg-extra" }, kk);
+  var nSmall = PLIST.filter(function(p){ return rKind(rVal(p.pct, RSVC, 2025)) === "small"; }).length;
+  var nOld = PLIST.filter(function(p){ return rKind(rVal(p.pct, RSVC, 2025)) === "old"; }).length;
+  if (nSmall){ var s1 = HT("span", null, ex); HT("i", { "class":"sw", style:"background:var(--cnt)", "aria-hidden":"true" }, s1); s1.appendChild(document.createTextNode("Under 200 calls (" + nSmall + ")")); }
+  if (nOld){ var s2 = HT("span", null, ex); HT("i", { "class":"sw hatch", "aria-hidden":"true" }, s2); s2.appendChild(document.createTextNode("No figure for today’s boundaries: see note " + rNoteN("116"))); }
+}
+// fastest and slowest precinct medians in 2025, naming every precinct tied at either end; precincts with
+// under 200 calls in 2019 or 2025 are left out of the range
+function respRange(svc){
+  var ok = PLIST.map(function(p){ return { p:p, v:rVal(p.pct, svc, 2025) }; }).filter(function(x){ return rKind(x.v) === "ok" && rKind(rVal(x.p.pct, svc, 2019)) !== "small"; });
+  if (!ok.length) return null;
+  var key = function(x){ return Math.round(x.v.median * 10); };
+  var lo = Math.min.apply(null, ok.map(key)), hi = Math.max.apply(null, ok.map(key));
+  var at = function(k){ return { m:k / 10, ps:ok.filter(function(x){ return key(x) === k; }).map(function(x){ return x.p; }) }; };
+  return [at(lo), at(hi)];
+}
+function buildResp(){
+  var step = $("#respStep");
+  if (!RESP || !RESP.citywide){ step.hidden = true; return; }
+  step.hidden = false;
+  ["police", "ems"].forEach(function(svc){
+    var box = $(svc === "police" ? "#rPolice" : "#rEms"); box.innerHTML = "";
+    var a = rCity(svc, 2019), b = rCity(svc, 2025); if (!b) return;
+    HT("p", { "class":"rh-k" }, box, R_LABEL[svc]);
+    var big = HT("p", { "class":"rh-big" }, box, mins(b.median)); HT("small", null, big, "min");
+    var ln = HT("p", { "class":"rh-line" }, box);
+    if (a && a.median != null){
+      var d = Math.round((b.median - a.median) * 10) / 10;
+      ln.textContent = "2019: " + mins(a.median) + " min · " + (d > 0 ? "+" + d.toFixed(1) + " min" : d < 0 ? MINUS + Math.abs(d).toFixed(1) + " min" : "no change");
+    }
+    HT("p", { "class":"rh-n" }, box, fmt(b.nArrived) + (svc === "police" ? " calls with an arrival time" : " incidents with a valid response time") + " in 2025");
+    HT("p", { "class":"rh-def" }, box, R_DEF[svc] + ".");
+    var rg = respRange(svc), rp = HT("p", { "class":"rh-range" }, box);
+    if (rg){
+      var names = function(ps){ ps.forEach(function(p, i){ if (i) rp.appendChild(document.createTextNode(i === ps.length - 1 ? " and " : ", ")); HT("a", { href:pageURL(p.pct), "data-rp":"1" }, rp, shortOrd(p)); }); };
+      rp.appendChild(document.createTextNode("Precincts in 2025: " + mins(rg[0].m) + " min ("));
+      names(rg[0].ps);
+      rp.appendChild(document.createTextNode(") to " + mins(rg[1].m) + " min ("));
+      names(rg[1].ps);
+      rp.appendChild(document.createTextNode(")."));
+    }
+  });
+  var n = $("#rNote"); n.innerHTML = ""; n.appendChild(document.createTextNode("Both clocks start after the 911 call is answered. See notes "));
+  [["clock", ", "], ["arrive", " and "], ["defs", "."]].forEach(function(x){ var k = rNoteN(x[0]); HT("a", { "class":"see-n", href:"#rnote-" + k }, n, String(k)); n.appendChild(document.createTextNode(x[1])); });
+  $$("#rTog button").forEach(function(bt){
+    bt.addEventListener("click", function(){
+      RSVC = bt.getAttribute("data-v");
+      $$("#rTog button").forEach(function(x){ x.setAttribute("aria-pressed", x === bt ? "true" : "false"); });
+      if (STATE === "resp"){ renderLegend(); renderMap(); renderCard(); }
+    });
+  });
+  // notes, in About
+  var nb = $("#respNotes"); nb.innerHTML = "";
+  HT("h3", null, nb, "Response times");
+  var ol = HT("ol", { "class":"r-notes-list" }, nb); nb.className = "r-notes";
+  R_NOTES.forEach(function(t, i){ HT("li", { id:"rnote-" + (i + 1) }, ol, respNoteText(t[0])); });
+  var src = HT("p", { "class":"quiet" }, nb, "Sources: ");
+  Object.keys(RESP.sources || {}).forEach(function(k, i){ var so = RESP.sources[k]; if (i) src.appendChild(document.createTextNode("; ")); if (so.url) HT("a", { href:so.url, rel:"noopener" }, src, so.name); else src.appendChild(document.createTextNode(so.name)); });
+  src.appendChild(document.createTextNode(". Calendar years. Built " + RESP.generated + "."));
+}
+function updateRespLinks(){ $$("#respStep a[data-rp]").forEach(function(a){ var m = /pct=(\d+)/.exec(a.getAttribute("href")); if (m) a.href = pageURL(+m[1]); }); }
+function respCard(box){
+  var p = PCT[SEL];
+  HT("p", { "class":"c-k" }, box, p.boro + (named(p) ? " · " + p.ord : ""));
+  HT("h3", null, box, title(p));
+  HT("p", { "class":"c-hoods" }, box, "How fast help arrives, 2025 (2019)");
+  ["police", "ems"].forEach(function(svc){
+    var a = rVal(SEL, svc, 2019), b = rVal(SEL, svc, 2025), k = rKind(b);
+    if (k === "old" && b && !b.unavailable && b.median != null) k = "ok";   // 105th/113th EMS: a median for the old, larger area
+    var row = HT("div", { "class":"pr-row" }, box);
+    HT("div", { "class":"m" }, row, R_LABEL[svc]);
+    if (k === "ok"){
+      HT("b", { "class":"v" }, row, mins(b.median) + " min");
+      var ka = rKind(a);
+      row.appendChild(document.createTextNode(ka === "ok" ? " (2019: " + mins(a.median) + ")" : ""));
+      HT("div", { "class":"m" }, row, fmt(b.nArrived) + " calls" + (b.oldBoundary ? " · covers the precinct’s pre-2025 area" : ""));
+      if (b.oldBoundary) seeNote(row, "116");
+    } else if (k === "old"){
+      row.appendChild(document.createTextNode("No figure for this precinct’s current boundaries."));
+      seeNote(row, "116");
+    } else if (k === "small"){
+      row.appendChild(document.createTextNode("Only " + fmt(b.nArrived) + " calls with an arrival time in 2025 (" + fmt(a ? a.nArrived : null) + " in 2019): too few for a median."));
+      seeNote(row, "small");
+    } else row.appendChild(document.createTextNode("No data."));
+  });
+  HT("a", { "class":"go", href:pageURL(SEL) }, box, (named(p) ? "See " + p.name : "See the " + p.ord) + " →");
+}
+
+/* ---------- In the subway (data/subway.json): systemwide, so it never changes the precinct map ---------- */
+function buildSubway(){
+  var step = $("#subStep");
+  if (!SUB || !SUB.years || !SUB.assaults){ step.hidden = true; return; }
+  step.hidden = false;
+  var ys = SUB.years, v = SUB.assaults, r19 = SUB.rate && SUB.rate["2019"], r25 = SUB.rate && SUB.rate["2025"];
+  var i19 = ys.indexOf(2019), i25 = ys.indexOf(2025);
+  $("#subDef").textContent = SUB.definition || "";
+  var hn = $("#subNums"); hn.innerHTML = "";
+  function cell(val, lab, cls){ var d = HT("div", { "class":"hn" + (cls ? " " + cls : "") }, hn); var b = HT("b", null, d); b.innerHTML = val; HT("span", { "class":"lab" }, d, lab); }
+  cell(fmt(v[i19]), "2019");
+  cell('<span class="arrow" aria-hidden="true">→</span>', "");
+  cell('<span class="c25">' + fmt(v[i25]) + "</span>", "2025");
+  var pc = SUB.pctChange2019to2025 != null ? SUB.pctChange2019to2025 : (v[i25] - v[i19]) / v[i19] * 100;
+  cell(pctTxt(pc), "Change", "chg");
+  $("#subT").textContent = "Felony assaults on subway riders, " + ys[0] + "–" + ys[ys.length - 1];
+  // two simple bars: felony assaults per 100 million rides
+  var rb = $("#subRate"); rb.innerHTML = "";
+  if (r19 && r25){
+    HT("p", { "class":"sr-t" }, rb, "Felony assaults per 100 million rides");
+    var mx = Math.max(r19.per100mRides, r25.per100mRides) || 1;
+    [["2019", r19, "y19"], ["2025", r25, "y25"]].forEach(function(x){
+      var row = HT("div", { "class":"sr-row" }, rb);
+      HT("span", null, row, x[0]);
+      var tr = HT("span", null, row); HT("i", { "class":"bar " + x[2], style:"width:" + (x[1].per100mRides / mx * 100).toFixed(1) + "%", "aria-hidden":"true" }, tr);
+      HT("b", null, row, x[1].per100mRides.toFixed(1));
+    });
+    var bil = function(m){ return (m / 1000).toFixed(2); };
+    var fell = r25.ridesMillions < r19.ridesMillions;
+    HT("p", { "class":"quiet" }, rb, "Subway rides " + (fell ? "fell" : "rose") + " from " + bil(r19.ridesMillions) + " billion in 2019 to " + bil(r25.ridesMillions) + " billion in 2025, so assaults per 100 million rides " + (fell ? "rose faster than the count." : "changed less than the count."));
+  }
+  // notes and sources, in About
+  var nb = $("#subNotes"); nb.innerHTML = ""; nb.className = "r-notes";
+  HT("h3", null, nb, "Subway");
+  var ol = HT("ol", null, nb);
+  (SUB.notes || []).forEach(function(t, k){ HT("li", { id:"snote-" + (k + 1) }, ol, t); });
+  var sp = HT("p", { "class":"quiet" }, nb, "Sources: ");
+  Object.keys(SUB.sources || {}).forEach(function(k, j){ var so = SUB.sources[k]; if (j) sp.appendChild(document.createTextNode("; ")); if (so.url) HT("a", { href:so.url, rel:"noopener" }, sp, so.name); else sp.appendChild(document.createTextNode(so.name)); });
+  sp.appendChild(document.createTextNode("."));
+  var sn = $("#subNote"); sn.innerHTML = "";
+  if ((SUB.notes || []).length){
+    sn.appendChild(document.createTextNode("Systemwide, not by precinct, so the map doesn’t change. See " + (SUB.notes.length > 1 ? "notes " : "note ")));
+    SUB.notes.forEach(function(t, k){ if (k) sn.appendChild(document.createTextNode(k === SUB.notes.length - 1 ? " and " : ", ")); HT("a", { "class":"see-n", href:"#snote-" + (k + 1) }, sn, String(k + 1)); });
+    sn.appendChild(document.createTextNode("."));
+  }
+  subChart.data = { ys:ys, v:v };
+  subChart();
+  setTimeout(subChart, 0);   // once more after layout, at the card's real width
+}
+// a small year chart with the shared readout (INTERACTION_SPEC): snap to the nearest year, rule + dot, tap/drag, ←/→/Home/End/Esc
+function subChart(){
+  var box = $("#subPlot"), D = subChart.data; if (!box || !D) return;
+  box.innerHTML = "";
+  var ys = D.ys, v = D.v, W = Math.max(220, box.clientWidth || 280), H = 130, pl = 6, pr = 40, pt = 18, pb = 20;
+  var svg = S("svg", { viewBox:"0 0 " + W + " " + H, width:W, height:H, "aria-hidden":"true" }, box);
+  var mx = 0; v.forEach(function(x){ if (x != null && x > mx) mx = x; });
+  var X = function(i){ return pl + i * (W - pl - pr) / (v.length - 1); }, Y = function(x){ return pt + (H - pt - pb) * (1 - x / (mx || 1)); };
+  S("line", { "class":"t-axis", x1:pl, x2:W - pr, y1:Y(0), y2:Y(0) }, svg);
+  var d = ""; v.forEach(function(x, i){ if (x == null) return; d += (d ? "L" : "M") + X(i).toFixed(1) + "," + Y(x).toFixed(1); });
+  S("path", { "class":"t-line", d:d }, svg);
+  var i19 = ys.indexOf(2019), last = v.length - 1;
+  S("text", { "class":"t-lbl", x:pl, y:H - 4 }, svg, String(ys[0]));
+  if (i19 >= 0) S("text", { "class":"t-lbl", x:X(i19), y:H - 4, "text-anchor":"middle" }, svg, "2019");
+  S("text", { "class":"t-lbl", x:X(last), y:H - 4, "text-anchor":"middle" }, svg, String(ys[last]));
+  if (i19 >= 0){ S("circle", { "class":"t-dot y19", cx:X(i19), cy:Y(v[i19]), r:4 }, svg); S("text", { "class":"t-val", x:X(i19), y:Y(v[i19]) - 9, "text-anchor":"middle" }, svg, fmt(v[i19])); }
+  S("circle", { "class":"t-dot", cx:X(last), cy:Y(v[last]), r:4.5 }, svg);
+  S("text", { "class":"t-val b", x:X(last) + 8, y:Y(v[last]) + 4 }, svg, fmt(v[last]));
+  var g = S("g", null, svg);
+  var st = { i:last, step:(W - pl - pr) / (v.length - 1), pl:pl };
+  function set(i, active){
+    i = Math.max(0, Math.min(last, i)); st.i = i; g.innerHTML = "";
+    if (active){ S("line", { "class":"t-rule", x1:X(i), x2:X(i), y1:pt - 6, y2:H - pb }, g); S("circle", { "class":"t-sel", cx:X(i), cy:Y(v[i]), r:4 }, g); }
+    var r = $("#subRead"); r.innerHTML = ""; HT("b", null, r, String(ys[i])); r.appendChild(document.createTextNode(" · ")); HT("span", { "class":"sw-l", "aria-hidden":"true" }, r); r.appendChild(document.createTextNode("Felony assaults on riders " + fmt(v[i])));
+  }
+  set(last, false);
+  function idx(e){ var rr = box.getBoundingClientRect(); return Math.round((e.clientX - rr.left - st.pl) / st.step); }
+  var start = null, scrub = false;
+  box.onpointerdown = function(e){ start = { x:e.clientX, y:e.clientY }; scrub = false; if (e.pointerType === "mouse") set(idx(e), true); };
+  box.onpointermove = function(e){
+    if (e.pointerType === "mouse"){ set(idx(e), true); return; }
+    if (!start) return; var dx = Math.abs(e.clientX - start.x), dy = Math.abs(e.clientY - start.y);
+    if (!scrub && dx > 6 && dx > dy) scrub = true; if (scrub) set(idx(e), true);
+  };
+  box.onpointerup = function(e){ if (start && e.pointerType !== "mouse" && !scrub) set(idx(e), true); start = null; scrub = false; };
+  box.onpointercancel = function(){ start = null; scrub = false; };
+  box.onpointerleave = function(e){ if (e.pointerType === "mouse") set(last, false); };
+  box.onkeydown = function(e){
+    var k = e.key, i = st.i;
+    if (k === "ArrowLeft") i--; else if (k === "ArrowRight") i++; else if (k === "Home") i = 0; else if (k === "End") i = last;
+    else if (k === "Escape"){ set(last, false); return; } else return;
+    e.preventDefault(); set(i, true);
+  };
+}
+
+/* ---------- the rises / falls cards in the scrolly ---------- */
+function rankedRows(){
+  var rows = comparable();
+  var gid = null; PLIST.forEach(function(p){ if (p.compare2019 === false && p.group) gid = p.group; });
+  if (gid){ var gc = chg(gid, CAT); if (gc.kind === "ok") rows.push({ group:gid, c:gc }); }
+  rows.sort(function(a, b){ return b.c.p - a.c.p || (a.p ? a.p.pct : 999) - (b.p ? b.p.pct : 999); });
+  return rows;
+}
+function topRows(which){
+  var rows = rankedRows(), N = Math.min(10, Math.floor(rows.length / 2));
+  return which === "rises" ? rows.slice(0, N) : rows.slice(-N).reverse();
+}
+function renderSteps(){
+  var c = catByKey(CAT), lp = lc(c.plural || c.label), cntMode = countsOnlyCat(CAT);
+  // murder (counts only): one line instead of the two lists
+  var cn = $("#chgNote"); cn.hidden = !cntMode; $("#risesBox").hidden = cntMode; $("#fallsBox").hidden = cntMode;
+  if (cntMode){ cn.textContent = uc(lp) + " are too few in most precincts to rank by percent change; the map shows each precinct’s count."; cn.className = "c-note"; return; }
+  ["rises", "falls"].forEach(function(w){
+    var body = $("#" + w + "Body"), sub = $("#" + w + "Sub"); body.innerHTML = "";
+    var rows = cntMode ? [] : topRows(w);
+    var nDown = rows.filter(function(r){ return r.c.p < 0; }).length, nUp = rows.filter(function(r){ return r.c.p > 0; }).length;
+    $("#" + w + "H").textContent = w === "rises" ? (nUp === rows.length ? "Biggest rises" : "Smallest falls")
+      : (nDown === rows.length ? "Biggest falls" : nDown === 0 ? "Smallest rises" : "Biggest falls and smallest rises");
+    if (!rows.length){ sub.textContent = ""; HT("p", { "class":"c-note" }, body, "Too few precincts can be compared."); return; }
+    sub.textContent = "The " + rows.length + " precincts with the " + (w === "rises" ? "largest increase" : "largest decrease or smallest increase") + " in " + lp + ", 2019 to 2025. Precincts with fewer than " + SMALL + " in either year are left out.";
+    var lo = 0, hi = 0; rankedRows().forEach(function(r){ lo = Math.min(lo, r.c.p); hi = Math.max(hi, r.c.p); });
+    var span = (hi - lo) || 1, z = -lo / span * 100;
+    var ul = HT("ol", { "class":"rk-list" }, body);
+    rows.forEach(function(r){
+      var li = HT("li", null, ul), p = r.p, a;
+      if (p){ a = HT("a", { "class":"rk", href:pageURL(p.pct), "data-pct":p.pct }, li); var n = HT("span", { "class":"rk-n" }, a, title(p) + " "); HT("small", null, n, p.boro); }
+      else { a = HT("a", { "class":"rk", href:pageURL(116), "data-pct":116 }, li); var nn = HT("span", { "class":"rk-n" }, a, "105th, 113th & 116th "); HT("small", null, nn, "combined"); }
+      HT("span", { "class":"rk-p" }, a, pctTxt(r.c.p));
+      var bar = HT("span", { "class":"rk-bar", "aria-hidden":"true" }, a);
+      var v = r.c.p / span * 100, left = v >= 0 ? z : z + v;
+      HT("i", { "class":"b" + binOf(r.c.p), style:"left:" + left.toFixed(2) + "%;width:" + Math.max(0.6, Math.abs(v)).toFixed(2) + "%" }, bar);
+      HT("span", { "class":"zero", style:"left:" + z.toFixed(2) + "%" }, bar);
+      HT("span", { "class":"rk-c" }, a, fmt(r.c.a) + " → " + fmt(r.c.b));
+      clusterMark(p, li);
+      // pointing at a row outlines that precinct on the map
+      var on = function(){ HOV = +a.getAttribute("data-pct"); drawOver(); }, off = function(){ HOV = null; drawOver(); };
+      a.addEventListener("mouseenter", on); a.addEventListener("mouseleave", off); a.addEventListener("focus", on); a.addEventListener("blur", off);
+    });
+  });
+}
+
+/* ---------- ranking: biggest changes ---------- */
+// One rule for the headline, the ranking box and the precinct pages: a precinct is compared when it kept its
+// boundaries (not the 105th, 113th or 116th), NYPD's 2025 figure isn't misaligned (the 22nd, some crimes) and it
+// had at least SMALL in both years. The three Queens precincts are ranked once, together, as one area.
+function leftOut(){
+  var out = PLIST.filter(function(p){ return p.compare2019 === false; }).concat(PLIST.filter(function(p){ return p.compare2019 !== false && issueFor(p.pct, CAT); })).map(shortOrd);
+  var few = PLIST.filter(function(p){ return p.compare2019 !== false && !issueFor(p.pct, CAT) && chg(p.pct, CAT).kind === "few"; }).length;
+  return (out.length ? "the " + listJoin(out) + " are left out" : "") + (few ? (out.length ? ", and " : "") + few + (few === 1 ? " has" : " have") + " fewer than " + SMALL + " in a year" : "") + "; see About the data";
+}
+function comparable(){
+  return PLIST.filter(function(p){ return p.compare2019 !== false && !issueFor(p.pct, CAT); }).map(function(p){ return { p:p, c:chg(p.pct, CAT) }; }).filter(function(r){ return r.c.kind === "ok"; });
+}
+// felony assault: many of these precincts' reports sit at one courthouse or jail location (city.json clusterNote)
+function clusterMark(p, li){
+  if (!p || !p.clusterNote || CAT !== "felony_assault") return;
+  HT("a", { "class":"see-n rk-note", href:pageURL(p.pct) + "#notes", "aria-label":"See note on " + title(p) + ": reports clustered at one location" }, li, "See note");
+}
+var RANK_ALL = false;
+function renderRank(){
+  var c = catByKey(CAT), pl = c.plural || c.label, lp = lc(pl);
+  $("#rankH").textContent = "Biggest changes in " + lp + ", 2019 to 2025";
+  if (countsOnlyCat(CAT)){
+    $("#rankBody").innerHTML = ""; $("#rankSub").textContent = ""; $("#rankFoot").textContent = "";
+    HT("p", { "class":"c-note", style:"margin:4px 0 0" }, $("#rankBody"), uc(lp) + " are too few in most precincts to rank by percent change; the map above has each precinct’s counts.");
+    return;
+  }
+  var rows = comparable();
+  // the boundary-changed group, shown once
+  var gid = null; PLIST.forEach(function(p){ if (p.compare2019 === false && p.group) gid = p.group; });
+  if (gid){ var gc = chg(gid, CAT); if (gc.kind === "ok") rows.push({ group:gid, c:gc }); }
+  rows.sort(function(a, b){ return b.c.p - a.c.p || (a.p ? a.p.pct : 999) - (b.p ? b.p.pct : 999); });
+  var body = $("#rankBody"); body.innerHTML = "";
+  if (!rows.length){ HT("p", { "class":"c-note" }, body, "No precinct had at least " + SMALL + " " + lp + " in both 2019 and 2025, so none can be ranked by percentage change."); }
+  var lo = 0, hi = 0; rows.forEach(function(r){ lo = Math.min(lo, r.c.p); hi = Math.max(hi, r.c.p); });
+  var span = (hi - lo) || 1, z = -lo / span * 100;
+  function rowEl(r, ul){
+    var li = HT("li", null, ul), a, p = r.p;
+    if (p){ a = HT("a", { "class":"rk", href:pageURL(p.pct) }, li); var n = HT("span", { "class":"rk-n" }, a, title(p) + " "); HT("small", null, n, (named(p) ? p.ord + " · " : "") + p.boro + (!named(p) && p.hoods && p.hoods[0] ? " · " + p.hoods[0] : "")); }
+    else {
+      a = HT("div", { "class":"rk" }, li);
+      var nn = HT("span", { "class":"rk-n" }, a, "105th, 113th & 116th "); HT("small", null, nn, "Queens, combined"); HT("span", { "class":"rk-tag" }, nn, "Boundary change");
+    }
+    HT("span", { "class":"rk-p" }, a, pctTxt(r.c.p));
+    var bar = HT("span", { "class":"rk-bar", "aria-hidden":"true" }, a);
+    var v = r.c.p / span * 100, left = v >= 0 ? z : z + v;
+    HT("i", { "class":"b" + binOf(r.c.p), style:"left:" + left.toFixed(2) + "%;width:" + Math.max(0.6, Math.abs(v)).toFixed(2) + "%" }, bar);
+    HT("span", { "class":"zero", style:"left:" + z.toFixed(2) + "%" }, bar);
+    HT("span", { "class":"rk-c" }, a, fmt(r.c.a) + " in 2019 → " + fmt(r.c.b) + " in 2025");
+    clusterMark(p, li);
+    if (!p){
+      var ln = HT("span", { "class":"rk-links" }, a);
+      r.group.split("+").forEach(function(n){ var pp = PCT[+n]; if (pp) HT("a", { href:pageURL(pp.pct) }, ln, "See the " + shortOrd(pp)); });
+    }
+  }
+  var N = 10;
+  if (rows.length){
+    if (RANK_ALL || rows.length <= 2 * N){
+      var ul = HT("ol", { "class":"rk-list", "aria-label":"All " + rows.length + " comparable precincts, largest rise first" }, body);
+      rows.forEach(function(r){ rowEl(r, ul); });
+    } else {
+      var top = rows.slice(0, N), bot = rows.slice(-N).reverse();
+      var cols = HT("div", { "class":"rk-cols" }, body);
+      var c1 = HT("div", null, cols), c2 = HT("div", null, cols);
+      var allUp = top.every(function(r){ return r.c.p > 0; });
+      HT("h3", { "class":"rk-h", id:"rkTop" }, c1, allUp ? "Largest rises" : "Smallest falls");
+      var u1 = HT("ol", { "class":"rk-list", "aria-labelledby":"rkTop" }, c1); top.forEach(function(r){ rowEl(r, u1); });
+      var nDown = bot.filter(function(r){ return r.c.p < 0; }).length;
+      HT("h3", { "class":"rk-h", id:"rkBot" }, c2, nDown === N ? "Largest falls" : nDown === 0 ? "Smallest rises" : "Largest falls and smallest rises");
+      var u2 = HT("ol", { "class":"rk-list", "aria-labelledby":"rkBot" }, c2); bot.forEach(function(r){ rowEl(r, u2); });
+    }
+    if (rows.length > 2 * N){
+      var tb = HT("button", { "class":"more-btn", type:"button", "aria-expanded":RANK_ALL ? "true" : "false" }, body, RANK_ALL ? "Show only the biggest changes" : "Show all " + rows.length);
+      tb.addEventListener("click", function(){ RANK_ALL = !RANK_ALL; renderRank(); var b2 = $("#rankBody .more-btn"); if (b2) b2.focus({ preventScroll:!RANK_ALL }); if (!RANK_ALL) goTo($("#ranksec")); });
+    }
+  }
+  var rose = rows.filter(function(r){ return r.c.p > 0; }).length, fell = rows.filter(function(r){ return r.c.p < 0; }).length;
+  var nP = rows.filter(function(r){ return r.p; }).length, hasG = rows.length > nP;
+  $("#rankSub").textContent = rows.length ? "The " + nP + " precincts that can be compared" + (hasG ? ", plus the 105th, 113th and 116th ranked together as one area (" + rows.length + " in all)" : "") + ": " + rose + " rose, " + fell + " fell" + (rows.length - rose - fell ? ", " + (rows.length - rose - fell) + " unchanged" : "") + "." : "";
+  // too few to compare
+  var few = PLIST.filter(function(p){ return p.compare2019 !== false && !issueFor(p.pct, CAT) && chg(p.pct, CAT).kind === "few"; });
+  var gFew = gid && chg(gid, CAT).kind === "few";
+  if (few.length || gFew){
+    var fb = HT("div", { "class":"few-box" }, body);
+    HT("h3", { "class":"rk-h" }, fb, "Too few to compare");
+    HT("p", { "class":"quiet", style:"margin:0" }, fb, "Fewer than " + SMALL + " " + lp + " in 2019 or 2025, so no percentage: 2019 → 2025 counts.");
+    var pills = HT("div", { "class":"pills" }, fb);
+    var addPill = function(pp, ch, lab){ var a = HT("a", { href:pageURL(pp.pct) }, pills, lab); HT("small", null, a, fmt(ch.a) + " → " + fmt(ch.b)); };
+    var showFew = few.length > 24 && !renderRank.fewOpen ? few.slice(0, 18) : few;
+    showFew.forEach(function(pp){ addPill(pp, chg(pp.pct, CAT), shortOrd(pp)); });
+    if (gFew){ var gch = chg(gid, CAT); gid.split("+").forEach(function(n){ var pp = PCT[+n]; if (pp) addPill(pp, gch, shortOrd(pp) + "*"); }); }
+    if (showFew.length < few.length){
+      var mb = HT("button", { "class":"more-btn", type:"button", "aria-expanded":"false" }, fb, "Show all " + few.length);
+      mb.addEventListener("click", function(){ renderRank.fewOpen = true; renderRank(); });
+    }
+    if (gFew) HT("p", { "class":"quiet" }, fb, "* 105th, 113th and 116th combined, because of the 2024 boundary change.");
+  }
+  var iss = PLIST.filter(function(p){ return issueFor(p.pct, CAT); }).map(shortOrd);
+  $("#rankFoot").textContent = "NYPD official precinct totals. Leaves out precincts with fewer than " + SMALL + " in either year" + (iss.length ? ", and the " + listJoin(iss) + ", whose official 2025 figure appears misaligned in NYPD’s spreadsheet" : "") + ". The 105th, 113th and 116th are shown once, combined, because the 116th was created from parts of the other two in Dec. 2024. Changes in counts, not rates per resident.";
+}
+
+/* ---------- every precinct, by borough ---------- */
+function buildAll(){
+  var box = $("#allBox");
+  $("#allSub").textContent = "All " + PLIST.length + " precincts, by borough, each with its own page.";
+  var grid = HT("div", { "class":"boro-grid" }, box);
+  BOROS.forEach(function(bn){
+    var ps = PLIST.filter(function(p){ return p.boro === bn; }); if (!ps.length) return;
+    var col = HT("div", { "class":"boro-col" }, grid);
+    HT("h3", { "class":"boro-h" }, col, bn + " · " + ps.length);
+    var pills = HT("div", { "class":"pills" }, col);
+    ps.forEach(function(p){ var a = HT("a", { href:pageURL(p.pct), "data-pct":p.pct }, pills, shortOrd(p)); if (named(p)) HT("small", null, a, p.name); else if (p.hoods && p.hoods[0]) HT("small", null, a, p.hoods[0]); });
+  });
+  $("#allBtn").addEventListener("click", function(){ var o = this.getAttribute("aria-expanded") !== "true"; this.setAttribute("aria-expanded", o ? "true" : "false"); box.hidden = !o; this.textContent = o ? "Hide the list" : "Show all " + PLIST.length; });
+  $("#allBtn").textContent = "Show all " + PLIST.length;
+}
+function updateLinks(){ $$("#allBox a[data-pct]").forEach(function(a){ a.href = pageURL(a.getAttribute("data-pct")); }); }
+
+/* ---------- about ---------- */
+function buildAbout(){
+  var box = $("#aboutBody");
+  HT("h3", null, box, "How we counted");
+  var ul = HT("ul", null, box);
+  HT("li", null, ul, "2019 and 2025 figures are NYPD’s official annual totals for each precinct. 2026 figures are year-to-date from NYPD’s weekly CompStat reports for the week ending " + C.weekEnding + (C.weekRange ? " (" + C.weekRange + ")" : "") + ", compared with the same period of 2025.");
+  HT("li", null, ul, "Where a precinct had fewer than " + SMALL + " in 2019 or 2025, we show the two counts, not a percentage change: small numbers swing a lot from year to year.");
+  var cj = HT("li", null, ul, "Citywide totals include complaints inside city jails (Department of Correction). Since 2014, NYPD counts crimes inside city jails separately from the precincts. Some reports at courthouses and central booking are still counted in the precinct (see the ");
+  HT("a", { href:pageURL(5) + "#notes" }, cj, "5th"); cj.appendChild(document.createTextNode(" and ")); HT("a", { href:pageURL(84) + "#notes" }, cj, "84th"); cj.appendChild(document.createTextNode(")."));
+  HT("li", null, ul, "Comparisons and rankings leave out the 105th, 113th and 116th, whose boundaries changed in Dec. 2024 (they’re compared and ranked together, as one area), and precincts with fewer than " + SMALL + " in either year.");
+  var i22 = PLIST.filter(function(p){ return p.dataIssue; });
+  i22.forEach(function(p){ HT("li", null, ul, "The " + p.ord + " (" + p.name + "): NYPD’s official " + (p.dataIssue.year || 2025) + " figure appears misaligned in its spreadsheet for " + listJoin(p.dataIssue.keys.map(function(k){ return lc(catByKey(k) ? (catByKey(k).plural || catByKey(k).label) : k); })) + ", so it is left out of comparisons and rankings for those crimes. Citywide 2025 totals on this site are NYPD’s as published, so they include these misaligned values (a difference of a few dozen reports in each crime)."); });
+  HT("li", null, ul, "No per-capita rates: business districts like Midtown have few residents, so rates per resident would mislead.");
+  HT("h3", null, box, "Boundary changes");
+  var ub = HT("ul", null, box);
+  HT("li", null, ub, "The 116th Precinct was created in Dec. 2024 from parts of the 105th and 113th. Their 2019 and 2025 numbers cover different areas, so the three are compared only together.");
+  HT("li", null, ub, "The 121st was created in July 2013 from parts of the 120th and 122nd.");
+  HT("li", null, ub, "The 77th, 78th and 88th were realigned in 2012.");
+  HT("h3", null, box, "Sources");
+  var us = HT("ul", null, box);
+  Object.keys(C.sources || {}).forEach(function(k){ var s = C.sources[k]; if (!s) return; var li = HT("li", null, us); if (s.url) HT("a", { href:s.url, rel:"noopener" }, li, s.name); else li.textContent = s.name; });
+  HT("p", { "class":"quiet", style:"margin-top:14px" }, box, "Data built " + C.generated + ". CompStat week ending " + C.weekEnding + ".");
+}
+
+/* ---------- find a precinct ---------- */
+/* one search engine, two boxes: "Find your precinct" under the title (goes to the precinct page)
+   and "Find a precinct" in the last card (selects it on the map). Same matching, keyboard and messages. */
+var SEARCHES = [];
+function norm(s){ return String(s || "").toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, " ").trim(); }
+function wordStart(text, n){ return (" " + norm(text)).indexOf(" " + n) >= 0; }
+function localMatches(q){
+  var n = norm(q); if (!n) return [];
+  var out = [], seen = {};
+  function add(p, label, sub, rank){ var key = p.pct + "|" + label; if (seen[key]) return; seen[key] = 1; out.push({ type:"pct", pct:p.pct, label:label, sub:sub, rank:rank }); }
+  var m = n.match(/^(?:precinct |pct )?(\d{1,3})(?: ?(?:st|nd|rd|th))?(?: (?:precinct|pct))?$/);
+  if (m){
+    var num = parseInt(m[1], 10);
+    if (PCT[num]) add(PCT[num], PCT[num].ord, (named(PCT[num]) ? PCT[num].name + " · " : "") + PCT[num].boro, 0);
+    if (m[1].length < 3) PLIST.forEach(function(p){ if (p.pct !== num && String(p.pct).indexOf(m[1]) === 0) add(p, p.ord, (named(p) ? p.name + " · " : "") + p.boro, 1); });
+  }
+  if (n.length >= 2 && !/^\d+$/.test(n)){
+    PLIST.forEach(function(p){ if (named(p) && wordStart(p.name, n)) add(p, p.name, p.ord + " · " + p.boro, 0); });
+    PLIST.forEach(function(p){ (p.hoods || []).forEach(function(h, i){
+      if (!wordStart(h, n)) return;
+      var hn = norm(h), r = hn === n ? 1.5 : hn.indexOf(n) === 0 ? 2 : 2.5;
+      add(p, h, "Neighborhood · " + longName(p) + ", " + p.boro, r + i * 0.05);
+    }); });
+  }
+  out.sort(function(a, b){ return a.rank - b.rank; });
+  return out.slice(0, 6);
+}
+var ADDR = "idle";
+function loadAddr(){
+  if (ADDR !== "idle") return; ADDR = "loading";
+  var s = document.createElement("script"); s.src = "data/addr/search.js"; s.async = true;
+  s.onload = function(){ ADDR = window.AddrSearch && typeof window.AddrSearch.suggest === "function" ? "ready" : "fail"; SEARCHES.forEach(function(x){ x.refresh(); }); };
+  s.onerror = function(){ ADDR = "fail"; };
+  document.head.appendChild(s);
+}
+function wantsAddr(n){ return /[a-z]/.test(n) && n.length >= 4; }
+function addrMatches(q){
+  if (ADDR !== "ready") return Promise.resolve([]);
+  var n = norm(q); if (!wantsAddr(n)) return Promise.resolve([]);
+  return Promise.resolve(window.AddrSearch.suggest(q, 6)).then(function(res){
+    return (res || []).filter(function(r){ return r && PCT[r.pct] && isFinite(r.lat) && isFinite(r.lon); }).map(function(r){
+      var p = PCT[r.pct];
+      return { type:"addr", pct:r.pct, label:r.label, lat:+r.lat, lon:+r.lon, sub:(r.kind === "intersection" ? "Intersection" : "Address") + " · " + longName(p) };
+    });
+  }).catch(function(){ return []; });
+}
+function makeSearch(o){
+  var qEl = o.input, list = o.list, sugg = [], active = -1, seq = 0, pre = o.idp, deb = 0;
+  function closeList(){ list.hidden = true; qEl.setAttribute("aria-expanded", "false"); qEl.removeAttribute("aria-activedescendant"); active = -1; }
+  function showList(){
+    list.innerHTML = "";
+    if (!sugg.length){ closeList(); return; }
+    sugg.forEach(function(s, i){
+      var li = HT("li", { role:"option", id:pre + i, "aria-selected":i === active ? "true" : "false" }, list);
+      HT("span", null, li, s.label); HT("small", null, li, s.sub);
+      li.addEventListener("mousedown", function(e){ e.preventDefault(); });
+      li.addEventListener("click", function(){ choose(i); });
+    });
+    list.hidden = false; qEl.setAttribute("aria-expanded", "true");
+    if (active >= 0){ qEl.setAttribute("aria-activedescendant", pre + active); var el = document.getElementById(pre + active); if (el && el.scrollIntoView) el.scrollIntoView({ block:"nearest" }); }
+    else qEl.removeAttribute("aria-activedescendant");
+  }
+  function update(){
+    var v = qEl.value.trim(), my = ++seq;
+    active = -1; msg("");
+    if (v.length < 1){ sugg = []; closeList(); return Promise.resolve(); }
+    var loc = localMatches(v);
+    sugg = loc; showList();
+    return addrMatches(v).then(function(ad){ if (my !== seq) return; sugg = loc.slice(0, ad.length ? 4 : 6).concat(ad).slice(0, 9); showList(); });
+  }
+  function msg(t, err){ var m = o.msg; m.textContent = t; m.classList.toggle("err", !!err); }
+  function choose(i){
+    var s = sugg[i]; if (!s) return;
+    qEl.value = s.label; closeList(); msg("");
+    if (phoneMQ.matches) qEl.blur();   // close the on-screen keyboard
+    o.onChoose(s);
+  }
+  qEl.addEventListener("focus", loadAddr);
+  qEl.addEventListener("input", function(){ loadAddr(); clearTimeout(deb); var v = qEl.value.trim(); sugg = localMatches(v); active = -1; showList(); deb = setTimeout(update, 120); });
+  qEl.addEventListener("keydown", function(e){
+    if (e.key === "ArrowDown"){ if (!sugg.length) return; e.preventDefault(); active = (active + 1) % sugg.length; showList(); }
+    else if (e.key === "ArrowUp"){ if (!sugg.length) return; e.preventDefault(); active = (active - 1 + sugg.length) % sugg.length; showList(); }
+    else if (e.key === "Escape"){ closeList(); }
+    else if (e.key === "Enter" && active >= 0 && !list.hidden){ e.preventDefault(); choose(active); }
+  });
+  qEl.addEventListener("blur", function(){ setTimeout(closeList, 150); });
+  o.form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = qEl.value.trim(); if (!v) return;
+    clearTimeout(deb);
+    var go = function(){
+      if (sugg.length){ choose(0); return; }
+      var n = norm(v);
+      msg(ADDR === "loading" && wantsAddr(n) ? "Still loading the address list; try again in a moment." :
+          ADDR === "fail" && wantsAddr(n) ? "Address search isn’t available right now. Try a precinct number or a neighborhood." :
+          "No precinct, neighborhood or address matched “" + v + "”. Try a precinct number (75th), a neighborhood (Astoria) or an address (1501 Broadway).", true);
+    };
+    if (ADDR === "loading"){
+      var tries = 0, iv = setInterval(function(){ tries++; if (ADDR !== "loading" || tries > 40){ clearInterval(iv); update().then(go); } }, 100);
+    } else update().then(go);
+  });
+  var api = { refresh:function(){ if (qEl.value.trim().length >= 2 && document.activeElement === qEl) update(); } };
+  SEARCHES.push(api);
+  return api;
+}
+// the map card: select the precinct (and pin the address) on the citywide map
+makeSearch({ form:$("#sform"), input:$("#q"), list:$("#sugg"), msg:$("#smsg"), idp:"opt", onChoose:function(s){
+  if (s.type === "addr") select(s.pct, { from:"search", zoom:true, pin:{ pct:s.pct, lat:s.lat, lon:s.lon, label:s.label } });
+  else select(s.pct, { from:"search", zoom:true });
+} });
+// under the title: straight to the precinct page (an address opens Check your block there)
+function goPct(pct, extra){ location.href = pageURL(pct, extra); }
+makeSearch({ form:$("#tform"), input:$("#tq"), list:$("#tsugg"), msg:$("#tmsg"), idp:"topt", onChoose:function(s){
+  goPct(s.pct, s.type === "addr" ? "&lat=" + s.lat.toFixed(5) + "&lon=" + s.lon.toFixed(5) : "");
+} });
+// "or choose from the list": every precinct, grouped by borough; picking one (click, tap or Enter) goes there.
+// Arrow keys only move through the list, so keyboard users aren't sent away on the first keypress.
+function buildPctList(){
+  var sel = $("#pctList"), keyAt = 0;
+  var byB = {};
+  PLIST.forEach(function(p){ (byB[p.boro] = byB[p.boro] || []).push(p); });
+  ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"].forEach(function(b){
+    if (!byB[b]) return;
+    var g = HT("optgroup", { label:b }, sel);
+    byB[b].forEach(function(p){ HT("option", { value:String(p.pct) }, g, p.ord + (named(p) ? " · " + p.name : "")); });
+  });
+  sel.disabled = false;
+  sel.addEventListener("keydown", function(e){
+    if (/^(Arrow|Page|Home|End)/.test(e.key)) keyAt = Date.now();
+    if (e.key === "Enter" && sel.value){ e.preventDefault(); goPct(sel.value); }
+  });
+  sel.addEventListener("change", function(){ if (sel.value && Date.now() - keyAt > 400) goPct(sel.value); });
+}
+})();
+</script>
+</body>
+</html>

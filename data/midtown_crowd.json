@@ -1,0 +1,64 @@
+{
+ "_about": "Midtown only (14th + 18th precincts). Built by build/build_midtown_crowd.py from midtown-interactive/data.js (pedestrian counts), data/midtown_response.json (2025 weekday 4-7pm medians) and data/pct/14.json + 18.json. Never use these figures elsewhere.",
+ "pcts": [
+  14,
+  18
+ ],
+ "site": {
+  "name": "Eighth Avenue (West 44th Street–West 45th Street)",
+  "lat": 40.75885,
+  "lon": -73.98862,
+  "pct": 14,
+  "perMin": 108.8,
+  "perMinRounded": 109
+ },
+ "perMinRange": [
+  45,
+  118
+ ],
+ "perMinMedian": 67,
+ "countedBlocks": 14,
+ "window": "2025, weekdays, clock start 4-7pm",
+ "policeArrivalMin": 5.0,
+ "jobClosedMin": 55.3,
+ "emsArrivalMin": 9.2,
+ "policeArrivalSec": 300,
+ "jobClosedSec": 3318,
+ "emsArrivalSec": 552,
+ "emsOnSceneMin": 21.9,
+ "emsDepartMin": 31.1,
+ "emsDepartSec": 1866,
+ "peopleByEmsDepart": 3384,
+ "nEmsOnScene": 1637,
+ "peopleByArrival": 544,
+ "peopleByWrapUp": 6017,
+ "peopleByEms": 1001,
+ "exactMin": {
+  "policeArrival": 5.01,
+  "jobClosed": 55.28,
+  "emsArrival": 9.22,
+  "emsOnScene": 21.87
+ },
+ "nPolice": 30,
+ "nEms": 2720,
+ "fit": {
+  "k": 42,
+  "n": 870,
+  "ratio": 21,
+  "nice": 20
+ },
+ "sources": [
+  {
+   "name": "NYC DOT Bi-Annual Pedestrian Counts",
+   "url": "https://data.cityofnewyork.us/Transportation/Bi-Annual-Pedestrian-Counts/cqsj-cfgu"
+  },
+  {
+   "name": "NYPD Calls for Service (Historic)",
+   "url": "https://data.cityofnewyork.us/d/d6zx-ckhd"
+  },
+  {
+   "name": "EMS Incident Dispatch Data",
+   "url": "https://data.cityofnewyork.us/d/76xm-jjuj"
+  }
+ ]
+}
